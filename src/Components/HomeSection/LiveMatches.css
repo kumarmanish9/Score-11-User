@@ -1,0 +1,38 @@
+.live-section {
+  background: #f5f7fa;
+  padding: 100px 0;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 30px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+
+.tabs button {
+  border: none;
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: #e9eef5;
+  color: #333;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.tabs button:hover {
+  background: #d6e4f5;
+}
+
+.tabs .active {
+  background: #0f3357;
+  color: #fff;
+}

@@ -1,0 +1,77 @@
+.leaderboard-section {
+  padding: 80px 20px;
+  background: #020617;
+  color: #fff;
+}
+
+/* CARD CONTAINER */
+.leaderboard-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* TITLE */
+.leaderboard-card h3 {
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+
+/* LIST ITEM */
+.leader-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  background: rgba(255,255,255,0.03);
+  transition: 0.3s;
+}
+
+/* HOVER */
+.leader-item:hover {
+  transform: translateX(6px);
+  background: rgba(255,255,255,0.08);
+}
+
+/* 🥇 GOLD */
+.leader-item.gold {
+  border-left: 4px solid #facc15;
+}
+
+/* 🥈 SILVER */
+.leader-item.silver {
+  border-left: 4px solid #94a3b8;
+}
+
+/* 🥉 BRONZE */
+.leader-item.bronze {
+  border-left: 4px solid #fb923c;
+}
+
+/* RANK */
+.rank {
+  font-weight: bold;
+  color: #38bdf8;
+  width: 40px;
+}
+
+/* PLAYER */
+.player-info {
+  flex: 1;
+  text-align: left;
+}
+
+.name {
+  font-size: 15px;
+}
+
+/* SCORE */
+.score {
+  font-size: 13px;
+  color: #cbd5f5;
+}

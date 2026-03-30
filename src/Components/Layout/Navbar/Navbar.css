@@ -1,0 +1,75 @@
+.navbar {
+  height: 70px;
+}
+
+.navbar-brand strong {
+  font-size: 18px;
+}
+
+.nav-link {
+  font-size: 14px;
+}
+
+.nav-link:hover {
+  color: black !important;
+}
+.navbar {
+  background-color: #0f3357 !important;
+  color: #fff;
+}
+
+/* Text color */
+.navbar .nav-link,
+.navbar-brand,
+.navbar-brand strong {
+  color: #fff !important;
+}
+
+/* Hover effect */
+.nav-link:hover {
+  color: #ddd !important;
+}
+
+/* Sign In button */
+.signin-btn,
+.btn-outline-success {
+  border-color: #fff !important;
+  color: #fff !important;
+}
+
+.btn-outline-success:hover {
+  background-color: #fff !important;
+  color: #0f3357 !important;
+}
+
+/* Icons */
+.store-icon,
+.search-icon {
+  color: #fff;
+}
+.nav-item.dropdown:hover .dropdown-menu {
+  display: block;
+  margin-top: 0;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 35px;
+  right: 0;
+  background: #1e293b;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  width: 140px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  z-index: 1000;
+}
+
+.profile-dropdown p {
+  margin: 8px 0;
+  cursor: pointer;
+}
+
+.profile-dropdown p:hover {
+  color: #6c5ce7;
+}

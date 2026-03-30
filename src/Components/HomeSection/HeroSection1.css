@@ -1,0 +1,49 @@
+.hero-section {
+  background: #0f3357;
+  color: #fff;
+  padding: 240px 0;
+}
+
+/* TITLE */
+.hero-title {
+  font-size: 48px;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+/* SUBTEXT */
+.hero-subtitle {
+  font-size: 16px;
+  margin: 20px 0;
+  color: #ddd;
+}
+
+/* BUTTONS */
+.hero-buttons .btn {
+  padding: 10px 20px;
+  border-radius: 30px;
+}
+
+/* IMAGE */
+.hero-img {
+  width: 100%;
+  max-width: 450px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 32px;
+  }
+
+  .hero-section {
+    padding: 70px 0;
+  }
+}
+.hero-section {
+  background: 
+    linear-gradient(rgba(15, 51, 87, 0.85), rgba(15, 51, 87, 0.85)),
+    url('../../assets/Styles/Section1.png');
+  background-size: cover;
+  background-position: center;
+}
