@@ -1,0 +1,45 @@
+.match-card {
+  background: #020617;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+  border: 1px solid #1e293b;
+}
+
+.match-card:hover {
+  transform: translateY(-5px);
+  border-color: #2563eb;
+}
+
+/* Teams */
+.teams {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.team h4 {
+  margin: 0;
+}
+
+.vs {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+/* Info */
+.match-info {
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+/* Button */
+.view-btn {
+  width: 100%;
+  padding: 6px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  border-radius: 6px;
+}

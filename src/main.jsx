@@ -4,8 +4,14 @@ import './index.css'
 import App from './App.jsx'
 import './assets/Styles/Global.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+// 🔥 Import AuthProvider
+import { AuthProvider } from './Context/AuthContext';
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <AuthProvider>   {/* ✅ Wrap here */}
+      <App />
+    </AuthProvider>
   </StrictMode>,
 )

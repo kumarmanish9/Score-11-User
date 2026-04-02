@@ -1,0 +1,43 @@
+.performance-section {
+  background: linear-gradient(135deg, #1f1f2e, #2c2c44);
+  padding: 20px;
+  border-radius: 12px;
+  color: white;
+}
+
+/* 🔥 Proper Grid */
+.performance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-top: 15px;
+}
+
+/* 🔥 Clean Cards */
+.performance-card {
+  background: #2a2a3d;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+/* ✨ Hover */
+.performance-card:hover {
+  transform: translateY(-5px);
+  background: #3a3a55;
+}
+
+/* 🔥 Big Numbers */
+.performance-card h2 {
+  font-size: 28px;
+  margin: 0;
+  color: #00e676;
+}
+
+/* 🔹 Label */
+.performance-card p {
+  margin-top: 5px;
+  font-size: 13px;
+  opacity: 0.7;
+}

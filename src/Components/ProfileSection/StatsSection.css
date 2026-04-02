@@ -1,0 +1,87 @@
+.profile-section {
+  background: #1e1e2f;
+  padding: 15px;
+  border-radius: 12px;
+  color: white;
+}
+
+.profile-section h3 {
+  margin-bottom: 10px;
+}
+
+/* 🔥 Grid Layout */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+/* 🔹 Each Box */
+.stat-box {
+  background: #2a2a3d;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.stat-box:hover {
+  transform: translateY(-5px);
+  background: #3a3a55;
+}
+
+.stat-box p {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.stat-box h3 {
+  margin-top: 5px;
+}
+
+/* 🔥 Section Upgrade */
+.premium-section {
+  background: linear-gradient(135deg, #1e1e2f, #2c2c44);
+  padding: 20px;
+  border-radius: 15px;
+  color: white;
+}
+
+/* 🔥 Grid Layout */
+.premium-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 15px;
+}
+
+/* 🔥 Premium Card */
+.premium-card {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 18px;
+  border-radius: 12px;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ✨ Hover Effect */
+.premium-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* 🔹 Label */
+.premium-card .label {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+/* 🔹 Value (Main Highlight) */
+.premium-card .value {
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 5px;
+  color: #ff4d4d;
+}

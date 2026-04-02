@@ -1,0 +1,68 @@
+.profile-header {
+  margin-top: 80px; /* 👈 ADD THIS (same as navbar height) */
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #0b70b4, #0b70b4);
+  padding: 20px;
+  border-radius: 12px;
+  color: white;
+  flex-wrap: wrap;
+}
+
+/* 🔹 Left Section */
+.profile-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid white;
+}
+
+.profile-info h2 {
+  margin: 0;
+}
+
+.username {
+  opacity: 0.9;
+}
+
+.email {
+  font-size: 14px;
+}
+
+.level {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+/* 🔹 Right Section */
+.profile-stats {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 10px 15px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 80px;
+  backdrop-filter: blur(5px);
+}
+
+.stat-card p {
+  font-size: 12px;
+  margin: 0;
+}
+
+.stat-card h3 {
+  margin: 5px 0 0;
+}

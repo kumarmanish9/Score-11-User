@@ -1,0 +1,114 @@
+.leaderboard-section {
+  padding: 20px;
+}
+
+/* Header */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.section-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.view-all {
+  font-size: 14px;
+  color: #22c55e;
+  cursor: pointer;
+}
+
+/* Top 3 Players */
+.top-players {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 10px;
+}
+
+.top-card {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  transition: 0.3s;
+}
+
+.top-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Rank Colors */
+.rank-1 {
+  border-top: 4px solid gold;
+}
+
+.rank-2 {
+  border-top: 4px solid silver;
+}
+
+.rank-3 {
+  border-top: 4px solid #cd7f32;
+}
+
+/* Rank */
+.top-card .rank {
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+/* Image */
+.top-card img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  margin-bottom: 6px;
+}
+
+/* Name */
+.top-card h4 {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+/* Points */
+.top-card p {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Remaining List */
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.leaderboard-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background: #ffffff;
+  padding: 12px 14px;
+  border-radius: 10px;
+
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+
+/* Text */
+.leaderboard-item .name {
+  flex: 1;
+  margin-left: 10px;
+}
+
+.leaderboard-item .points {
+  font-weight: 500;
+}

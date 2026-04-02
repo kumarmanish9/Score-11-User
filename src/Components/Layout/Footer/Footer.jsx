@@ -1,8 +1,17 @@
 import "./Footer.css";
 import Logo from "../../../assets/Styles/Logo.png";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { useLocation } from "react-router-dom";
 
 function Footer() {
+  const location = useLocation();
+
+  // const hideFooterRoutes = ["/login", "/register", "/dashboard"];
+
+  // if (hideFooterRoutes.includes(location.pathname)) {
+  //   return null;
+  // }
+
   return (
     <footer className="footer">
       <div className="footer-container">

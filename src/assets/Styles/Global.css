@@ -6,3 +6,29 @@
 body {
   margin: 0;
 }
+/* Reset + full height */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+/* Layout container */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* Main content grows */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+/* Force every page to fill space */
+.main-content > * {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}

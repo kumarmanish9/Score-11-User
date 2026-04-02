@@ -1,0 +1,82 @@
+/* Header Background */
+.header {
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  height: 70px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Search Box */
+.search-box {
+  position: relative;
+  width: 400px;
+}
+
+.search-box input {
+  padding-left: 40px;
+  border-radius: 30px;
+  background: #1e293b;
+  border: none;
+  color: white;
+}
+
+.search-box input::placeholder {
+  color: #94a3b8;
+}
+
+.search-icon {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+/* Icons */
+.icon-box {
+  position: relative;
+  font-size: 20px;
+  color: white;
+  cursor: pointer;
+}
+
+.icon-box:hover {
+  color: #38bdf8;
+}
+
+/* Notification Badge */
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  background: red;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 50%;
+}
+
+/* Profile */
+.profile-img {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+}
+
+/* Dropdown */
+.dropdown-menu {
+  background: #1e293b;
+  border: none;
+  border-radius: 10px;
+}
+
+.dropdown-item {
+  color: white;
+}
+
+.dropdown-item:hover {
+  background: #334155;
+}
