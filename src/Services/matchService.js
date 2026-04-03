@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_BASE } from "../config/api";
 
-const BASE_URL = "http://68.178.171.95:3000/api/v1/matches";
+const BASE_URL = `${API_BASE}/matches`;
 
 export const getMatches = async (type) => {
   const res = await axios.get(`${BASE_URL}/${type}`);

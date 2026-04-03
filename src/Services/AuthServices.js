@@ -1,14 +1,15 @@
 import axios from "axios";
 
 // ✅ Base URL
-const API = "http://68.178.171.95:3000/api/v1/auth";
+import { API_BASE } from "../config/api";
+const API = `${API_BASE}/auth`;
 
 // 🔐 Axios instance
 const axiosInstance = axios.create({
   baseURL: API,
 });
 
-// 🔥 Attach token automatically
+// ✅ Uses shared API config + token interceptor
 axiosInstance.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 

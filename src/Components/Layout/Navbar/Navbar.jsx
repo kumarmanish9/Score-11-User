@@ -1,274 +1,183 @@
 import React, { useState, useEffect, useContext } from "react";
 import logo from "../../../assets/Styles/Logo.png";
-import { FaSearch, FaGooglePlay, FaApple, FaUserCircle } from "react-icons/fa";
+import { FaSearch, FaBell, FaWallet, FaGooglePlay, FaApple, FaUserCircle, FaBars, FaPlus } from "react-icons/fa";
 import "./Navbar.css";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { logoutUser } from "../../../Services/AuthServices";
 import { AuthContext } from "../../../Context/AuthContext";
+import { getWalletBalance } from "../../../Services/walletService";
 
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-
-  // ✅ Context (MAIN FIX 🔥)
   const { user, setUser } = useContext(AuthContext);
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  const [open, setOpen] = useState(false);
-
-  // ✅ Close dropdown on outside click
   useEffect(() => {
-    const closeDropdown = () => setOpen(false);
-    window.addEventListener("click", closeDropdown);
-    return () => window.removeEventListener("click", closeDropdown);
-  }, []);
+    if (user) {
+      fetchWalletBalance();
+    }
+  }, [user]);
 
-  // ✅ Logout
+  const fetchWalletBalance = async () => {
+    try {
+      const balance = await getWalletBalance();
+      setWalletBalance(balance || 0);
+    } catch (err) {
+      console.log('Wallet fetch error:', err);
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await logoutUser();
     } catch (error) {
       console.log("Logout error:", error);
     }
-
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
-    setUser(null);   // 🔥 instant update (no refresh)
-
+    setUser(null);
     navigate("/login");
   };
 
-  // ✅ Hide navbar on auth pages
-  //  const hideNavbarRoutes = ["/login", "/register", "/dashboard"];
-
-  // if (hideNavbarRoutes.includes(location.pathname)) {
-  //   return null;
-  // }
-
-
   return (
-    <nav className="navbar navbar-expand-lg border-bottom fixed-top">
+    <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
       <div className="container">
-
-        {/* LOGO */}
-        <a className="navbar-brand d-flex align-items-center" href="#">
-          <img src={logo} alt="logo" width="60" height="40" className="me-2" />
+        {/* Logo */}
+        <Link className="navbar-brand d-flex align-items-center fw-bold" to="/">
+          <img src={logo} alt="Score11" width="50" height="40" className="me-2 shadow-sm rounded" />
           <div>
-            <strong>
-              Score<span style={{ color: "red" }}>11</span>
-            </strong>
-            <div style={{ fontSize: "10px", color: "#777" }}>
-              Your cricket matters
-            </div>
+            Score<span className="text-primary fw-bolder">11</span>
+            <div className="small text-muted">Fantasy Cricket</div>
           </div>
-        </a>
+        </Link>
 
-        {/* MOBILE */}
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarContent"
-        >
-          <span className="navbar-toggler-icon"></span>
+        {/* Mobile toggle */}
+        <button className="navbar-toggler border-0 p-2" onClick={() => setMobileOpen(!mobileOpen)} style={{borderRadius: '8px'}}>
+          <FaBars size={24} className="text-primary" />
         </button>
 
-        <div className="collapse navbar-collapse" id="navbarContent">
-
-          {/* MENU */}
+        {/* Desktop Nav */}
+        <div className={`collapse navbar-collapse ${mobileOpen ? 'show' : ''}`} id="navbarContent">
           <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
-            {/* Live Score */}
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                href="#"
-                id="liveScoresDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
+            {/* Live Scores */}
+            <li className="nav-item dropdown me-3">
+              <a className="nav-link dropdown-toggle fw-semibold text-dark px-4 py-2 rounded-pill" href="#" role="button" data-bs-toggle="dropdown">
                 Live Scores
               </a>
-
-              <ul className="dropdown-menu">
-                <li><a className="dropdown-item" href="#">Matches</a></li>
-                <li><a className="dropdown-item" href="#">Tournaments</a></li>
-                <li><a className="dropdown-item" href="#">Associations</a></li>
+              <ul className="dropdown-menu shadow-lg border-0 mt-2 rounded-3">
+                <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/matches">All Matches</Link></li>
+                <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/tournaments">Tournaments</Link></li>
+                <li><hr className="dropdown-divider mx-3 my-0" /></li>
+                <li><Link className="dropdown-item px-4 py-3 fw-medium text-warning" to="/leaderboard">Leaderboard</Link></li>
               </ul>
             </li>
-            {/* Network */}
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                href="#"
-                id="networkDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Network
+
+            {/* Fantasy */}
+            <li className="nav-item dropdown me-3">
+              <a className="nav-link dropdown-toggle fw-semibold text-dark px-4 py-2 rounded-pill" href="#" role="button" data-bs-toggle="dropdown">
+                Fantasy
               </a>
-
-              <ul className="dropdown-menu">
-                <li><a className="dropdown-item" href="#">Community</a></li>
-                <li><a className="dropdown-item" href="#">Looking</a></li>
+              <ul className="dropdown-menu shadow-lg border-0 mt-2 rounded-3">
+                <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/contests">Contests</Link></li>
+                <li><Link className="dropdown-item px-4 py-3 fw-semibold text-primary" to="/create-team">Create Team</Link></li>
+                <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/teams">My Teams</Link></li>
+                <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/players">Player Search</Link></li>
               </ul>
             </li>
-            {/* Ads ons */}
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                href="#"
-                id="addonsDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Add ons
+
+            {/* Live & Community */}
+            <li className="nav-item dropdown me-3">
+              <a className="nav-link dropdown-toggle fw-semibold text-dark px-4 py-2 rounded-pill" href="#" role="button" data-bs-toggle="dropdown">
+                Live & Community
               </a>
-
-              <ul className="dropdown-menu" aria-labelledby="addonsDropdown">
-
-                <li><a className="dropdown-item" href="#">Score11 PRO</a></li>
-
-                {/* 🔥 Submenu Start */}
-                <li className="dropdown-submenu position-relative">
-                  <a className="dropdown-item dropdown-toggle" href="#">
-                    Go Live
-                  </a>
-
-                  <ul className="dropdown-menu">
-                    <li><a className="dropdown-item" href="#">with camera</a></li>
-                    <li><a className="dropdown-item" href="#">with phone</a></li>
-                  </ul>
-                </li>
-                {/* 🔥 Submenu End */}
-
-                <li><a className="dropdown-item" href="#">Your App</a></li>
-                <li><a className="dropdown-item" href="#">Your Web</a></li>
-                <li><a className="dropdown-item" href="#">Super Sponsor</a></li>
-
+              <ul className="dropdown-menu shadow-lg border-0 mt-2 rounded-3">
+                <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/live">Live Streams</Link></li>
+                <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/go-live">Go Live</Link></li>
+                <li><hr className="dropdown-divider mx-3 my-0" /></li>
+                <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/community">Community</Link></li>
               </ul>
             </li>
+
             {/* More */}
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                href="#"
-                id="moreDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
+            <li className="nav-item dropdown me-3">
+              <a className="nav-link dropdown-toggle fw-semibold text-dark px-4 py-2 rounded-pill" href="#" role="button" data-bs-toggle="dropdown">
                 More
               </a>
-
-              <ul className="dropdown-menu" aria-labelledby="moreDropdown">
-                <li><a className="dropdown-item" href="#">Tournament Guide</a></li>
-                <li><a className="dropdown-item" href="#">Cricket Tips</a></li>
-                <li><a className="dropdown-item" href="#">FAQs</a></li>
-                <li><a className="dropdown-item" href="#">Blogs</a></li>
-                <li><a className="dropdown-item" href="#">Organize Tournaments</a></li>
-                <li><a className="dropdown-item" href="#">CrickHeroes Awards</a></li>
-                <li><hr className="dropdown-divider" /></li>
-                <li><a className="dropdown-item" href="#">Support</a></li>
+              <ul className="dropdown-menu shadow-lg border-0 mt-2 rounded-3">
+                <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/blogs">Blogs</Link></li>
+                <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/store">Store</Link></li>
+                <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/wallet">Wallet</Link></li>
+                <li><hr className="dropdown-divider mx-3 my-0" /></li>
+                <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/faq">FAQ</Link></li>
               </ul>
             </li>
-            <li className="nav-item"><a className="nav-link" href="#">Store</a></li>
-            <li className="nav-item"><a className="nav-link" href="#">Jobs</a></li>
-            <li className="nav-item"><a className="nav-link" href="#">Contact Us</a></li>
           </ul>
 
-          {/* RIGHT */}
+          {/* Right side */}
           <div className="d-flex align-items-center gap-3">
+            {/* Search */}
+            <FaSearch size={20} className="cursor-pointer text-gray-500 fs-5" title="Search" style={{cursor: 'pointer'}} />
 
-            <FaGooglePlay size={20} style={{ cursor: "pointer" }} />
-            <FaApple size={20} style={{ cursor: "pointer" }} />
-
-            {/* ✅ LOGIN / PROFILE SWITCH */}
-            {!user ? (
-              <Link
-                to="/login"
-                className="btn btn-outline-success rounded-pill px-3"
-              >
-                Sign In
-              </Link>
-            ) : (
-              <div style={{ position: "relative" }}>
-
-                {/* 🔥 Profile Icon (from user) */}
-                {user?.avatar?.url ? (
-                  <img
-                    src={user.avatar.url}
-                    alt="profile"
-                    className="profile-icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpen(!open);
-                    }}
-                  />
-                ) : (
-                  <FaUserCircle
-                    size={26}
-                    style={{ cursor: "pointer" }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpen(!open);
-                    }}
-                  />
-                )}
-
-                {/* DROPDOWN */}
-                {open && (
-                  <div
-                    className="profile-dropdown"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div
-                      className="profile-item"
-                      onClick={() => {
-                        setOpen(false);
-                        navigate("/profile");
-                      }}
-                    >
-                      My Profile
-                    </div>
-                    <div
-                      className="profile-item"
-                      onClick={() => {
-                        setOpen(false);
-                        navigate("/matches");
-                      }}
-                    >
-                      Matches
-                    </div>
-                    <div
-                      className="profile-item"
-                      onClick={() => {
-                        setOpen(false);
-                        navigate("/players");
-                      }}
-                    >
-                      Players
-                    </div>
-
-                    <div
-                      className="profile-item logout"
-                      onClick={() => {
-                        setOpen(false);
-                        handleLogout();
-                      }}
-                    >
-                      Logout
-                    </div>
-                  </div>
-                )}
-
+            {/* Wallet */}
+            {user && (
+              <div className="position-relative me-3">
+                <FaWallet size={20} className="cursor-pointer text-primary fs-5" title="Wallet" style={{cursor: 'pointer'}} />
+                <span className="position-absolute -top-2 start-100 translate-middle badge rounded-pill bg-danger">
+                  ₹{walletBalance.toLocaleString() || '0'}
+                </span>
               </div>
             )}
 
-            <FaSearch size={18} style={{ cursor: "pointer" }} />
+            {/* Apps */}
+            <div className="d-none d-md-flex gap-2">
+              <FaGooglePlay size={20} className="cursor-pointer text-success fs-5" title="Android" style={{cursor: 'pointer'}} />
+              <FaApple size={20} className="cursor-pointer text-dark fs-5" title="iOS" style={{cursor: 'pointer'}} />
+            </div>
 
+            {/* Profile */}
+            {!user ? (
+              <Link className="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold border-2 shadow-sm" to="/login">
+                Sign In
+              </Link>
+            ) : (
+              <div className="dropdown">
+                <a className="d-flex align-items-center text-decoration-none dropdown-toggle cursor-pointer p-2 rounded-pill bg-gray-100" href="#" role="button" data-bs-toggle="dropdown" style={{textDecoration: 'none'}}>
+                  {user?.avatar?.url ? (
+                    <img 
+                      src={user.avatar.url} 
+                      alt="profile" 
+                      className="rounded-circle me-2" 
+                      style={{width: '40px', height: '40px', objectFit: 'cover', border: '2px solid #3B82F6'}}
+                    />
+                  ) : (
+                    <FaUserCircle size={32} className="me-2 text-primary" />
+                  )}
+                  <span className="d-none d-md-inline fw-semibold text-dark small">{user.name?.split(' ')[0] || 'User'}</span>
+                </a>
+                <ul className="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 rounded-3 p-0" style={{minWidth: '240px'}}>
+                  <li>
+                    <div className="px-4 py-3 border-bottom bg-gray-50 rounded-top">
+                      <strong className="d-block mb-1">{user.name}</strong>
+                      <small className="text-muted">{user.email}</small>
+                    </div>
+                  </li>
+                  <li><Link className="dropdown-item px-4 py-3 fw-semibold border-bottom" to="/profile">Profile</Link></li>
+                  <li><Link className="dropdown-item px-4 py-3 fw-semibold" to="/dashboard">Dashboard</Link></li>
+                  <li><Link className="dropdown-item px-4 py-3 fw-semibold" to="/create-team">Create Team</Link></li>
+                  <li><Link className="dropdown-item px-4 py-3 fw-semibold" to="/wallet">Wallet</Link></li>
+                  <li><Link className="dropdown-item px-4 py-3 fw-semibold" to="/teams">My Teams</Link></li>
+                  <li><Link className="dropdown-item px-4 py-3 fw-semibold" to="/contests">Contests</Link></li>
+                  <li><hr className="dropdown-divider mx-3" /></li>
+                  <li>
+                    <button className="dropdown-item px-4 py-3 text-danger fw-semibold w-100 text-start border-0 bg-transparent" onClick={handleLogout}>
+                      Sign Out
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </div>

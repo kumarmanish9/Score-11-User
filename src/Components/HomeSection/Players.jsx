@@ -1,48 +1,66 @@
 import React from "react";
+import { getPlayers } from "../../Services/playerService";
 import PlayerCard from "./PlayerCard";
 import "./Players.css";
 
-function Players() {
-  const playersData = [
-    {
-      name: "Virat Kohli",
-      team: "RCB",
-      runs: 650,
-      wickets: 2,
-      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSD0KsnEnd1qUVhi7rmevIsRzz4SDFKFYMXhQ&s",
-    },
-    {
-      name: "MS Dhoni",
-      team: "CSK",
-      runs: 420,
-      wickets: 0,
-      img: "https://wcric.in/wp-content/uploads/2025/03/photo-2.webp",
-    },
-    {
-      name: "Jasprit Bumrah",
-      team: "MI",
-      runs: 50,
-      wickets: 22,
-      img: "https://i.pinimg.com/736x/21/c9/0e/21c90e382ca349c2c190dfbae1ba4af6.jpg",
-    },
-    {
-      name: "Rohit Sharma",
-      team: "MI",
-      runs: 580,
-      wickets: 1,
-      img: "https://media.assettype.com/outlookindia/2024-07/5c1b801c-0287-4fb1-8d3b-9404d3d45699/rohit_sharma_with_t20_world_cup_trophy_X__BCCI.jpg?w=801&auto=format%2Ccompress&fit=max&format=webp&dpr=1.0",
-    },
-  ];
+function Players({ players = [] }) {
+  const [topPlayers, setTopPlayers] = React.useState(players.slice(0, 8));
+  const [loading, setLoading] = React.useState(!players.length);
+
+  React.useEffect(() => {
+    if (!players.length) {
+      fetchPlayers();
+    } else {
+      setTopPlayers(players.slice(0, 8));
+      setLoading(false);
+    }
+  }, [players]);
+
+  const fetchPlayers = async () => {
+    try {
+      const data = await getPlayers();
+      setTopPlayers(data.slice(0, 8));
+    } catch (err) {
+      console.error('Players fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <section className="players-section">
+        <div className="container">
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status">
+              <span className="visually-hidden">Loading top players...</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section className="players-section">
+    <section className="players-section py-5 bg-light">
       <div className="container">
-        <h2 className="section-title">Top Players</h2>
+        <div className="text-center mb-5 fade-in-up">
+          <h2 className="section-title mb-3">Top Players</h2>
+          <p className="lead text-muted">Best performers this season</p>
+        </div>
 
-        <div className="players-grid">
-          {playersData.map((player, index) => (
-            <PlayerCard key={index} {...player} />
+        <div className="row g-4">
+          {topPlayers.map((player, index) => (
+            <div className="col-lg-3 col-md-6" key={player._id || index}>
+              <PlayerCard {...player} rank={index + 1} />
+            </div>
           ))}
+        </div>
+
+        <div className="text-center mt-5">
+          <a href="/players" className="btn btn-primary btn-lg">
+            View All Players →
+          </a>
         </div>
       </div>
     </section>

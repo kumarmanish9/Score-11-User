@@ -1,122 +1,447 @@
-/* Full Page Container */
-.register-container {
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* ─── Root Tokens ─────────────────────────────────────────────────────────── */
+:root {
+  --white:      #ffffff;
+  --off-white:  #f8f7f4;
+  --surface:    #f2f0eb;
+  --border:     #e0ddd6;
+  --text-dark:  #1a1814;
+  --text-mid:   #4a4744;
+  --text-soft:  #8a8784;
+  --green:      #1a7a4a;
+  --green-mid:  #22a060;
+  --green-light:#e8f5ef;
+  --gold:       #c8941a;
+  --gold-light: #fdf6e3;
+  --red:        #c0392b;
+  --red-light:  #fdf0ee;
+  --shadow-sm:  0 2px 8px rgba(26,24,20,.06);
+  --shadow-md:  0 8px 32px rgba(26,24,20,.10);
+  --shadow-lg:  0 20px 60px rgba(26,24,20,.14);
+  --radius:     16px;
+  --radius-sm:  10px;
+  --radius-xs:  6px;
+  --transition: 220ms cubic-bezier(.4,0,.2,1);
+}
+
+/* ─── Reset / Base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--off-white);
+  color: var(--text-dark);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Page Shell ───────────────────────────────────────────────────────────── */
+.auth-container.cricket-bg {
   min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--white);
+  overflow: hidden;
+}
+
+/* ─── Left Hero Panel ──────────────────────────────────────────────────────── */
+.stadium-hero {
+  position: relative;
+  background: var(--text-dark);
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-
-  /* Background with overlay */
-  background: 
-    linear-gradient(rgba(15, 51, 87, 0.5), rgba(15, 51, 87, 0.5)),
-    url('../../assets/Styles/Section1.png');
-
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  justify-content: center;
+  padding: 3rem 2.5rem;
+  overflow: hidden;
+  min-height: 100vh;
 }
 
-/* Glass Card */
-.register-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+/* Subtle texture overlay */
+.stadium-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, rgba(26,122,74,.20) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 80% at 80% 80%, rgba(200,148,26,.10) 0%, transparent 60%);
+  pointer-events: none;
+}
 
-  padding: 35px;
-  width: 360px;
+/* Decorative grid lines */
+.stadium-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
 
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+.stadium-svg {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 460px;
+  opacity: .85;
+  filter: saturate(1.1) brightness(1.05);
+  animation: floatSvg 6s ease-in-out infinite;
+}
 
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+@keyframes floatSvg {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
 
+.hero-text {
+  position: relative;
+  z-index: 1;
   text-align: center;
-  color: white;
+  margin-top: 2rem;
 }
 
-/* Heading */
-.register-card h2 {
-  margin-bottom: 20px;
-  font-weight: 600;
+.stadium-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.8rem, 5vw, 4.2rem);
+  font-weight: 900;
+  color: var(--white);
+  letter-spacing: -.02em;
+  line-height: 1;
 }
 
-/* Input Fields */
-.register-card input {
+.logo-highlight {
+  color: var(--gold);
+  position: relative;
+}
+
+.logo-highlight::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 2px;
+  height: 3px;
+  background: var(--gold);
+  border-radius: 2px;
+  opacity: .5;
+}
+
+.stadium-subtitle {
+  margin-top: .75rem;
+  font-size: .95rem;
+  font-weight: 300;
+  color: rgba(255,255,255,.55);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+/* ─── Right Form Panel ─────────────────────────────────────────────────────── */
+.auth-form-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 2rem;
+  background: var(--off-white);
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.auth-card.register-card {
   width: 100%;
-  padding: 12px;
-  margin-bottom: 15px;
-
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
-
-  color: white;
-  font-size: 14px;
-
-  outline: none;
-  transition: 0.3s;
+  max-width: 560px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 2.5rem 2.5rem 2rem;
+  animation: slideUp .45s cubic-bezier(.16,1,.3,1) both;
 }
 
-/* Placeholder */
-.register-card input::placeholder {
-  color: rgba(255, 255, 255, 0.7);
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Input Focus Effect */
-.register-card input:focus {
-  border-color: #00c6ff;
-  box-shadow: 0 0 8px rgba(0, 198, 255, 0.5);
+/* ─── Logo / Header ────────────────────────────────────────────────────────── */
+.logo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.8rem;
+  gap: .5rem;
 }
 
-/* Button */
-.register-card button {
-  width: 100%;
-  padding: 12px;
-
-  background: linear-gradient(135deg, #00c6ff, #0072ff);
-  border: none;
-  border-radius: 8px;
-
-  color: white;
-  font-size: 15px;
-  font-weight: 600;
-
-  cursor: pointer;
-  transition: 0.3s;
+.cricket-bat-logo {
+  width: 52px;
+  height: 52px;
+  background: var(--text-dark);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition);
 }
 
-/* Button Hover */
-.register-card button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(0, 114, 255, 0.4);
+.cricket-bat-logo:hover { transform: rotate(-6deg) scale(1.05); }
+
+.logo-section h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  letter-spacing: -.02em;
 }
 
-/* Login Link */
-.login-link {
-  display: inline-block;
-  margin-top: 10px;
+.logo-section p {
+  font-size: .85rem;
+  color: var(--text-soft);
+  font-weight: 400;
+}
 
-  color: #00c6ff;
-  text-decoration: none;
+/* ─── Alert ────────────────────────────────────────────────────────────────── */
+.alert.alert-danger {
+  background: var(--red-light);
+  border: 1px solid rgba(192,57,43,.20);
+  color: var(--red);
+  border-radius: var(--radius-sm);
+  padding: .75rem 1rem;
+  font-size: .85rem;
   font-weight: 500;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
 }
 
-/* Hover Effect */
-.login-link:hover {
-  text-decoration: underline;
+.alert.alert-danger::before {
+  content: '⚠';
+  font-size: 1rem;
 }
 
-/* Optional: Smooth Animation */
-.register-card {
-  animation: fadeIn 0.8s ease-in-out;
+/* ─── Form Layout ──────────────────────────────────────────────────────────── */
+form { display: flex; flex-direction: column; gap: 1rem; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+
+/* ─── Labels ───────────────────────────────────────────────────────────────── */
+.form-label {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text-mid);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.label-icon {
+  color: var(--green);
+  font-size: .85rem;
+  flex-shrink: 0;
+}
+
+/* ─── Inputs ───────────────────────────────────────────────────────────────── */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"] {
+  width: 100%;
+  padding: .72rem .95rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .9rem;
+  font-weight: 400;
+  color: var(--text-dark);
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+
+input::placeholder { color: var(--text-soft); font-weight: 300; }
+
+input:hover {
+  border-color: #ccc9c0;
+}
+
+input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(26,122,74,.10);
+  background: var(--green-light);
+}
+
+/* ─── Submit Button ────────────────────────────────────────────────────────── */
+.btn-cricket {
+  margin-top: .5rem;
+  width: 100%;
+  padding: .9rem 1.5rem;
+  background: var(--text-dark);
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  box-shadow: 0 4px 14px rgba(26,24,20,.18);
+}
+
+.btn-cricket:hover:not(:disabled) {
+  background: var(--green);
+  box-shadow: 0 6px 20px rgba(26,122,74,.28);
+  transform: translateY(-1px);
+}
+
+.btn-cricket:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-cricket:disabled {
+  opacity: .65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Spinner */
+.spinner-border {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Auth Links / Divider ─────────────────────────────────────────────────── */
+.auth-links {
+  margin-top: 1.25rem;
+  text-align: center;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.divider span {
+  font-size: .78rem;
+  color: var(--text-soft);
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.auth-links p {
+  font-size: .875rem;
+  color: var(--text-mid);
+}
+
+.highlight-link {
+  color: var(--green);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1.5px solid transparent;
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.highlight-link:hover {
+  color: var(--green-mid);
+  border-bottom-color: var(--green-mid);
+}
+
+/* ─── Responsive ───────────────────────────────────────────────────────────── */
+
+/* Tablet landscape */
+@media (max-width: 1024px) {
+  .stadium-hero { padding: 2.5rem 1.75rem; }
+  .auth-card.register-card { padding: 2rem 2rem 1.75rem; }
+}
+
+/* Tablet portrait — stack vertically */
+@media (max-width: 820px) {
+  .auth-container.cricket-bg {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .stadium-hero {
+    min-height: auto;
+    padding: 2.5rem 1.5rem 2rem;
   }
+
+  .stadium-svg { max-width: 280px; }
+
+  .stadium-title { font-size: 2.4rem; }
+
+  .auth-form-container {
+    min-height: auto;
+    padding: 2rem 1.25rem 3rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 540px) {
+  .auth-card.register-card {
+    padding: 1.75rem 1.25rem 1.5rem;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: .85rem;
+  }
+
+  .logo-section h2 { font-size: 1.35rem; }
+
+  .stadium-title  { font-size: 2rem; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"] {
+    font-size: .875rem;
+    padding: .68rem .85rem;
+  }
+
+  .btn-cricket { font-size: .875rem; padding: .85rem 1.25rem; }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+  .auth-form-container { padding: 1.5rem 1rem 2.5rem; }
+  .stadium-svg { max-width: 200px; }
 }

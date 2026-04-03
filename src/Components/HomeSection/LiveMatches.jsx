@@ -1,124 +1,101 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./LiveMatches.css";
 import MatchCard from "./MatchCard";
 
-function LiveMatches() {
-
-  const matchData = {
-    live: [
-      {
-        teamA: "Team A",
-        teamB: "Team B",
-        scoreA: "120/3",
-        scoreB: "-",
-        overs: "15.2",
-        status: "Team A batting",
-      },
-      {
-        teamA: "Team c",
-        teamB: "Team D",
-        scoreA: "120/3",
-        scoreB: "-",
-        overs: "15.2",
-        status: "Team C batting",
-      },
-    ],
-
-    upcoming: [
-      {
-        teamA: "India",
-        teamB: "Australia",
-        time: "Today 7:00 PM",
-      },
-      {
-        teamA: "Australia",
-        teamB: "India",
-        time: "Today 9:00 PM",
-      },
-    ],
-
-    completed: [
-      {
-        teamA: "RCB",
-        teamB: "KKR",
-        result: "RCB won by 5 wickets",
-      },
-      {
-        teamA: "CSK",
-        teamB: "MI",
-        result: "CSK won by 5 wickets",
-      },
-    ],
-  };
-
+function LiveMatches({ live = [], upcoming = [], refresh }) {
   const [activeTab, setActiveTab] = useState("live");
+  const [localLoading, setLocalLoading] = useState(true);
+
+  useEffect(() => {
+    if (live.length || upcoming.length) {
+      setLocalLoading(false);
+    }
+  }, [live, upcoming]);
+
+  if (localLoading) {
+    return (
+      <section className="live-section">
+        <div className="container">
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status">
+              <span className="visually-hidden">Loading matches...</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="live-section">
       <div className="container">
 
         {/* Title */}
-        <h2 className="section-title">Live Matches</h2>
+        <h2 className="section-title fade-in-up">Live Matches</h2>
 
-        {/* ✅ Tabs Fixed */}
-        <div className="tabs">
+        {/* Tabs */}
+        <div className="tabs mb-4">
           <button 
-            className={activeTab === "live" ? "active" : ""} 
+            className={`tab-btn ${activeTab === "live" ? "active" : ""}`} 
             onClick={() => setActiveTab("live")}
           >
-            Live
+            Live ({live.length})
           </button>
 
           <button 
-            className={activeTab === "upcoming" ? "active" : ""} 
+            className={`tab-btn ${activeTab === "upcoming" ? "active" : ""}`} 
             onClick={() => setActiveTab("upcoming")}
           >
-            Upcoming
+            Upcoming ({upcoming.length})
           </button>
 
           <button 
-            className={activeTab === "completed" ? "active" : ""} 
+            className={`tab-btn ${activeTab === "completed" ? "active" : ""}`} 
             onClick={() => setActiveTab("completed")}
           >
             Completed
           </button>
         </div>
 
-        {/* ✅ Dynamic Cards */}
+        {/* Dynamic Cards */}
         <div className="row g-4">
-          {matchData[activeTab].map((match, index) => (
-            <div className="col-md-6 col-lg-4" key={index}>
-
-              {activeTab === "live" && (
-                <MatchCard match={match} />
-              )}
-
-              {activeTab === "upcoming" && (
-                <div className="match-card">
-                  <h6>{match.teamA} vs {match.teamB}</h6>
-                  <p>{match.time}</p>
+          {(() => {
+            const data = activeTab === 'live' ? live : activeTab === 'upcoming' ? upcoming : [];
+            if (data.length === 0) {
+              return (
+                <div className="col-12 text-center py-5">
+                  <h5>No {activeTab} matches at the moment</h5>
+                  <p className="text-muted">Check back soon!</p>
                 </div>
-              )}
-
-              {activeTab === "completed" && (
-                <div className="match-card">
-                  <h6>{match.teamA} vs {match.teamB}</h6>
-                  <p>{match.result}</p>
-                </div>
-              )}
-
-            </div>
-          ))}
+              );
+            }
+            return data.map((match, index) => (
+              <div className="col-md-6 col-lg-4" key={match._id || index}>
+                {activeTab === "live" ? (
+                  <MatchCard match={match} />
+                ) : (
+                  <div className="card h-100 hover-lift">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between mb-2">
+                        <span className="fw-bold">{match.teamA || 'Team A'}</span>
+                        <span className="text-muted">vs</span>
+                        <span className="fw-bold">{match.teamB || 'Team B'}</span>
+                      </div>
+                      {match.time && <p className="card-text mb-0">{match.time}</p>}
+                      {match.result && <p className="card-text text-success fw-bold mb-0">{match.result}</p>}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ));
+          })()}
         </div>
 
-        {/* Button */}
-        <div className="text-center mt-4">
-          <button 
-            className="btn btn-primary"
-            onClick={() => alert(`Showing all ${activeTab} matches`)}
-          >
-            View All Matches
-          </button>
+        {/* View All Button */}
+        <div className="text-center mt-5">
+          <a href="/matches" className="btn btn-primary btn-lg">
+            View All Matches →
+          </a>
         </div>
 
       </div>
