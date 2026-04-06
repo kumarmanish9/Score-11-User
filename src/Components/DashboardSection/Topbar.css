@@ -1,0 +1,149 @@
+/* 🔥 PREMIUM BACKGROUND (like reference UI) */
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e6f0ff, #f9fbff);
+  font-family: 'Poppins', sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* 🔷 Soft floating shapes (premium look) */
+body::before,
+body::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  z-index: -1;
+}
+
+body::before {
+  width: 220px;
+  height: 220px;
+  background: rgba(59, 130, 246, 0.12);
+  top: 40px;
+  left: 40px;
+}
+
+body::after {
+  width: 300px;
+  height: 300px;
+  background: rgba(168, 85, 247, 0.12);
+  bottom: 40px;
+  right: 40px;
+}
+
+/* 🔥 MAIN WRAPPER (IMPORTANT for removing white edges) */
+.app-container {
+  padding: 20px;
+  background: transparent;
+}
+
+/* 🔷 Topbar container (FIXED VERSION) */
+.topbar {
+  background: linear-gradient(90deg, #1e3a5f, #16324f);
+  border-radius: 20px;
+  padding: 12px 25px;
+  margin: 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* 🔥 REMOVE BOOTSTRAP WHITE BG ISSUE */
+.container-fluid {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* 🔷 Logo */
+.logo {
+  font-weight: 600;
+  font-size: 22px;
+  color: #ffffff !important;
+}
+
+/* 🔷 Search box */
+.search-box {
+  position: relative;
+  width: 35%;
+}
+
+.search-box input {
+  padding-left: 38px;
+  border-radius: 25px;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  height: 40px;
+}
+
+.search-box input::placeholder {
+  color: #cbd5f5;
+}
+
+.search-icon {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  color: #cbd5f5;
+}
+
+/* 🔷 Nav links */
+.nav-link {
+  font-weight: 500;
+  color: #cbd5f5 !important;
+  margin: 0 12px;
+  transition: 0.3s;
+}
+
+.nav-link:hover {
+  color: #ffffff !important;
+}
+
+.nav-link.active {
+  color: #ffffff !important;
+  border-bottom: 2px solid #3b82f6;
+}
+
+/* 🔴 LIVE badge */
+.live .badge {
+  margin-left: 6px;
+  font-size: 10px;
+  padding: 3px 6px;
+}
+
+/* 🔔 Notification */
+.icon {
+  position: relative;
+  font-size: 18px;
+  margin: 0 15px;
+  cursor: pointer;
+  color: white;
+}
+
+.notification-dot {
+  position: absolute;
+  top: -3px;
+  right: -5px;
+  width: 8px;
+  height: 8px;
+  background: red;
+  border-radius: 50%;
+}
+
+/* 👤 Profile */
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: white;
+}
+
+.profile-img {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  border: 2px solid white;
+}

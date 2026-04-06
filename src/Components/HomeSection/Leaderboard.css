@@ -1,26 +1,37 @@
+/* =========================
+   LEADERBOARD SECTION (LIGHT UI)
+========================= */
 .leaderboard-section {
   padding: 80px 20px;
-  background: #020617;
-  color: #fff;
+  background: #ffffff;
+  color: #1e293b;
 }
 
-/* CARD CONTAINER */
+/* =========================
+   CARD CONTAINER
+========================= */
 .leaderboard-card {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(10px);
+  background: #ffffff;
   border-radius: 16px;
-  padding: 20px;
+  padding: 25px;
   margin-bottom: 30px;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
-/* TITLE */
+/* =========================
+   TITLE
+========================= */
 .leaderboard-card h3 {
   margin-bottom: 20px;
   font-size: 20px;
+  color: #0f172a;
+  font-weight: 600;
 }
 
-/* LIST ITEM */
+/* =========================
+   LIST ITEM
+========================= */
 .leader-item {
   display: flex;
   align-items: center;
@@ -28,39 +39,51 @@
   padding: 14px 16px;
   border-radius: 12px;
   margin-bottom: 12px;
-  background: rgba(255,255,255,0.03);
-  transition: 0.3s;
+  background: #f8fafc;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
 }
 
-/* HOVER */
+/* =========================
+   HOVER EFFECT
+========================= */
 .leader-item:hover {
   transform: translateX(6px);
-  background: rgba(255,255,255,0.08);
+  background: #f1f5f9;
+  border-color: #e2e8f0;
 }
 
-/* 🥇 GOLD */
+/* =========================
+   TOP RANK COLORS
+========================= */
 .leader-item.gold {
   border-left: 4px solid #facc15;
+  background: #fffbea;
 }
 
-/* 🥈 SILVER */
 .leader-item.silver {
   border-left: 4px solid #94a3b8;
+  background: #f8fafc;
 }
 
-/* 🥉 BRONZE */
 .leader-item.bronze {
   border-left: 4px solid #fb923c;
+  background: #fff7ed;
 }
 
-/* RANK */
+/* =========================
+   RANK
+========================= */
 .rank {
   font-weight: bold;
-  color: #38bdf8;
+  color: #3b82f6;
   width: 40px;
+  font-size: 16px;
 }
 
-/* PLAYER */
+/* =========================
+   PLAYER INFO
+========================= */
 .player-info {
   flex: 1;
   text-align: left;
@@ -68,10 +91,28 @@
 
 .name {
   font-size: 15px;
+  color: #0f172a;
+  font-weight: 500;
 }
 
-/* SCORE */
+/* =========================
+   SCORE
+========================= */
 .score {
   font-size: 13px;
-  color: #cbd5f5;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+  .leaderboard-card {
+    padding: 20px;
+  }
+
+  .leader-item {
+    padding: 12px;
+  }
 }

@@ -39,13 +39,24 @@ function Register() {
       return;
     }
 
+    // const payload = {
+    //   username: form.username,
+    //   fullName: form.name,
+    //   email: form.email,
+    //   phone: form.phone,
+    //   password: form.password
+    // };
+
     const payload = {
-      username: form.username,
-      fullName: form.name,
+      name: form.name,          // ✅ NOT fullName
       email: form.email,
       phone: form.phone,
       password: form.password
     };
+
+    // 👇 ADD THIS HERE
+    console.log("PHONE VALUE:", form.phone);
+    console.log("PAYLOAD:", payload);
 
     try {
       setLoading(true);
@@ -65,28 +76,28 @@ function Register() {
         <svg className="stadium-svg" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice">
           <defs>
             <linearGradient id="stadiumGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#10B981"/>
-              <stop offset="50%" stopColor="#059669"/>
-              <stop offset="100%" stopColor="#047857"/>
+              <stop offset="0%" stopColor="#10B981" />
+              <stop offset="50%" stopColor="#059669" />
+              <stop offset="100%" stopColor="#047857" />
             </linearGradient>
             <filter id="glow">
-              <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
-              <feMerge> 
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
+              <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
           </defs>
-          <rect className="pitch" x="200" y="200" width="800" height="200" rx="20" fill="#D97706" filter="url(#glow)"/>
-          <circle cx="600" cy="300" r="80" fill="#F59E0B" stroke="#B45309" strokeWidth="8" filter="url(#glow)"/>
-          <path d="M 300 280 Q 450 200 600 280 T 900 280" stroke="#FBBF24" strokeWidth="20" strokeLinecap="round" fill="none" filter="url(#glow)"/>
-          <path d="M 300 320 Q 450 400 600 320 T 900 320" stroke="#F59E0B" strokeWidth="20" strokeLinecap="round" fill="none" filter="url(#glow)"/>
-          <circle cx="520" cy="300" r="12" fill="#EF4444"/>
-          <circle cx="680" cy="300" r="12" fill="#EF4444"/>
+          <rect className="pitch" x="200" y="200" width="800" height="200" rx="20" fill="#D97706" filter="url(#glow)" />
+          <circle cx="600" cy="300" r="80" fill="#F59E0B" stroke="#B45309" strokeWidth="8" filter="url(#glow)" />
+          <path d="M 300 280 Q 450 200 600 280 T 900 280" stroke="#FBBF24" strokeWidth="20" strokeLinecap="round" fill="none" filter="url(#glow)" />
+          <path d="M 300 320 Q 450 400 600 320 T 900 320" stroke="#F59E0B" strokeWidth="20" strokeLinecap="round" fill="none" filter="url(#glow)" />
+          <circle cx="520" cy="300" r="12" fill="#EF4444" />
+          <circle cx="680" cy="300" r="12" fill="#EF4444" />
           <g className="batsman">
-            <rect x="580" y="220" width="40" height="160" rx="20" fill="#F59E0B" stroke="#B45309" strokeWidth="4" filter="url(#glow)"/>
-            <circle cx="600" cy="200" r="25" fill="#D97706"/>
-            <path d="M 550 150 Q 600 100 650 150" stroke="#FBBF24" strokeWidth="12" strokeLinecap="round" fill="none" filter="url(#glow)"/>
+            <rect x="580" y="220" width="40" height="160" rx="20" fill="#F59E0B" stroke="#B45309" strokeWidth="4" filter="url(#glow)" />
+            <circle cx="600" cy="200" r="25" fill="#D97706" />
+            <path d="M 550 150 Q 600 100 650 150" stroke="#FBBF24" strokeWidth="12" strokeLinecap="round" fill="none" filter="url(#glow)" />
           </g>
         </svg>
         <div className="hero-text">
@@ -102,9 +113,9 @@ function Register() {
           <div className="logo-section">
             <div className="cricket-bat-logo">
               <svg viewBox="0 0 60 60">
-                <path d="M 10 10 L 50 50 M 10 50 L 50 10" stroke="#3B82F6" strokeWidth="8" strokeLinecap="round" fill="none"/>
-                <rect x="25" y="5" width="10" height="50" rx="5" fill="#1E40AF"/>
-                <circle cx="30" cy="55" r="5" fill="#F59E0B"/>
+                <path d="M 10 10 L 50 50 M 10 50 L 50 10" stroke="#3B82F6" strokeWidth="8" strokeLinecap="round" fill="none" />
+                <rect x="25" y="5" width="10" height="50" rx="5" fill="#1E40AF" />
+                <circle cx="30" cy="55" r="5" fill="#F59E0B" />
               </svg>
             </div>
             <h2>Join Score11</h2>
@@ -148,7 +159,7 @@ function Register() {
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label">
-<FaEnvelope className="label-icon" />
+                  <FaEnvelope className="label-icon" />
                   Email
                 </label>
                 <input

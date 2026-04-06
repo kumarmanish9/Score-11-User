@@ -35,7 +35,7 @@ export const registerUser = (data) => {
 
 // ✅ LOGOUT
 export const logoutUser = () => {
-  return axiosInstance.post("/logout");
+  return axiosInstance.post("/logout"); 
 };
 
 // ================= PASSWORD FLOW ================= //

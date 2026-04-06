@@ -59,7 +59,7 @@ function Matches() {
           <p className="no-data">No matches found</p>
         ) : (
           matches.map((match) => (
-            <MatchCard key={match.id} match={match} />
+            <MatchCard key={match._id} match={match} />
           ))
         )}
       </div>

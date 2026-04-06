@@ -19,7 +19,7 @@ export const getTeams = async () => {
 };
 
 export const getUserTeams = async () => {
-  const response = await api.get('/me');
+  const response = await api.get('/my-teams');
   return response.data.data || [];
 };
 

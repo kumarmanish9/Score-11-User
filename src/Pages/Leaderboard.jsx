@@ -35,25 +35,23 @@ function Leaderboard() {
     <div className="py-5 bg-gray-50 min-vh-100">
       <div className="container">
         <div className="row mb-5">
-          <div className="col-lg-8">
-            <nav className="d-flex gap-2 mb-4">
-              {tabs.map(tab => (
-                <button
-                  key={tab.id}
-                  className={`btn px-4 py-2 rounded-pill fw-semibold border-0 ${
-                    activeTab === tab.id 
-                      ? 'bg-blue-500 text-white shadow-sm' 
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
+          <div className="col-lg-8 mx-auto text-center d-flex flex-column align-items-center">            <nav className="d-flex gap-2 mb-4">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                className={`btn px-4 py-2 rounded-pill fw-semibold border-0 ${activeTab === tab.id
+                    ? 'bg-blue-500 text-white shadow-sm'
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
                   }`}
-                  onClick={() => {
-                    setActiveTab(tab.id);
-                    fetchLeaderboard(tab.id);
-                  }}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  fetchLeaderboard(tab.id);
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
             <h1 className="display-4 fw-bold mb-3">Leaderboard</h1>
             <p className="lead text-gray-700 mb-0">
               Top players ranked by fantasy points. Climb the ranks and win rewards!
@@ -63,7 +61,7 @@ function Leaderboard() {
 
         {loading ? (
           <div className="text-center py-8">
-            <div className="spinner-border text-blue-500 mb-3" style={{width: '3rem', height: '3rem'}} />
+            <div className="spinner-border text-blue-500 mb-3" style={{ width: '3rem', height: '3rem' }} />
             <p className="text-muted">Loading leaderboard...</p>
           </div>
         ) : (
@@ -84,17 +82,17 @@ function Leaderboard() {
                     {mockLeaderboard.map((player, index) => (
                       <tr key={index} className={player.rank <= 3 ? 'table-active fw-semibold' : ''}>
                         <td className="fs-4 fw-bold text-primary">
-                          <div className="rank-badge p-3 rounded-circle bg-primary text-white d-inline-block text-center" style={{width: '48px', height: '48px', lineHeight: '24px'}}>
+                          <div className="rank-badge p-3 rounded-circle bg-primary text-white d-inline-block text-center" style={{ width: '48px', height: '48px', lineHeight: '24px' }}>
                             #{player.rank}
                           </div>
                         </td>
                         <td>
                           <div className="d-flex align-items-center gap-3">
-                            <img 
-                              src={player.avatar} 
+                            <img
+                              src={player.avatar}
                               alt={player.name}
-                              className="rounded-circle" 
-                              style={{width: '56px', height: '56px'}}
+                              className="rounded-circle"
+                              style={{ width: '56px', height: '56px' }}
                             />
                             <div>
                               <div className="fw-bold">{player.name}</div>
@@ -106,9 +104,8 @@ function Leaderboard() {
                           <div className="fw-bold fs-5 text-success">{player.points.toLocaleString()}</div>
                         </td>
                         <td>
-                          <span className={`badge fs-6 px-3 py-2 fw-semibold ${
-                            player.change.startsWith('+') ? 'bg-success' : 'bg-danger'
-                          }`}>
+                          <span className={`badge fs-6 px-3 py-2 fw-semibold ${player.change.startsWith('+') ? 'bg-success' : 'bg-danger'
+                            }`}>
                             {player.change}
                           </span>
                         </td>

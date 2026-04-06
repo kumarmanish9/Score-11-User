@@ -1,31 +1,32 @@
-/* Professional White Footer - Score11 Cricket */
+/* 🔥 PREMIUM COMPACT FOOTER - Score11 */
 
 /* Main Footer */
 .footer {
   background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
   color: #475569;
-  margin-top: 60px;
+  margin-top: 40px;
   font-family: 'Segoe UI', sans-serif;
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.03);
 }
 
 /* Main Container */
 .footer-main {
-  padding: 60px 20px 40px;
-  border-bottom: 1px solid #E2E8F0;
+  padding: 40px 20px 20px;
+  border-bottom: none;
 }
 
 .footer-container {
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 40px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
 }
 
 @media (max-width: 768px) {
   .footer-container {
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: 24px;
     text-align: center;
   }
 }
@@ -33,11 +34,11 @@
 /* Footer Section */
 .footer-section h3 {
   color: #1E293B;
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #E2E8F0;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #E2E8F0;
 }
 
 .footer-section ul {
@@ -46,52 +47,52 @@
 }
 
 .footer-section ul li {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .footer-section ul li a {
   color: #64748B;
   text-decoration: none;
   font-weight: 500;
+  font-size: 14px;
   transition: all 0.2s ease;
   display: block;
 }
 
 .footer-section ul li a:hover {
   color: #3B82F6;
-  transform: translateX(4px);
+  transform: translateX(3px);
 }
 
 /* Brand Section */
 .footer-logo {
-  width: 140px;
-  height: auto;
-  margin-bottom: 16px;
+  width: 110px;
+  margin-bottom: 12px;
 }
 
 .footer-desc {
   color: #64748B;
-  line-height: 1.6;
-  font-size: 15px;
-  margin-bottom: 24px;
+  line-height: 1.5;
+  font-size: 14px;
+  margin-bottom: 16px;
 }
 
 /* Social Icons */
 .social-icons {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .social-icons a {
+  width: 36px;
+  height: 36px;
+  background: #F1F5F9;
+  border-radius: 10px;
+  color: #64748B;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  background: #F1F5F9;
-  border-radius: 12px;
-  color: #64748B;
-  font-size: 18px;
   transition: all 0.2s ease;
 }
 
@@ -99,130 +100,130 @@
   background: #3B82F6;
   color: #FFFFFF;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
 }
 
-/* Newsletter Section */
+/* 🔥 Newsletter + App Section (Compact Row) */
 .footer-newsletter {
   background: #FFFFFF;
-  padding: 40px 20px;
+  padding: 24px 20px;
   border-bottom: 1px solid #E2E8F0;
 }
 
-.newsletter-content {
-  flex: 1;
+.newsletter-wrapper {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
+/* Newsletter */
 .newsletter-content h3 {
-  font-size: 22px;
+  font-size: 18px;
   color: #1E293B;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .newsletter-content p {
   color: #64748B;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
+  font-size: 14px;
 }
 
 .newsletter-form {
   display: flex;
-  gap: 12px;
-  max-width: 400px;
+  gap: 8px;
+  max-width: 350px;
 }
 
 .newsletter-input {
   flex: 1;
-  padding: 14px 16px;
+  padding: 10px 12px;
   border: 1px solid #D1D5DB;
-  border-radius: 12px;
-  font-size: 16px;
-  background: #FFFFFF;
+  border-radius: 10px;
+  font-size: 14px;
 }
 
 .newsletter-input:focus {
   outline: none;
   border-color: #3B82F6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 .newsletter-btn {
-  padding: 14px 24px;
+  padding: 10px 16px;
   background: linear-gradient(135deg, #3B82F6, #2563EB);
   color: #FFFFFF;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
+  font-size: 14px;
   transition: all 0.2s ease;
-  white-space: nowrap;
 }
 
 .newsletter-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
 }
 
 /* App Stores */
 .app-stores {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
 }
 
 .app-stores h4 {
   color: #1E293B;
-  font-weight: 600;
-  margin-bottom: 12px;
+  font-size: 14px;
+  margin-bottom: 4px;
 }
 
 .app-badges {
   display: flex;
-  gap: 12px;
+  gap: 8px;
 }
 
 .app-badge {
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #FFFFFF;
+  border-radius: 10px;
+  font-size: 13px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #FFFFFF;
-  border-radius: 12px;
-  font-weight: 500;
-  font-size: 14px;
+  gap: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .app-badge:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
 }
 
-.app-badge svg {
-  font-size: 20px;
-}
-
+/* Mobile Fix */
 @media (max-width: 768px) {
-  .newsletter-content,
-  .app-stores {
+  .newsletter-wrapper {
+    flex-direction: column;
     text-align: center;
   }
-  
+
   .newsletter-form {
     flex-direction: column;
+    width: 100%;
   }
-  
+
   .app-badges {
     justify-content: center;
   }
 }
 
-/* Bottom Copyright */
+/* Bottom */
 .footer-bottom {
   background: #F8FAFC;
-  padding: 24px 20px;
+  padding: 16px 20px;
   border-top: 1px solid #E2E8F0;
 }
 
@@ -230,14 +231,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  padding: 0;
+  gap: 10px;
 }
 
 .footer-bottom p {
-  color: #64748B;
-  font-size: 14px;
+  font-size: 13px;
   margin: 0;
+  color: #64748B;
 }
 
 .footer-bottom a {
@@ -250,19 +250,13 @@
 }
 
 .footer-extra {
+  font-size: 12px;
   color: #94A3B8;
-  font-size: 13px;
 }
 
 @media (max-width: 768px) {
   .footer-bottom .footer-container {
     flex-direction: column;
-    gap: 12px;
     text-align: center;
   }
-}
-
-/* Hide footer on auth pages - uncomment if needed */
-.auth-page .footer {
-  display: none;
 }

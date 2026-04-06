@@ -1,22 +1,20 @@
-import axios from 'axios';
+import axios from "axios";
 
-export const API_BASE = 'http://68.178.171.95:3000/api/v1';
-// Comment out for local dev: http://localhost:3000/api/v1
+export const API_BASE = "http://68.178.171.95:3000/api/v1";
 
-export const createApiInstance = (axios) => {
-  const axiosInstance = axios.create({
-    baseURL: API_BASE,
-  });
+const api = axios.create({
+  baseURL: API_BASE,
+});
 
-  axiosInstance.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  });
+// ✅ Add token automatically
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
 
-  return axiosInstance;
-};
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
 
-export default createApiInstance(axios);
+  return config;
+});
+
+export default api;

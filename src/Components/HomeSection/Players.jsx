@@ -4,64 +4,70 @@ import PlayerCard from "./PlayerCard";
 import "./Players.css";
 
 function Players({ players = [] }) {
-  const [topPlayers, setTopPlayers] = React.useState(players.slice(0, 8));
-  const [loading, setLoading] = React.useState(!players.length);
+  const [topPlayers, setTopPlayers] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    if (!players.length) {
-      fetchPlayers();
-    } else {
+    if (players.length) {
       setTopPlayers(players.slice(0, 8));
       setLoading(false);
+    } else {
+      fetchPlayers();
     }
   }, [players]);
 
   const fetchPlayers = async () => {
     try {
       const data = await getPlayers();
-      setTopPlayers(data.slice(0, 8));
+      console.log("Players API:", data);
+
+      // adjust if API returns { data: [] }
+      const playersData = data.data || data;
+
+      setTopPlayers(playersData.slice(0, 8));
     } catch (err) {
-      console.error('Players fetch error:', err);
+      console.error("Players fetch error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <section className="players-section">
-        <div className="container">
-          <div className="text-center py-5">
-            <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status">
-              <span className="visually-hidden">Loading top players...</span>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section className="players-section py-5 bg-light">
+    <section className="players-section py-5">
       <div className="container">
-        <div className="text-center mb-5 fade-in-up">
-          <h2 className="section-title mb-3">Top Players</h2>
-          <p className="lead text-muted">Best performers this season</p>
+
+        {/* HEADER */}
+        <div className="text-center mb-5">
+          <h2 className="section-title">Top Players</h2>
+          <p className="section-subtitle">Best performers this season</p>
         </div>
 
-        <div className="row g-4">
-          {topPlayers.map((player, index) => (
-            <div className="col-lg-3 col-md-6" key={player._id || index}>
-              <PlayerCard {...player} rank={index + 1} />
+        {/* LOADING */}
+        {loading ? (
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" />
+          </div>
+        ) : (
+          <>
+            {/* GRID */}
+            <div className="players-grid">
+              {topPlayers.map((player, index) => (
+                <PlayerCard
+                  key={player._id || index}
+                  {...player}
+                  rank={index + 1}
+                />
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className="text-center mt-5">
-          <a href="/players" className="btn btn-primary btn-lg">
-            View All Players →
-          </a>
-        </div>
+            {/* BUTTON */}
+            <div className="text-center mt-5">
+              <a href="/players" className="view-btn">
+                View All Players →
+              </a>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

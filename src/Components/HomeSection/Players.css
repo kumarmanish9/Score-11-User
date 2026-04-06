@@ -1,13 +1,19 @@
+/* SECTION */
 .players-section {
   padding: 80px 20px;
-  background: #020617;
-  color: #fff;
+  background: #ffffff; /* white background */
+  color: #1e293b;
 }
 
+/* TITLE */
 .section-title {
-  text-align: center;
   font-size: 32px;
-  margin-bottom: 50px;
+  font-weight: 700;
+}
+
+.section-subtitle {
+  color: #64748b;
+  font-size: 16px;
 }
 
 /* GRID */
@@ -22,9 +28,8 @@
   padding: 25px;
   border-radius: 16px;
   text-align: center;
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, #2F4D6B, #3b5f85);
+  color: #ffffff;
   transition: 0.4s ease;
   position: relative;
 }
@@ -35,13 +40,18 @@
   height: 80px;
   border-radius: 50%;
   margin-bottom: 15px;
-  border: 2px solid #38bdf8;
+  border: 2px solid #60a5fa;
+}
+
+/* NAME */
+.player-card h5 {
+  margin-bottom: 5px;
 }
 
 /* TEAM */
 .team {
   font-size: 14px;
-  color: #94a3b8;
+  color: #cbd5f5;
   margin-bottom: 15px;
 }
 
@@ -54,18 +64,33 @@
 
 .stats span {
   font-size: 12px;
-  color: #94a3b8;
+  color: #cbd5f5;
 }
 
 .stats strong {
   display: block;
   margin-top: 5px;
   font-size: 16px;
+  color: #ffffff;
 }
 
-/* HOVER EFFECT 🔥 */
+/* HOVER */
 .player-card:hover {
   transform: translateY(-10px) scale(1.03);
-  border-color: #6366f1;
-  box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 10px 30px rgba(47, 77, 107, 0.6);
+}
+
+/* BUTTON */
+.view-btn {
+  display: inline-block;
+  padding: 12px 28px;
+  background: #2563eb;
+  color: #fff;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.view-btn:hover {
+  background: #1d4ed8;
 }

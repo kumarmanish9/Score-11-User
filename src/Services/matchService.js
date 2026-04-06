@@ -1,13 +1,15 @@
-import axios from "axios";
-import { API_BASE } from "../config/api";
+import api from "../config/api";
 
-const BASE_URL = `${API_BASE}/matches`;
+const BASE_URL = "/matches";
 
+// ✅ Get all matches
 export const getMatches = async (type) => {
-  const res = await axios.get(`${BASE_URL}/${type}`);
+  const res = await api.get(`${BASE_URL}/${type}`);
   return res.data?.data;
 };
+
+// ✅ Get match details
 export const getMatchDetails = async (id) => {
-  const res = await axios.get(`${BASE_URL}/${id}`);
+  const res = await api.get(`${BASE_URL}/${id}`);
   return res.data?.data;
 };
