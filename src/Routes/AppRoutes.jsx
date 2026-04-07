@@ -43,7 +43,7 @@ function AppRoutes() {
       <Route path="/verify-otp" element={<VerifyOtp />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/matches" element={<Matches />} />
-      {/* <Route path="/matches/:id" element={<MatchDetails />} /> */}
+      <Route path="/matches/:id" element={<MatchDetails />} />
       <Route path="/match/:id" element={<MatchDetails />} />
       <Route path="/tournaments" element={<TournamentList />} />
       <Route path="/players" element={<PlayerSearch />} />

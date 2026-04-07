@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createTeam } from "../Services/teamService";
-import { getMatches } from "../Services/matchService";
+import { getMatches, getMatchDetails } from "../Services/matchService";
 import { searchPlayers } from "../Services/playerService";
 import PlayerCard from "../Components/HomeSection/PlayerCard";
+import MatchSelector from "../Components/CreateTeam/MatchSelector";
+import PlayerSearchList from "../Components/CreateTeam/PlayerSearchList";
+import TeamLineup from "../Components/CreateTeam/TeamLineup";
 import "../assets/Styles/Global.css";
 
 function CreateTeam() {
   const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const [matchType, setMatchType] = useState("upcoming");
   const [searchQuery, setSearchQuery] = useState("");
   const [players, setPlayers] = useState([]);
+  const [availablePlayers, setAvailablePlayers] = useState([]);
   const [team, setTeam] = useState(Array(11).fill(null));
   const [captain, setCaptain] = useState(null);
   const [viceCaptain, setViceCaptain] = useState(null);
@@ -19,7 +24,7 @@ function CreateTeam() {
 
   useEffect(() => {
     fetchMatches();
-  }, []);
+  }, [matchType]);
 
   useEffect(() => {
     if (searchQuery) {
@@ -27,10 +32,44 @@ function CreateTeam() {
     }
   }, [searchQuery, selectedMatch]);
 
+  useEffect(() => {
+    const loadMatchPlayers = async () => {
+      if (!selectedMatch?._id) return;
+      try {
+        const detail = await getMatchDetails(selectedMatch._id);
+        // attempt to extract players from different possible shapes
+        let matchPlayers = [];
+        if (!detail) matchPlayers = [];
+        else if (Array.isArray(detail.players)) matchPlayers = detail.players;
+        else if (Array.isArray(detail.squad)) matchPlayers = detail.squad;
+        else if (detail.team1?.players || detail.team2?.players) {
+          matchPlayers = [...(detail.team1?.players || []), ...(detail.team2?.players || [])];
+        } else if (Array.isArray(detail.squads)) {
+          matchPlayers = detail.squads.flatMap(s => Array.isArray(s.players) ? s.players : []);
+        } else if (typeof detail === 'object') {
+          // collect any array-valued props
+          Object.values(detail).forEach(v => {
+            if (Array.isArray(v)) matchPlayers.push(...v);
+          });
+        }
+
+        // normalize minimal player fields
+        matchPlayers = matchPlayers.map(p => (p && typeof p === 'object') ? p : { name: String(p) });
+        setAvailablePlayers(matchPlayers);
+        setPlayers(matchPlayers.slice(0, 12));
+      } catch (err) {
+        console.error('Error fetching match details:', err);
+        setAvailablePlayers([]);
+        setPlayers([]);
+      }
+    };
+    loadMatchPlayers();
+  }, [selectedMatch]);
+
   const fetchMatches = async () => {
     try {
-      const data = await getMatches();
-      setMatches(data.slice(0, 5)); // Top 5 matches
+      const data = await getMatches(matchType);
+      setMatches((data || []).slice(0, 5)); // Top 5 matches
     } catch (err) {
       console.error("Error fetching matches:", err);
     }
@@ -38,18 +77,30 @@ function CreateTeam() {
 
   const fetchPlayers = async () => {
     try {
-      const data = await searchPlayers(searchQuery);
-      setPlayers(data);
+      if (selectedMatch) {
+        const q = searchQuery.trim().toLowerCase();
+        const filtered = availablePlayers.filter(p => {
+          const name = (p.name || p.fullName || p.shortName || '').toString().toLowerCase();
+          return name.includes(q);
+        });
+        setPlayers(filtered.slice(0, 12));
+      } else {
+        const data = await searchPlayers(searchQuery);
+        setPlayers(data);
+      }
     } catch (err) {
       console.error("Error searching players:", err);
     }
   };
 
-  const addToTeam = (player, position) => {
-    if (team[position - 1] || team.filter(Boolean).length >= 11) return;
-    
+  const addToTeam = (player) => {
+    if (!player) return;
+    // prevent duplicate players
+    if (team.some(p => p && ((p._id && player._id && p._id === player._id) || (p.name && player.name && p.name === player.name)))) return;
+    const firstEmpty = team.findIndex(p => !p);
+    if (firstEmpty === -1) return; // team full
     const newTeam = [...team];
-    newTeam[position - 1] = player;
+    newTeam[firstEmpty] = player;
     setTeam(newTeam);
   };
 
@@ -72,7 +123,7 @@ function CreateTeam() {
         players: team.map(p => p._id),
         captainId: captain._id,
         viceCaptainId: viceCaptain._id,
-        name: `Team for ${selectedMatch.team1} vs ${selectedMatch.team2}`
+        name: `Team for ${selectedMatch?.team1?.shortName || selectedMatch?.team1?.name || selectedMatch?.team1} vs ${selectedMatch?.team2?.shortName || selectedMatch?.team2?.name || selectedMatch?.team2}`
       };
 
       await createTeam(teamData);
@@ -101,145 +152,31 @@ function CreateTeam() {
                 </div>
               </div>
               <div className="card-body p-0">
-                {/* Step 1: Select Match */}
-                <div className="p-4 border-bottom">
-                  <label className="form-label fw-semibold text-gray-700 mb-3 d-block">
-                    1. Select Match
-                  </label>
-                  <div className="row g-3">
-                    {matches.map((match) => (
-                      <div key={match._id} className="col-md-6">
-                        <div 
-                          className={`card hover-lift cursor-pointer p-3 ${selectedMatch?._id === match._id ? 'border-primary' : ''}`}
-                          onClick={() => setSelectedMatch(match)}
-                        >
-                          <div className="d-flex align-items-center justify-content-between">
-                            <div>
-                              <h6 className="fw-bold mb-1">{match.team1} vs {match.team2}</h6>
-                              <small className="text-muted">{match.date} | {match.time}</small>
-                            </div>
-                            {selectedMatch?._id === match._id && (
-                              <span className="badge bg-primary">Selected</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <MatchSelector
+                  matches={matches}
+                  matchType={matchType}
+                  setMatchType={setMatchType}
+                  selectedMatch={selectedMatch}
+                  onSelectMatch={setSelectedMatch}
+                />
 
-                {/* Step 2: Search Players */}
-                <div className="p-4 border-bottom">
-                  <label className="form-label fw-semibold text-gray-700 mb-3 d-block">
-                    2. Search & Add Players ({team.filter(Boolean).length}/11)
-                  </label>
-                  <div className="input-group mb-4">
-                    <input 
-                      type="text" 
-                      className="form-control" 
-                      placeholder="Search players..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-                  <div className="row g-3">
-                    {players.slice(0, 12).map((player, index) => (
-                      <div key={player._id} className="col-md-6 col-lg-4">
-                        <div className="card h-100 hover-lift border-0 shadow-sm">
-                          <div className="card-body p-3">
-                            <PlayerCard {...player} rank={index + 1} />
-                            <button 
-                              className="btn btn-primary w-100 mt-2"
-                              onClick={() => addToTeam(player, team.filter(Boolean).length + 1)}
-                            >
-                              Add to Team
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <PlayerSearchList
+                  players={players}
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  onAddPlayer={addToTeam}
+                />
 
-                {/* Step 3: Team Lineup */}
-                <div className="p-4">
-                  <label className="form-label fw-semibold text-gray-700 mb-3 d-block">
-                    3. Team Lineup
-                  </label>
-                  <div className="row g-2 mb-4">
-                    {team.map((player, index) => (
-                      <div key={index} className="col-6 col-md-4 col-lg-2">
-                        <div className={`position-relative p-3 rounded-2 border h-100 ${player ? 'border-primary bg-primary-subtle' : 'border-dashed border-gray-300 bg-gray-50'}`}>
-                          {player ? (
-                            <div>
-                              <small className="text-muted d-block mb-1">#{index + 1}</small>
-                              <PlayerCard {...player} rank={index + 1} />
-                              {(captain?._id === player._id || viceCaptain?._id === player._id) && (
-                                <span className="position-absolute top-0 end-0 badge bg-success">
-                                  {captain?._id === player._id ? 'C' : 'VC'}
-                                </span>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="text-center text-muted">
-                              <small>Empty Slot</small>
-                            </div>
-                          )}
-                          {player && (
-                            <button 
-                              className="btn btn-sm btn-outline-danger position-absolute top-0 start-0 m-1"
-                              onClick={() => removeFromTeam(index)}
-                            >
-                              ×
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Captain & Vice Captain */}
-                  <div className="row g-3 mb-4">
-                    <div className="col-md-6">
-                      <label className="form-label fw-semibold">Captain</label>
-                      <select 
-                        className="form-select" 
-                        value={captain?._id || ''}
-                        onChange={(e) => setCaptain(team[parseInt(e.target.value)])}
-                      >
-                        <option value="">Select Captain</option>
-                        {team.filter(Boolean).map((player, index) => (
-                          <option key={player._id} value={index}>
-                            #{index + 1} {player.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-semibold">Vice Captain</label>
-                      <select 
-                        className="form-select" 
-                        value={viceCaptain?._id || ''}
-                        onChange={(e) => setViceCaptain(team[parseInt(e.target.value)])}
-                      >
-                        <option value="">Select Vice Captain</option>
-                        {team.filter(Boolean).map((player, index) => (
-                          <option key={player._id} value={index}>
-                            #{index + 1} {player.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <button 
-                    className="btn btn-primary btn-lg w-100" 
-                    onClick={handleSubmit}
-                    disabled={loading || team.filter(Boolean).length !== 11}
-                  >
-                    {loading ? 'Creating Team...' : 'Create Team & Save'}
-                  </button>
-                </div>
+                <TeamLineup
+                  team={team}
+                  captain={captain}
+                  viceCaptain={viceCaptain}
+                  onRemove={removeFromTeam}
+                  onSetCaptain={(index) => setCaptain(team[index] || null)}
+                  onSetViceCaptain={(index) => setViceCaptain(team[index] || null)}
+                  onSubmit={handleSubmit}
+                  loading={loading}
+                />
               </div>
             </div>
           </div>

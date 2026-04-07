@@ -1,0 +1,104 @@
+.scorecard-container {
+  margin-top: 20px;
+}
+
+/* CARD */
+.inning-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  color: #111827;
+}
+
+/* HEADER */
+.inning-header h3 {
+  display: flex;
+  justify-content: space-between;
+  font-size: 20px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.inning-header span {
+  color: #2563eb;
+  font-weight: bold;
+}
+
+/* MATCH INFO */
+.match-info {
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: #4b5563;
+}
+
+/* EXTRAS */
+.extras-box {
+  background: #f9fafb;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+/* SECTION TITLE */
+.table-section h5 {
+  margin: 15px 0 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* TABLE */
+.score-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* HEADER */
+.score-table th {
+  text-align: left;
+  font-size: 13px;
+  padding: 10px;
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+/* ROW */
+.score-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+/* LAST ROW BORDER REMOVE */
+.score-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* HIGHLIGHTS */
+.highlight {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.wicket {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+/* HOVER */
+.score-table tr:hover {
+  background: #f9fafb;
+}
+
+/* NO DATA */
+.no-data {
+  font-size: 14px;
+  color: #6b7280;
+}

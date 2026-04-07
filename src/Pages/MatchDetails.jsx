@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getMatchDetails } from '../Services/matchService';
+
+// ✅ COMPONENTS
+import Scorecard from "../Components/MatchDetails/Scorecard";
+import BallByBall from "../Components/MatchDetails/BallByBall";
+import Teams from "../Components/MatchDetails/Teams";
+
+// ✅ SERVICES
+import {
+  getMatchDetails,
+  getMatchTimeline,
+  getLiveScore,
+  getScorecard
+} from '../Services/matchService';
+
 import "../assets/Styles/Global.css";
 
 function MatchDetails() {
@@ -11,21 +24,88 @@ function MatchDetails() {
   const [activeTab, setActiveTab] = useState('scorecard');
   const [error, setError] = useState('');
 
+  const [timeline, setTimeline] = useState([]);
+  const [timelineLoading, setTimelineLoading] = useState(false);
+
+  const [liveScore, setLiveScore] = useState(null);
+
+  // 🔥 IMPORTANT FIX → should be object, not array
+  const [scorecard, setScorecard] = useState({});
+  const [scorecardLoading, setScorecardLoading] = useState(false);
+
+  // ✅ Fetch Match
   useEffect(() => {
     fetchMatch();
+  }, [id]);
+
+  // ✅ Fetch Timeline
+  useEffect(() => {
+    if (activeTab === "ball") {
+      fetchTimeline();
+    }
+  }, [activeTab]);
+
+  // ✅ Fetch Scorecard
+  useEffect(() => {
+    if (activeTab === "scorecard") {
+      fetchScorecard();
+    }
+  }, [activeTab]);
+
+  // ✅ Live Score Polling
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const data = await getLiveScore(id);
+        setLiveScore(data);
+      } catch (err) {
+        console.error("Live score error:", err);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [id]);
 
   const fetchMatch = async () => {
     try {
       setLoading(true);
       const data = await getMatchDetails(id);
-      console.log("Match Details API:", data);
       setMatch(data);
     } catch (err) {
       console.error(err);
       setError('Failed to load match details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTimeline = async () => {
+    try {
+      setTimelineLoading(true);
+      const data = await getMatchTimeline(id);
+
+      // 🔥 SAFE FIX
+      setTimeline(Array.isArray(data) ? data : data?.timeline || []);
+    } catch (err) {
+      console.error("Timeline error:", err);
+      setTimeline([]);
+    } finally {
+      setTimelineLoading(false);
+    }
+  };
+
+  const fetchScorecard = async () => {
+    try {
+      setScorecardLoading(true);
+      const data = await getScorecard(id);
+
+      // 🔥 SAFE FIX
+      setScorecard(data?.scorecard || {});
+    } catch (err) {
+      console.error("Scorecard error:", err);
+      setScorecard({});
+    } finally {
+      setScorecardLoading(false);
     }
   };
 
@@ -48,100 +128,98 @@ function MatchDetails() {
     );
   }
 
-  // ✅ Teams Fix
-  const teamA = match?.team1 || match?.teamA || {};
-  const teamB = match?.team2 || match?.teamB || {};
+  const teamA = match?.team1 || {};
+  const teamB = match?.team2 || {};
+
+  // ✅ Player Map
+  const allPlayers = [...(teamA.players || []), ...(teamB.players || [])];
+  const playerMap = {};
+  allPlayers.forEach(p => {
+    playerMap[p._id] = p.name;
+  });
+
+  // ✅ Team Map
+  const teamMap = {
+    [teamA?._id]: teamA?.name,
+    [teamB?._id]: teamB?.name
+  };
 
   return (
     <div className="py-5 min-vh-100">
       <div className="container">
 
-        {/* ✅ HEADER */}
+        {/* HEADER */}
         <div className="text-center mb-4">
-          <h2>
-            {teamA?.name || teamA?.shortName || "Team A"} vs{" "}
-            {teamB?.name || teamB?.shortName || "Team B"}
-          </h2>
-
+          <h2>{teamA?.shortName} vs {teamB?.shortName}</h2>
           <p>Status: {match?.status}</p>
-
-          <p>
-            {match?.venue
-              ? `${match.venue.name}, ${match.venue.city}, ${match.venue.country}`
-              : "Venue not available"}
-          </p>
+          <p>{match?.venue?.name}, {match?.venue?.city}</p>
         </div>
 
-        {/* ✅ SCORE SECTION (FIXED) */}
+        {/* LIVE SCORE */}
         <div className="row text-center mb-5">
-
-          {/* TEAM 1 */}
           <div className="col-md-6">
-            <h3>{teamA?.name || "Team A"}</h3>
-
+            <h3>{teamA?.name}</h3>
             <h2>
-              {match?.score?.team1?.runs || 0}/
-              {match?.score?.team1?.wickets || 0}
+              {liveScore?.team1?.runs || match?.score?.team1?.runs || 0}/
+              {liveScore?.team1?.wickets || match?.score?.team1?.wickets || 0}
             </h2>
-
-            <p>{match?.score?.team1?.overs || "0.0"} overs</p>
+            <p>{liveScore?.team1?.overs || match?.score?.team1?.overs || "0.0"} overs</p>
           </div>
 
-          {/* TEAM 2 */}
           <div className="col-md-6">
-            <h3>{teamB?.name || "Team B"}</h3>
-
+            <h3>{teamB?.name}</h3>
             <h2>
-              {match?.score?.team2?.runs || 0}/
-              {match?.score?.team2?.wickets || 0}
+              {liveScore?.team2?.runs || match?.score?.team2?.runs || 0}/
+              {liveScore?.team2?.wickets || match?.score?.team2?.wickets || 0}
             </h2>
-
-            <p>{match?.score?.team2?.overs || "0.0"} overs</p>
+            <p>{liveScore?.team2?.overs || match?.score?.team2?.overs || "0.0"} overs</p>
           </div>
-
         </div>
 
-        {/* ✅ RESULT (NEW 🔥) */}
+        {/* RESULT */}
         {match?.result && (
           <div className="text-center mb-4">
             <p className="text-success fw-bold">
               Result: {match?.result?.margin}
             </p>
-            <p>
-              Player of Match: {match?.result?.playerOfMatch?.playerName}
-            </p>
+            <p>Player of Match: {match?.result?.playerOfMatch?.playerName}</p>
           </div>
         )}
 
-        {/* ✅ TABS */}
+        {/* TABS */}
         <div className="text-center mb-4">
           <button onClick={() => setActiveTab('scorecard')}>Scorecard</button>
           <button onClick={() => setActiveTab('ball')}>Ball-by-Ball</button>
           <button onClick={() => setActiveTab('teams')}>Teams</button>
         </div>
 
-        {/* ✅ SCORECARD */}
+        {/* COMPONENTS */}
+
         {activeTab === 'scorecard' && (
-          <div>
-            <h4>Scorecard Coming from API next step</h4>
-          </div>
+          <Scorecard
+            scorecard={scorecard}
+            loading={scorecardLoading}
+            teamMap={teamMap}
+            playerMap={playerMap}
+          />
         )}
 
-        {/* ✅ BALL BY BALL */}
         {activeTab === 'ball' && (
-          <div>
-            <h4>Live Commentary (Next Step)</h4>
-          </div>
+          <BallByBall
+            timeline={timeline}
+            loading={timelineLoading}
+          />
         )}
 
-        {/* ✅ TEAMS */}
         {activeTab === 'teams' && (
-          <div>
-            <h4>Teams Info (Next Step)</h4>
-          </div>
+          <Teams
+            teamA={teamA}
+            teamB={teamB}
+            playerMap={playerMap}
+          />
         )}
 
-        {/* ACTION */}
+        {/* BACK */}
         <div className="text-center mt-5">
           <Link to="/matches" className="btn btn-primary">
             Back to Matches
