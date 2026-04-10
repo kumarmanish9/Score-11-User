@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getPlayerById } from '../Services/playerService';
 import "../assets/Styles/Global.css";
+import defaultAvatar from "../assets/Styles/Logo.png";
 
 function PlayerProfile() {
   const { id } = useParams();
@@ -17,42 +18,49 @@ function PlayerProfile() {
   const fetchPlayer = async () => {
     try {
       setLoading(true);
-      // TODO: Use playerService.getPlayerById(id)
-      // Mock data for now
-      setTimeout(() => {
-        setPlayer({
-          id,
-          name: 'Virat Kohli',
-          avatar: 'https://via.placeholder.com/200x200/3B82F6/FFFFFF?text=VK',
-          role: 'Batsman',
-          team: 'Royal Challengers Bengaluru',
-          matches: 512,
-          runs: 7265,
-          average: 49.85,
-          strikeRate: 132.52,
-          fifties: 64,
-          hundreds: 8,
-          bio: 'Indian cricket captain and one of the greatest batsmen of all time.',
-          recentMatches: [
-            { opponent: 'MI', runs: 82, date: '2 days ago' },
-            { opponent: 'CSK', runs: 54, date: '5 days ago' },
-            { opponent: 'PBKS', runs: 101, date: '1 week ago' },
-          ],
-          achievements: ['Player of the Tournament 2023', 'Highest Run Scorer IPL 2024']
-        });
-        setLoading(false);
-      }, 1000);
+      setError('');
+
+      const res = await getPlayerById(id);
+
+      // service returns data or object depending on implementation
+      const data = res?.data || res || null;
+
+      if (!data) {
+        throw new Error('No player data');
+      }
+
+      // Normalize player object fields with safe defaults
+      const normalized = {
+        _id: data._id || data.id || id,
+        name: data.name || data.playerName || data.fullName || 'Unknown Player',
+        avatar: data.avatar?.url || data.avatar || data.image || defaultAvatar,
+        role: data.role || data.position || 'Player',
+        team: data.team?.name || data.team || data.teamName || 'Unknown Team',
+        bio: data.bio || data.description || '',
+        recentMatches: Array.isArray(data.recentMatches) ? data.recentMatches : (Array.isArray(data.matchesList) ? data.matchesList : []),
+        achievements: Array.isArray(data.achievements) ? data.achievements : (data.awards ? [data.awards].flat() : []),
+        stats: data.stats || data.statistics || null,
+      };
+
+      setPlayer(normalized);
     } catch (err) {
+      console.error('Player fetch error:', err);
       setError('Failed to load player profile');
+      setPlayer(null);
+    } finally {
       setLoading(false);
     }
   };
 
-  const statsData = {
-    batting: { matches: 512, runs: 7265, avg: 49.85, sr: 132.52, fifties: 64, hundreds: 8 },
-    bowling: { matches: 12, wickets: 5, avg: 28.4, econ: 7.2 },
-    fielding: { catches: 124, runouts: 8, stumpings: 0 }
+  // Prefer player-provided stats when available; ensure safe defaults per tab
+  const defaultStats = {
+    batting: { matches: 0, runs: 0, avg: 0, sr: 0, fifties: 0, hundreds: 0 },
+    bowling: { matches: 0, wickets: 0, avg: 0, econ: 0 },
+    fielding: { matches: 0, catches: 0, runouts: 0, stumpings: 0 }
   };
+
+  const statsData = (player && player.stats) ? player.stats : defaultStats;
+  const statsForTab = statsData[statsTab] || defaultStats[statsTab];
 
   if (loading) {
     return (
@@ -68,7 +76,7 @@ function PlayerProfile() {
     return (
       <div className="min-vh-100 d-flex align-items-center justify-content-center bg-gray-50">
         <div className="text-center p-5">
-          <h2 className="mb-4">Player Not Found</h2>
+          <h2 className="mb-4">{error || 'Player Not Found'}</h2>
           <Link to="/players" className="btn btn-primary">Browse Players</Link>
         </div>
       </div>
@@ -154,25 +162,25 @@ function PlayerProfile() {
                   <div className="col-md-3">
                     <div className="stat-card h-100 p-4 bg-white rounded-3 shadow-sm border-start border-primary border-4">
                       <div className="h5 text-muted mb-1">Matches</div>
-                      <div className="display-4 fw-bold text-primary">{statsData[statsTab].matches}</div>
+                      <div className="display-4 fw-bold text-primary">{statsForTab.matches}</div>
                     </div>
                   </div>
                   <div className="col-md-3">
                     <div className="stat-card h-100 p-4 bg-white rounded-3 shadow-sm">
                       <div className="h5 text-muted mb-1">{statsTab === 'bowling' ? 'Wickets' : 'Runs'}</div>
-                      <div className="display-4 fw-bold text-success">{statsData[statsTab].runs || statsData[statsTab].wickets}</div>
+                      <div className="display-4 fw-bold text-success">{statsForTab.runs || statsForTab.wickets}</div>
                     </div>
                   </div>
                   <div className="col-md-3">
                     <div className="stat-card h-100 p-4 bg-white rounded-3 shadow-sm">
                       <div className="h5 text-muted mb-1">Average</div>
-                      <div className="h2 fw-bold text-info">{statsData[statsTab].avg}</div>
+                      <div className="h2 fw-bold text-info">{statsForTab.avg}</div>
                     </div>
                   </div>
                   <div className="col-md-3">
                     <div className="stat-card h-100 p-4 bg-white rounded-3 shadow-sm">
                       <div className="h5 text-muted mb-1">{statsTab === 'batting' ? 'SR' : 'Economy'}</div>
-                      <div className="h2 fw-bold text-warning">{statsData[statsTab].sr || statsData[statsTab].econ}</div>
+                      <div className="h2 fw-bold text-warning">{statsForTab.sr || statsForTab.econ}</div>
                     </div>
                   </div>
                 </div>

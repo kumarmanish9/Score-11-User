@@ -1,5 +1,6 @@
 import React from "react";
 import "./ProfileHeader.css";
+import defaultAvatar from "../../assets/Styles/Logo.png";
 
 function ProfileHeader({ user }) {
   return (
@@ -8,7 +9,7 @@ function ProfileHeader({ user }) {
       {/* 🔹 Left Section (Avatar + Info) */}
       <div className="profile-left">
         <img
-          src={user?.avatar?.url || "https://via.placeholder.com/80"}
+          src={user?.avatar?.url || defaultAvatar}
           alt="avatar"
           className="profile-avatar"
         />

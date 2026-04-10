@@ -6,6 +6,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { logoutUser } from "../../../Services/AuthServices";
 import { AuthContext } from "../../../Context/AuthContext";
 import { getWalletBalance } from "../../../Services/walletService";
+import { searchPlayers } from "../../../Services/playerService";
+import { searchMatches } from "../../../Services/matchService";
 
 function Navbar() {
   const location = useLocation();
@@ -13,6 +15,12 @@ function Navbar() {
   const { user, setUser } = useContext(AuthContext);
   const [walletBalance, setWalletBalance] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Search state
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -28,6 +36,59 @@ function Navbar() {
       console.log('Wallet fetch error:', err);
     }
   };
+
+  // Debounced search effect
+  useEffect(() => {
+    if (!query || query.trim().length < 2) {
+      setResults([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    let mounted = true;
+    setSearchLoading(true);
+    const id = setTimeout(async () => {
+      try {
+        const [players, matches] = await Promise.all([
+          searchPlayers(query).catch(() => []),
+          searchMatches(query).catch(() => []),
+        ]);
+
+        if (!mounted) return;
+
+        // Normalize results
+        const p = (Array.isArray(players) ? players : []).map(pl => ({
+          id: pl._id || pl.id,
+          title: pl.name || pl.playerName || pl.displayName || 'Player',
+          type: 'Player',
+          raw: pl,
+        }));
+
+        const m = (Array.isArray(matches) ? matches : []).map(mt => ({
+          id: mt._id || mt.id,
+          title: mt.title || mt.name || `${mt.teamA || mt.team1?.name || 'Team'} vs ${mt.teamB || mt.team2?.name || 'Team'}`,
+          type: 'Match',
+          raw: mt,
+        }));
+
+        setResults([...p.slice(0,6), ...m.slice(0,6)]);
+        setShowDropdown(true);
+      } catch (err) {
+        console.error('Search error:', err);
+        if (mounted) {
+          setResults([]);
+          setShowDropdown(true);
+        }
+      } finally {
+        if (mounted) setSearchLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      mounted = false;
+      clearTimeout(id);
+    };
+  }, [query]);
 
   const handleLogout = async () => {
     try {
@@ -118,7 +179,46 @@ function Navbar() {
           {/* Right side */}
           <div className="d-flex align-items-center gap-3">
             {/* Search */}
-            <FaSearch size={20} className="cursor-pointer text-gray-500 fs-5" title="Search" style={{cursor: 'pointer'}} />
+            <div className="position-relative me-2">
+              <div className="input-group">
+                <span className="input-group-text bg-white border-0"><FaSearch /></span>
+                <input
+                  className="form-control border-0 shadow-sm"
+                  placeholder="Search players, matches..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onFocus={() => { if (results.length) setShowDropdown(true); }}
+                  onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+                />
+              </div>
+
+              {showDropdown && (
+                <div className="search-dropdown position-absolute bg-white shadow-lg rounded mt-1" style={{width: '360px', zIndex: 2000}}>
+                  {searchLoading ? (
+                    <div className="p-3 text-center">Searching...</div>
+                  ) : results.length === 0 ? (
+                    <div className="p-3 text-center text-muted">No results found</div>
+                  ) : (
+                    <div className="list-group list-group-flush">
+                      {results.map(r => (
+                        <button key={r.id || r.title} className="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onMouseDown={(e) => e.preventDefault()} onClick={() => {
+                          if (r.type === 'Player') navigate(`/players/${r.id}`);
+                          else navigate(`/match/${r.id}`);
+                          setShowDropdown(false);
+                          setQuery('');
+                        }}>
+                          <div>
+                            <div className="fw-semibold">{r.title}</div>
+                            <small className="text-muted">{r.type}</small>
+                          </div>
+                          <div className="text-muted small">›</div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Wallet */}
             {user && (

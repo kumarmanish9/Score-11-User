@@ -28,3 +28,10 @@ export const getScorecard = async (id) => {
   const res = await api.get(`/scoring/match/${id}/scorecard`);
   return res.data?.data;
 };
+
+// 🔍 Search matches by query (public)
+export const searchMatches = async (query) => {
+  if (!query) return [];
+  const res = await api.get(`${BASE_URL}/search?q=${encodeURIComponent(query)}`);
+  return res.data?.data || [];
+};

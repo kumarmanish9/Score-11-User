@@ -52,7 +52,7 @@ const PlayerSearch = () => {
         if (!p || typeof p !== 'object') return p;
         const name = p.name || p.fullName || p.playerName || p.shortName || p.displayName || p.short_name || (p.player && (p.player.name || p.player.fullName)) || 'Unknown Player';
         const team = p.team || p.teamName || p.team_name || (p.teamObj && (p.teamObj.name || p.teamObj.shortName)) || '';
-        const avatar = p.avatar || p.picture || p.image || p.profilePic || (p.player && (p.player.avatar || p.player.image)) || '';
+        const avatar = p.avatar || p.picture || p.image || p.profilePic || (p.player && (p.player.avatar || p.player.image)) || null;
         const roleRaw = p.role || p.playerRole || p.position || p.type || p.primaryRole || p.roleName || (p.player && p.player.role);
         const role = normalizeRole(roleRaw);
         return { ...p, name, team, avatar, role };
@@ -208,7 +208,7 @@ const PlayerSearch = () => {
               <div key={player._id} className="col-xl-3 col-lg-4 col-md-6 col-sm-6">
                 <div className="card h-100 border-0 shadow-sm rounded-4 hover-lift overflow-hidden bg-white">
                   <img 
-                    src={player.avatar}
+                    src={player.avatar || null}
                     alt={player.name}
                     className="card-img-top"
                     style={{height: '220px', objectFit: 'cover'}}
