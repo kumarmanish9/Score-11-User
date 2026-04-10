@@ -1,5 +1,5 @@
 import React from 'react';
-import PlayerCard from '../HomeSection/PlayerCard';
+import PlayerCard from '../Cards/PlayerCard';
 
 export default function TeamLineup({ team, captain, viceCaptain, onRemove, onSetCaptain, onSetViceCaptain, onSubmit, loading }){
   return (
@@ -10,10 +10,10 @@ export default function TeamLineup({ team, captain, viceCaptain, onRemove, onSet
         {team.map((player, index) => (
           <div key={index} className="col-6 col-md-4 col-lg-2">
             <div className={`position-relative p-3 rounded-2 border h-100 ${player ? 'border-primary bg-primary-subtle' : 'border-dashed border-gray-300 bg-gray-50'}`}>
-              {player ? (
+                  {player ? (
                 <div>
                   <small className="text-muted d-block mb-1">#{index + 1}</small>
-                  <PlayerCard {...player} rank={index + 1} />
+                  <PlayerCard {...player} rank={index + 1} compact />
                   {(captain?._id === player._id || viceCaptain?._id === player._id) && (
                     <span className="position-absolute top-0 end-0 badge bg-success">{captain?._id === player._id ? 'C' : 'VC'}</span>
                   )}

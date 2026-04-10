@@ -16,126 +16,13 @@ const PlayerSearch = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // **MOCK PLAYERS DATA** - For demo/search
-  const mockPlayers = [
-    {
-      _id: '1',
-      name: 'Virat Kohli',
-      team: 'RCB',
-      role: 'Batsman',
-      points: 892,
-      average: 45.6,
-      runs: 6234,
-      matches: 245,
-      avatar: 'https://images.unsplash.com/photo-1570545887596-2d78a406c217?w=300'
-    },
-    {
-      _id: '2',
-      name: 'Rohit Sharma',
-      team: 'MI',
-      role: 'Batsman',
-      points: 765,
-      average: 42.3,
-      runs: 5890,
-      matches: 256,
-      avatar: 'https://images.unsplash.com/photo-1607345412315-79b4a2564405?w=300'
-    },
-    {
-      _id: '3',
-      name: 'Jasprit Bumrah',
-      team: 'MI',
-      role: 'Bowler',
-      points: 945,
-      average: 21.4,
-      wickets: 156,
-      matches: 132,
-      avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=300'
-    },
-    {
-      _id: '4',
-      name: 'KL Rahul',
-      team: 'LSG',
-      role: 'Wicketkeeper',
-      points: 678,
-      average: 38.9,
-      runs: 4567,
-      matches: 198,
-      avatar: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300'
-    },
-    {
-      _id: '5',
-      name: 'Hardik Pandya',
-      team: 'GT',
-      role: 'All-Rounder',
-      points: 823,
-      average: 32.1,
-      runs: 2345,
-      wickets: 67,
-      matches: 156,
-      avatar: 'https://images.unsplash.com/photo-1595874078383-cff1d3c8645b?w=300'
-    },
-    {
-      _id: '6',
-      name: 'Rashid Khan',
-      team: 'GT',
-      role: 'Bowler',
-      points: 901,
-      average: 18.2,
-      wickets: 123,
-      matches: 89,
-      avatar: 'https://images.unsplash.com/photo-1610134504813-6e5563d5fd99?w=300'
-    },
-    {
-      _id: '7',
-      name: 'Suryakumar Yadav',
-      team: 'MI',
-      role: 'Batsman',
-      points: 712,
-      average: 40.5,
-      runs: 2890,
-      matches: 134,
-      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2f91cbba?w=300'
-    },
-    {
-      _id: '8',
-      name: 'Rishabh Pant',
-      team: 'DC',
-      role: 'Wicketkeeper',
-      points: 645,
-      average: 35.8,
-      runs: 2678,
-      matches: 112,
-      avatar: 'https://images.unsplash.com/photo-1642814126034-1c4c9b450adf?w=300'
-    },
-    {
-      _id: '9',
-      name: 'Kuldeep Yadav',
-      team: 'DC',
-      role: 'Bowler',
-      points: 789,
-      average: 22.7,
-      wickets: 98,
-      matches: 145,
-      avatar: 'https://images.unsplash.com/photo-1604092436111-69722e4ab3f5?w=300'
-    },
-    {
-      _id: '10',
-      name: 'Jos Buttler',
-      team: 'RR',
-      role: 'Wicketkeeper',
-      points: 856,
-      average: 41.2,
-      runs: 3456,
-      matches: 167,
-      avatar: 'https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?w=300'
-    }
-  ];
+  // No local mock data: use API via playerService (searchPlayers/getPlayers)
 
   const debounce = (func, delay) => {
     let timeoutId;
     return (...args) => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => func(...target.value));
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func(...args), delay);
     };
   };
 
@@ -149,22 +36,36 @@ const PlayerSearch = () => {
       } else {
         data = await getPlayers();
       }
-      // Mock fallback + filter
-      const finalData = data || mockPlayers.filter(p => 
-        p.name.toLowerCase().includes(query.toLowerCase()) || 
-        p.team.toLowerCase().includes(query.toLowerCase())
-      );
-      setPlayers(finalData);
-      setAllPlayers(finalData);
+      const finalData = Array.isArray(data) ? data : [];
+
+      const normalizeRole = (raw) => {
+        if (!raw) return undefined;
+        const r = String(raw).toLowerCase();
+        if (r.includes('bat') || r.includes('batter')) return 'Batsman';
+        if (r.includes('wk') || r.includes('wicket')) return 'Wicketkeeper';
+        if (r.includes('all') || r.includes('all-round') || r.includes('allround')) return 'All-Rounder';
+        if (r.includes('bowl') || r.includes('bowler') || r.includes('spinner') || r.includes('pace')) return 'Bowler';
+        return raw.charAt(0).toUpperCase() + raw.slice(1);
+      };
+
+      const normalizePlayer = (p) => {
+        if (!p || typeof p !== 'object') return p;
+        const name = p.name || p.fullName || p.playerName || p.shortName || p.displayName || p.short_name || (p.player && (p.player.name || p.player.fullName)) || 'Unknown Player';
+        const team = p.team || p.teamName || p.team_name || (p.teamObj && (p.teamObj.name || p.teamObj.shortName)) || '';
+        const avatar = p.avatar || p.picture || p.image || p.profilePic || (p.player && (p.player.avatar || p.player.image)) || '';
+        const roleRaw = p.role || p.playerRole || p.position || p.type || p.primaryRole || p.roleName || (p.player && p.player.role);
+        const role = normalizeRole(roleRaw);
+        return { ...p, name, team, avatar, role };
+      };
+
+      const normalized = finalData.map(normalizePlayer);
+      setPlayers(normalized);
+      setAllPlayers(normalized);
     } catch (err) {
-      console.error('API error, using full mock data');
-      const filteredMock = mockPlayers.filter(p => 
-        !query || p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.team.toLowerCase().includes(query.toLowerCase()) ||
-        p.role.toLowerCase().includes(query.toLowerCase())
-      );
-      setPlayers(filteredMock);
-      setAllPlayers(mockPlayers);
+      console.error('Player search API error:', err);
+      setError('Failed to load players. Please try again.');
+      setPlayers([]);
+      setAllPlayers([]);
     } finally {
       setLoading(false);
     }
@@ -198,15 +99,7 @@ const PlayerSearch = () => {
 
   const roleOptions = ['all', 'Batsman', 'Bowler', 'All-Rounder', 'Wicketkeeper'];
 
-  if (loading) {
-    return (
-      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-offwhite py-5">
-        <div className="spinner-border text-primary pulse-animation" style={{width: '4rem', height: '4rem'}} role="status">
-          <span className="visually-hidden">Loading players...</span>
-        </div>
-      </div>
-    );
-  }
+  // NOTE: don't block the whole page while loading so users can continue typing.
 
   return (
     <div className="py-5 bg-offwhite min-vh-100">
@@ -282,14 +175,20 @@ const PlayerSearch = () => {
             <FaUser className="fs-1 text-warning mb-3" />
             <div>{error}</div>
             <button className="btn btn-outline-warning mt-2" onClick={() => fetchPlayers('')}>
-              Load Demo Players
+              Retry
             </button>
           </div>
         )}
 
         {/* Players Grid */}
         <div className="row g-4">
-          {filteredPlayers.length === 0 ? (
+          {loading ? (
+            <div className="col-12 text-center py-10">
+              <div className="spinner-border text-primary pulse-animation" style={{width: '3rem', height: '3rem'}} role="status">
+                <span className="visually-hidden">Loading players...</span>
+              </div>
+            </div>
+          ) : filteredPlayers.length === 0 ? (
             <div className="col-12 text-center py-10">
               <div className="display-1 text-muted mb-4 opacity-50">
                 <FaUser />

@@ -1,6 +1,6 @@
 import React from "react";
 import { getPlayers } from "../../Services/playerService";
-import PlayerCard from "./PlayerCard";
+import PlayerCard from "../Cards/PlayerCard";
 import "./Players.css";
 
 function Players({ players = [] }) {

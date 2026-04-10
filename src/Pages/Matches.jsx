@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import "../Components/PagesCss/Matches.css";
 import MatchCard from "../Components/MatchesSection/MatchCard";
 import { getMatches } from "../Services/matchService";
 
 function Matches() {
-  const [activeTab, setActiveTab] = useState("live");
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const initialTab = params.get("tab") || "live";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -23,6 +27,13 @@ function Matches() {
   useEffect(() => {
     fetchMatches(activeTab);
   }, [activeTab]);
+
+  // update tab when query param changes
+  useEffect(() => {
+    const p = new URLSearchParams(location.search).get("tab") || "live";
+    if (p !== activeTab) setActiveTab(p);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
 
   return (
     <div className="matches-page">

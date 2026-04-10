@@ -1,22 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import "../assets/Styles/Global.css";
-
-const mockLeaderboard = [
-  { rank: 1, name: 'Virat Kohli', points: 12540, avatar: 'https://via.placeholder.com/60', change: '+120' },
-  { rank: 2, name: 'Rohit Sharma', points: 11890, avatar: 'https://via.placeholder.com/60', change: '+95' },
-  { rank: 3, name: 'Jasprit Bumrah', points: 11230, avatar: 'https://via.placeholder.com/60', change: '+80' },
-  { rank: 4, name: 'KL Rahul', points: 10980, avatar: 'https://via.placeholder.com/60', change: '-15' },
-  { rank: 5, name: 'Hardik Pandya', points: 10750, avatar: 'https://via.placeholder.com/60', change: '+45' },
-  { rank: 6, name: 'Rishabh Pant', points: 10520, avatar: 'https://via.placeholder.com/60', change: '+30' },
-  { rank: 7, name: 'Shubman Gill', points: 10210, avatar: 'https://via.placeholder.com/60', change: '+65' },
-  { rank: 8, name: 'Mohammed Siraj', points: 9980, avatar: 'https://via.placeholder.com/60', change: '-20' },
-  { rank: 9, name: 'Suryakumar Yadav', points: 9850, avatar: 'https://via.placeholder.com/60', change: '+110' },
-  { rank: 10, name: 'Kuldeep Yadav', points: 9720, avatar: 'https://via.placeholder.com/60', change: '+55' },
-];
+import { getLeaderboardTop } from '../Services/dashboardService';
 
 function Leaderboard() {
   const [activeTab, setActiveTab] = useState('weekly');
+  const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const tabs = [
@@ -27,9 +16,29 @@ function Leaderboard() {
 
   const fetchLeaderboard = async (tab) => {
     setLoading(true);
-    // TODO: Integrate with leaderboardService.js when available
-    setTimeout(() => setLoading(false), 800);
+    try {
+      const period = tab; // 'weekly' | 'monthly' | 'all-time' - backend may support this
+      const data = await getLeaderboardTop(period);
+      const normalized = (data || []).map((p, idx) => ({
+        rank: p.rank || idx + 1,
+        name: p.name || p.playerName || p.displayName || 'Unknown',
+        points: p.points || p.score || p.value || 0,
+        avatar: p.avatar || p.image || `https://i.pravatar.cc/60?img=${idx + 10}`,
+        change: (p.change && String(p.change)) || (p.delta ? (p.delta > 0 ? `+${p.delta}` : String(p.delta)) : '+0'),
+      }));
+      setPlayers(normalized);
+    } catch (err) {
+      console.error('Error fetching leaderboard:', err);
+      setPlayers([]);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchLeaderboard(activeTab);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="py-5 bg-gray-50 min-vh-100">
@@ -79,43 +88,48 @@ function Leaderboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {mockLeaderboard.map((player, index) => (
-                      <tr key={index} className={player.rank <= 3 ? 'table-active fw-semibold' : ''}>
-                        <td className="fs-4 fw-bold text-primary">
-                          <div className="rank-badge p-3 rounded-circle bg-primary text-white d-inline-block text-center" style={{ width: '48px', height: '48px', lineHeight: '24px' }}>
-                            #{player.rank}
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex align-items-center gap-3">
-                            <img
-                              src={player.avatar}
-                              alt={player.name}
-                              className="rounded-circle"
-                              style={{ width: '56px', height: '56px' }}
-                            />
-                            <div>
-                              <div className="fw-bold">{player.name}</div>
-                              <small className="text-muted">Score11 PRO</small>
+                    {players.length ? (
+                      players.map((player, index) => (
+                        <tr key={index} className={player.rank <= 3 ? 'table-active fw-semibold' : ''}>
+                          <td className="fs-4 fw-bold text-primary">
+                            <div className="rank-badge p-3 rounded-circle bg-primary text-white d-inline-block text-center" style={{ width: '48px', height: '48px', lineHeight: '24px' }}>
+                              #{player.rank}
                             </div>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="fw-bold fs-5 text-success">{player.points.toLocaleString()}</div>
-                        </td>
-                        <td>
-                          <span className={`badge fs-6 px-3 py-2 fw-semibold ${player.change.startsWith('+') ? 'bg-success' : 'bg-danger'
-                            }`}>
-                            {player.change}
-                          </span>
-                        </td>
-                        <td>
-                          <Link to={`/players/${player.name.toLowerCase().replace(' ', '-')}`} className="btn btn-outline-primary btn-sm px-4">
-                            View Profile
-                          </Link>
-                        </td>
+                          </td>
+                          <td>
+                            <div className="d-flex align-items-center gap-3">
+                              <img
+                                src={player.avatar}
+                                alt={player.name}
+                                className="rounded-circle"
+                                style={{ width: '56px', height: '56px' }}
+                              />
+                              <div>
+                                <div className="fw-bold">{player.name}</div>
+                                <small className="text-muted">Score11 PRO</small>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="fw-bold fs-5 text-success">{Number(player.points).toLocaleString()}</div>
+                          </td>
+                          <td>
+                            <span className={`badge fs-6 px-3 py-2 fw-semibold ${String(player.change).startsWith('+') ? 'bg-success' : 'bg-danger'}`}>
+                              {player.change}
+                            </span>
+                          </td>
+                          <td>
+                            <Link to={`/players/${(player.name || '').toLowerCase().replace(/\s+/g, '-')}`} className="btn btn-outline-primary btn-sm px-4">
+                              View Profile
+                            </Link>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="text-center text-muted py-4">No leaderboard data available.</td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>

@@ -1,101 +1,230 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import "./LiveMatches.css";
-import MatchCard from "./MatchCard";
+import MatchCard from "../Cards/MatchCard";
+import { getLiveMatches, getUpcomingMatches } from "../../Services/dashboardService";
+import { getMatches } from "../../Services/matchService";
+import { getPublicTeam } from "../../Services/teamService";
 
 function LiveMatches({ live = [], upcoming = [], refresh }) {
   const [activeTab, setActiveTab] = useState("live");
   const [localLoading, setLocalLoading] = useState(true);
+  const [liveMatches, setLiveMatches] = useState(live || []);
+  const [upcomingMatches, setUpcomingMatches] = useState(upcoming || []);
+  const [completedMatches, setCompletedMatches] = useState([]);
+
+  // ✅ SAFE TEAM NAME FUNCTION
+  const getTeamName = (team) => {
+    if (!team) return "Team";
+    if (typeof team === "string") return team; // fallback if still ID
+    return team.shortName || team.name || "Team";
+  };
+
+  // ✅ WINNER NAME
+  const getWinnerName = (match) => {
+    if (match?.result?.winnerName) return match.result.winnerName;
+
+    const winner = match?.result?.winner;
+
+    if (!winner) return "";
+
+    if (typeof winner === "object") {
+      return getTeamName(winner);
+    }
+
+    // fallback (if still ID)
+    if (winner === match?.team1?._id) return getTeamName(match.team1);
+    if (winner === match?.team2?._id) return getTeamName(match.team2);
+
+    return winner;
+  };
 
   useEffect(() => {
-    if (live.length || upcoming.length) {
-      setLocalLoading(false);
-    }
-  }, [live, upcoming]);
+    let mounted = true;
+
+    const fetchAll = async () => {
+      try {
+        setLocalLoading(true);
+
+        const [liveData, upcomingData, completedData] = await Promise.all([
+          getLiveMatches().catch(() => []),
+          getUpcomingMatches().catch(() => []),
+          getMatches("completed").catch(() => []),
+        ]);
+
+        if (!mounted) return;
+
+        setLiveMatches(
+          live && live.length ? live : Array.isArray(liveData) ? liveData : []
+        );
+
+        setUpcomingMatches(
+          upcoming && upcoming.length
+            ? upcoming
+            : Array.isArray(upcomingData)
+            ? upcomingData
+            : []
+        );
+
+        let completed = Array.isArray(completedData)
+          ? completedData
+          : [];
+
+        // ✅ 🔥 FIX: Convert team IDs → team objects
+        const resolvedMatches = await Promise.all(
+          completed.map(async (match) => {
+            try {
+              let team1 = match.team1;
+              let team2 = match.team2;
+
+              // Fetch team1 if it's ID
+              if (typeof team1 === "string") {
+                const t1 = await getPublicTeam(team1).catch(() => null);
+                if (t1) team1 = t1;
+              }
+
+              // Fetch team2 if it's ID
+              if (typeof team2 === "string") {
+                const t2 = await getPublicTeam(team2).catch(() => null);
+                if (t2) team2 = t2;
+              }
+
+              return {
+                ...match,
+                team1,
+                team2,
+              };
+            } catch (err) {
+              console.error("Team fetch error:", err);
+              return match;
+            }
+          })
+        );
+
+        setCompletedMatches(resolvedMatches);
+      } catch (err) {
+        console.error("Error fetching matches:", err);
+        if (mounted) {
+          setLiveMatches(live || []);
+          setUpcomingMatches(upcoming || []);
+          setCompletedMatches([]);
+        }
+      } finally {
+        if (mounted) setLocalLoading(false);
+      }
+    };
+
+    fetchAll();
+
+    return () => (mounted = false);
+  }, [live, upcoming, refresh]);
 
   if (localLoading) {
     return (
       <section className="live-section">
-        <div className="container">
-          <div className="text-center py-5">
-            <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} role="status">
-              <span className="visually-hidden">Loading matches...</span>
-            </div>
-          </div>
+        <div className="container text-center py-5">
+          <div className="spinner-border text-primary"></div>
         </div>
       </section>
     );
   }
 
+  const dataForTab =
+    activeTab === "live"
+      ? liveMatches
+      : activeTab === "upcoming"
+      ? upcomingMatches
+      : completedMatches;
+
   return (
     <section className="live-section">
       <div className="container">
 
-        {/* Title */}
-        <h2 className="section-title fade-in-up">Live Matches</h2>
+        <h2 className="section-title">Matches</h2>
 
         {/* Tabs */}
         <div className="tabs mb-4">
-          <button 
-            className={`tab-btn ${activeTab === "live" ? "active" : ""}`} 
+          <button
+            className={activeTab === "live" ? "active" : ""}
             onClick={() => setActiveTab("live")}
           >
-            Live ({live.length})
+            Live ({liveMatches.length})
           </button>
 
-          <button 
-            className={`tab-btn ${activeTab === "upcoming" ? "active" : ""}`} 
+          <button
+            className={activeTab === "upcoming" ? "active" : ""}
             onClick={() => setActiveTab("upcoming")}
           >
-            Upcoming ({upcoming.length})
+            Upcoming ({upcomingMatches.length})
           </button>
 
-          <button 
-            className={`tab-btn ${activeTab === "completed" ? "active" : ""}`} 
+          <button
+            className={activeTab === "completed" ? "active" : ""}
             onClick={() => setActiveTab("completed")}
           >
-            Completed
+            Completed ({completedMatches.length})
           </button>
         </div>
 
-        {/* Dynamic Cards */}
+        {/* Match Cards */}
         <div className="row g-4">
-          {(() => {
-            const data = activeTab === 'live' ? live : activeTab === 'upcoming' ? upcoming : [];
-            if (data.length === 0) {
-              return (
-                <div className="col-12 text-center py-5">
-                  <h5>No {activeTab} matches at the moment</h5>
-                  <p className="text-muted">Check back soon!</p>
-                </div>
-              );
-            }
-            return data.map((match, index) => (
+          {dataForTab.length === 0 ? (
+            <div className="col-12 text-center py-5">
+              <h5>No {activeTab} matches</h5>
+            </div>
+          ) : (
+            dataForTab.map((match, index) => (
               <div className="col-md-6 col-lg-4" key={match._id || index}>
                 {activeTab === "live" ? (
                   <MatchCard match={match} />
                 ) : (
-                  <div className="card h-100 hover-lift">
-                    <div className="card-body">
-                      <div className="d-flex justify-content-between mb-2">
-                        <span className="fw-bold">{match.teamA || 'Team A'}</span>
-                        <span className="text-muted">vs</span>
-                        <span className="fw-bold">{match.teamB || 'Team B'}</span>
-                      </div>
-                      {match.time && <p className="card-text mb-0">{match.time}</p>}
-                      {match.result && <p className="card-text text-success fw-bold mb-0">{match.result}</p>}
+                  <div className="card h-100">
+                    <div className="card-body text-center">
+
+                      {/* Teams */}
+                      <h5>
+                        {getTeamName(match.team1)} vs{" "}
+                        {getTeamName(match.team2)}
+                      </h5>
+
+                      {/* Result */}
+                      {match.result && (
+                        <p className="text-success fw-bold">
+                          {getWinnerName(match)}{" "}
+                          {match.result.margin
+                            ? `won by ${match.result.margin}`
+                            : ""}
+                        </p>
+                      )}
+
+                      {/* Date */}
+                      {match.scheduledDate && (
+                        <p className="text-muted">
+                          {new Date(match.scheduledDate).toDateString()}
+                        </p>
+                      )}
+
+                      {/* Button */}
+                      <Link
+                        to={`/match/${match._id}`}
+                        className="btn btn-primary btn-sm mt-2"
+                      >
+                        View Details
+                      </Link>
+
                     </div>
                   </div>
                 )}
               </div>
-            ));
-          })()}
+            ))
+          )}
         </div>
 
-        {/* View All Button */}
+        {/* View All */}
         <div className="text-center mt-5">
-          <a href="/matches" className="btn btn-primary btn-lg">
+          <Link to="/matches" className="btn btn-primary">
             View All Matches →
-          </a>
+          </Link>
         </div>
 
       </div>

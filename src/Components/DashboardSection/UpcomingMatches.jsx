@@ -1,57 +1,69 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import "./UpcomingMatches.css";
+import { getUpcomingMatches } from "../../Services/dashboardService";
 
 function UpcomingMatches() {
-  const matches = [
-    {
-      team1: "GT",
-      team2: "RR",
-      date: "Apr 5",
-      time: "7:30 PM"
-    },
-    {
-      team1: "SRH",
-      team2: "LSG",
-      date: "Apr 6",
-      time: "3:30 PM"
-    },
-    {
-      team1: "CSK",
-      team2: "DC",
-      date: "Apr 7",
-      time: "7:30 PM"
-    }
-  ];
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetch = async () => {
+      try {
+        setLoading(true);
+        const data = await getUpcomingMatches();
+        if (!mounted) return;
+        setMatches(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Error fetching upcoming matches:", err);
+        if (mounted) setMatches([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    fetch();
+    return () => (mounted = false);
+  }, []);
 
   return (
     <section className="upcoming-section">
-      {/* Header */}
       <div className="section-header">
         <h2>📅 Upcoming Matches</h2>
-        <span className="view-all">View All →</span>
+        <Link to="/matches?tab=upcoming" className="view-all">View All →</Link>
       </div>
 
-      {/* Match List */}
-      <div className="upcoming-list">
-        {matches.map((match, index) => (
-          <div className="upcoming-card" key={index}>
-            
-            {/* Teams */}
-            <div className="teams">
-              <span>{match.team1}</span>
-              <span className="vs">vs</span>
-              <span>{match.team2}</span>
-            </div>
+      {loading ? (
+        <div className="text-center py-4">Loading upcoming matches...</div>
+      ) : (
+        <div className="upcoming-list">
+          {matches.length ? (
+            matches.map((match, index) => {
+              const t1 = match.team1?.shortName || match.team1?.name || match.team1 || (match.teams && match.teams[0]) || "Team 1";
+              const t2 = match.team2?.shortName || match.team2?.name || match.team2 || (match.teams && match.teams[1]) || "Team 2";
+              const date = match.date || match.startDate || match.start || match.kickoff || "";
+              const time = match.time || match.startTime || match.kickoffTime || "";
 
-            {/* Date & Time */}
-            <div className="match-info">
-              <span>{match.date}</span>
-              <span>{match.time}</span>
-            </div>
+              return (
+                <div className="upcoming-card" key={match._id || index}>
+                  <div className="teams">
+                    <span>{t1}</span>
+                    <span className="vs">vs</span>
+                    <span>{t2}</span>
+                  </div>
 
-          </div>
-        ))}
-      </div>
+                  <div className="match-info">
+                    <span>{date}</span>
+                    <span>{time}</span>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="text-muted">No upcoming matches.</div>
+          )}
+        </div>
+      )}
     </section>
   );
 }

@@ -1,23 +1,4 @@
-import axios from "axios";
-
-const BASE_URL = "http://68.178.171.95:3000/api/v1";
-
-// 🔑 Token (stored after login)
-const getToken = () => localStorage.getItem("token");
-
-// 🔹 Axios instance
-const api = axios.create({
-  baseURL: BASE_URL,
-});
-
-// 🔹 Add token in headers
-api.interceptors.request.use((config) => {
-  const token = getToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+import api from "../config/api";
 
 // ================= API FUNCTIONS =================
 
@@ -44,4 +25,24 @@ export const uploadStats = (id, data) => {
 // 👉 Update performance
 export const updatePerformance = (id, data) => {
   return api.post(`/playerProfile/${id}/performance`, data);
+};
+
+// 👉 Get profile by ID (public)
+export const getProfileById = (id) => {
+  return api.get(`/playerProfile/${id}`);
+};
+
+// 👉 Get verified profiles (paginated)
+export const getVerifiedProfiles = (page = 1, limit = 10) => {
+  return api.get(`/playerProfile/verified`, { params: { page, limit } });
+};
+
+// 👉 Link profile to player account (Profile Owner)
+export const linkPlayer = (id, data) => {
+  return api.post(`/playerProfile/${id}/link-player`, data);
+};
+
+// 👉 Delete profile (Profile Owner / Admin)
+export const deleteProfile = (id) => {
+  return api.delete(`/playerProfile/${id}`);
 };
