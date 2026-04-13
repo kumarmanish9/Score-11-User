@@ -28,6 +28,7 @@ import Leaderboard from "../Pages/Leaderboard";
 import PlayerProfile from "../Pages/PlayerProfile";
 import MatchDetails from "../Pages/MatchDetails";
 import MyTeams from "../Pages/MyTeams";
+import TournamentPage from "../Pages/TournamentPage";
 
 function AppRoutes() {
   return (
@@ -62,6 +63,7 @@ function AppRoutes() {
       <Route path="/contests" element={<Contests />} />
       <Route path="/leaderboard" element={<Leaderboard />} />
       <Route path="/my-teams" element={<MyTeams />} />
+      <Route path="/tournament/:id" element={<TournamentPage />} />
     </Routes>
   );
 }
