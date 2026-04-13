@@ -2,17 +2,18 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../Components/PagesCss/Register.css";
 import { registerUser } from "../Services/AuthServices";
-import { FaUser, FaEnvelope, FaPhone, FaLock, FaUserPlus } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaPhone, FaLock, FaUserPlus, FaStar, FaShieldAlt } from "react-icons/fa";
 
 function Register() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    username: "",
     name: "",
     email: "",
     phone: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    role: "user",
+    isPro: false
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -25,45 +26,93 @@ function Register() {
     setError("");
   };
 
+  const handleRoleChange = (e) => {
+    const newRole = e.target.value;
+    setForm({
+      ...form,
+      role: newRole,
+      isPro: newRole === "pro"
+    });
+  };
+
+  const handleProToggle = (e) => {
+    setForm({
+      ...form,
+      isPro: e.target.checked,
+      role: e.target.checked ? "pro" : "user"
+    });
+  };
+
+  const validateForm = () => {
+    if (!form.email || !form.email.toLowerCase().trim()) {
+      setError("Email is required");
+      return false;
+    }
+
+    // Email validation
+    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(form.email)) {
+      setError("Please enter a valid email");
+      return false;
+    }
+
+    // Phone validation
+    const phoneRegex = /^\+?[\d\s-]{10,}$/;
+    if (!phoneRegex.test(form.phone)) {
+      setError("Please enter a valid phone number (e.g., +91 9876543210)");
+      return false;
+    }
+
+    // Password strength
+    if (form.password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return false;
+    }
+    if (!/(?=.*[A-Z])(?=.*\d)/.test(form.password)) {
+      setError("Password must contain at least one uppercase letter and one number");
+      return false;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords do not match");
+      return false;
+    }
+
+    if (!form.name?.trim()) {
+      setError("Name is required");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (form.password !== form.confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    if (form.password.length < 6) {
-      setError("Password must be at least 6 characters");
-      return;
-    }
-
-    // const payload = {
-    //   username: form.username,
-    //   fullName: form.name,
-    //   email: form.email,
-    //   phone: form.phone,
-    //   password: form.password
-    // };
+    if (!validateForm()) return;
 
     const payload = {
-      name: form.name,          // ✅ NOT fullName
-      email: form.email,
-      phone: form.phone,
-      password: form.password
+      name: form.name.trim(),
+      email: form.email.trim().toLowerCase(),
+      phone: form.phone.trim(),
+      password: form.password,
+      role: form.role
     };
 
-    // 👇 ADD THIS HERE
-    console.log("PHONE VALUE:", form.phone);
-    console.log("PAYLOAD:", payload);
+    console.log("Registration Payload:", payload);
 
     try {
       setLoading(true);
       const res = await registerUser(payload);
-      navigate("/login");
+      
+      if (res.data?.accessToken) {
+        localStorage.setItem("token", res.data.accessToken);
+      }
+      
+      navigate("/dashboard");
     } catch (error) {
-      const msg = error.response?.data?.message || "Registration Failed";
+      const msg = error.response?.data?.message || error.message || "Registration failed";
       setError(msg);
     } finally {
       setLoading(false);
@@ -104,7 +153,7 @@ function Register() {
           <h1 className="stadium-title">
             Score<span className="logo-highlight">11</span>
           </h1>
-          <p className="stadium-subtitle">Create Account • Play Fantasy Cricket</p>
+          <p className="stadium-subtitle">Create Pro Account • Role-Based Registration</p>
         </div>
       </div>
 
@@ -119,7 +168,7 @@ function Register() {
               </svg>
             </div>
             <h2>Join Score11</h2>
-            <p>Create your player account</p>
+            <p>Complete registration with role selection</p>
           </div>
 
           {error && <div className="alert alert-danger shadow-sm">{error}</div>}
@@ -129,21 +178,7 @@ function Register() {
               <div className="form-group">
                 <label className="form-label">
                   <FaUser className="label-icon" />
-                  Username
-                </label>
-                <input
-                  type="text"
-                  name="username"
-                  placeholder="@player11"
-                  value={form.username}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">
-                  <FaUser className="label-icon" />
-                  Full Name
+                  Full Name *
                 </label>
                 <input
                   type="text"
@@ -154,13 +189,10 @@ function Register() {
                   required
                 />
               </div>
-            </div>
-
-            <div className="form-row">
               <div className="form-group">
                 <label className="form-label">
                   <FaEnvelope className="label-icon" />
-                  Email
+                  Email *
                 </label>
                 <input
                   type="email"
@@ -171,10 +203,13 @@ function Register() {
                   required
                 />
               </div>
+            </div>
+
+            <div className="form-row">
               <div className="form-group">
                 <label className="form-label">
                   <FaPhone className="label-icon" />
-                  Phone
+                  Phone *
                 </label>
                 <input
                   type="tel"
@@ -185,50 +220,72 @@ function Register() {
                   required
                 />
               </div>
-            </div>
-
-            <div className="form-row">
               <div className="form-group">
                 <label className="form-label">
                   <FaLock className="label-icon" />
-                  Password
+                  Password *
                 </label>
                 <input
                   type="password"
                   name="password"
-                  placeholder="Min 6 characters"
+                  placeholder="Min 8 chars (1 Upper, 1 Number)"
                   value={form.password}
                   onChange={handleChange}
                   required
-                  minLength="6"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">
-                  <FaLock className="label-icon" />
-                  Confirm Password
-                </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  placeholder="Repeat password"
-                  value={form.confirmPassword}
-                  onChange={handleChange}
-                  required
+                  minLength="8"
                 />
               </div>
             </div>
 
+            <div className="form-group">
+              <label className="form-label">
+                <FaLock className="label-icon" />
+                Confirm Password *
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Repeat password"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                <FaStar className="label-icon" />
+                Role *
+              </label>
+              <select name="role" value={form.role} onChange={handleRoleChange} className="form-select" required>
+                <option value="user">Regular User</option>
+                <option value="player">Player</option>
+                <option value="scorer">Scorer</option>
+                <option value="pro">Pro Scorer</option>
+              </select>
+            </div>
+
+            {form.isPro && (
+              <div className="pro-section">
+                <label className="pro-checkbox">
+                  <FaShieldAlt className="pro-icon" /> Pro Account - Admin verification required
+                </label>
+                <p className="pro-disclaimer small">
+                  Pro accounts enable live scoring. Verification takes 24-48 hours.
+                </p>
+              </div>
+            )}
+
             <button type="submit" disabled={loading} className="btn-cricket">
               {loading ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2"></span>
+                  <span className="spinner-border spinner-border-sm me-2" />
                   Creating Account...
                 </>
               ) : (
                 <>
                   <FaUserPlus className="me-2" />
-                  Create Account
+                  Create {form.role === 'pro' ? 'Pro ' : ''}{form.role.charAt(0).toUpperCase() + form.role.slice(1)} Account
                 </>
               )}
             </button>
@@ -239,16 +296,55 @@ function Register() {
               <span>or</span>
             </div>
             <p>
-              Already have account?{" "}
-              <Link to="/login" className="highlight-link">
-                Sign In
-              </Link>
+              Already have account? <Link to="/login" className="highlight-link">Sign In</Link>
             </p>
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .pro-section {
+          background: linear-gradient(135deg, #fbbf24, #f59e0b);
+          padding: 12px;
+          border-radius: 12px;
+          margin: 12px 0;
+          border-left: 4px solid #d97706;
+        }
+        .pro-checkbox {
+          display: flex;
+          align-items: center;
+          font-weight: 600;
+          color: #b45309;
+        }
+        .pro-icon {
+          margin-right: 8px;
+          color: #dc2626;
+        }
+        .pro-disclaimer {
+          font-size: 0.85rem;
+          color: #92400e;
+          margin: 4px 0 0 0;
+          font-style: italic;
+        }
+        .form-select {
+          width: 100%;
+          padding: 12px 16px;
+          border: 2px solid #e5e7eb;
+          border-radius: 12px;
+          background: white;
+          font-size: 1rem;
+          transition: all 0.2s;
+        }
+        .form-select:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .small { font-size: 0.8rem; }
+      `}</style>
     </div>
   );
 }
 
 export default Register;
+
