@@ -8,6 +8,7 @@ import MatchSelector from "../Components/CreateTeam/MatchSelector";
 import PlayerSearchList from "../Components/CreateTeam/PlayerSearchList";
 import TeamLineup from "../Components/CreateTeam/TeamLineup";
 
+
 import "../assets/Styles/Global.css";
 
 function CreateTeam() {

@@ -1,10 +1,17 @@
 import React from "react";
 import "./Scorecard.css";
-function Scorecard({ scorecard, loading, teamMap }) {
 
-  if (loading) return <p className="text-center">Loading scorecard...</p>;
+function Scorecard({ scorecard, loading, teamMap = {} }) {
 
-  if (!scorecard) return <p className="text-center">No scorecard available</p>;
+  // ✅ Loading state
+  if (loading) {
+    return <p className="text-center">Loading scorecard...</p>;
+  }
+
+  // ✅ No data state
+  if (!scorecard) {
+    return <p className="text-center">No scorecard available</p>;
+  }
 
   return (
     <div className="scorecard-container">
@@ -13,27 +20,29 @@ function Scorecard({ scorecard, loading, teamMap }) {
       <div className="inning-card">
         <div className="inning-header">
           <h3>
-            {teamMap[scorecard?.battingTeam] || "Batting Team"}
+            {teamMap?.[scorecard?.battingTeam] || "Batting Team"}
             <span>
-              {scorecard?.runs || 0}/{scorecard?.wickets || 0} ({scorecard?.overs || "0.0"})
+              {scorecard?.runs ?? 0}/{scorecard?.wickets ?? 0} ({scorecard?.overs ?? "0.0"})
             </span>
           </h3>
         </div>
 
         {/* 📊 MATCH INFO */}
         <div className="match-info">
-          <p><strong>Run Rate:</strong> {scorecard?.runRate || "0.00"}</p>
+          <p>
+            <strong>Run Rate:</strong> {scorecard?.runRate ?? "0.00"}
+          </p>
         </div>
 
         {/* ➕ EXTRAS */}
         <div className="extras-box">
           <p>
-            <strong>Extras:</strong> {scorecard?.extras?.total || 0}
+            <strong>Extras:</strong> {scorecard?.extras?.total ?? 0}
             <span>
-              (Wd: {scorecard?.extras?.wides || 0}, 
-              Nb: {scorecard?.extras?.noBalls || 0}, 
-              B: {scorecard?.extras?.byes || 0}, 
-              Lb: {scorecard?.extras?.legByes || 0})
+              (Wd: {scorecard?.extras?.wides ?? 0}, 
+              Nb: {scorecard?.extras?.noBalls ?? 0}, 
+              B: {scorecard?.extras?.byes ?? 0}, 
+              Lb: {scorecard?.extras?.legByes ?? 0})
             </span>
           </p>
         </div>
@@ -42,7 +51,7 @@ function Scorecard({ scorecard, loading, teamMap }) {
         <div className="table-section">
           <h5>Batting</h5>
 
-          {scorecard?.battingScorecard?.length === 0 ? (
+          {!(scorecard?.battingScorecard?.length > 0) ? (
             <p className="no-data">No batting data yet</p>
           ) : (
             <table className="score-table">
@@ -58,14 +67,14 @@ function Scorecard({ scorecard, loading, teamMap }) {
               </thead>
 
               <tbody>
-                {(scorecard?.battingScorecard || []).map((b, i) => ( 
+                {scorecard.battingScorecard.map((b, i) => (
                   <tr key={i}>
-                    <td>{b.playerName}</td>
-                    <td className="highlight">{b.runs}</td>
-                    <td>{b.balls}</td>
-                    <td>{b.fours}</td>
-                    <td>{b.sixes}</td>
-                    <td>{b.strikeRate}</td>
+                    <td>{b?.playerName ?? "-"}</td>
+                    <td className="highlight">{b?.runs ?? 0}</td>
+                    <td>{b?.balls ?? 0}</td>
+                    <td>{b?.fours ?? 0}</td>
+                    <td>{b?.sixes ?? 0}</td>
+                    <td>{b?.strikeRate ?? "0.00"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -77,7 +86,7 @@ function Scorecard({ scorecard, loading, teamMap }) {
         <div className="table-section">
           <h5>Bowling</h5>
 
-          {scorecard?.bowlingScorecard?.length === 0 ? (
+          {!(scorecard?.bowlingScorecard?.length > 0) ? (
             <p className="no-data">No bowling data yet</p>
           ) : (
             <table className="score-table">
@@ -92,13 +101,13 @@ function Scorecard({ scorecard, loading, teamMap }) {
               </thead>
 
               <tbody>
-                {(scorecard?.bowlingScorecard || []).map((b, i) => (
+                {scorecard.bowlingScorecard.map((b, i) => (
                   <tr key={i}>
-                    <td>{b.playerName}</td>
-                    <td>{b.overs}</td>
-                    <td>{b.runs}</td>
-                    <td className="wicket">{b.wickets}</td>
-                    <td>{b.economy}</td>
+                    <td>{b?.playerName ?? "-"}</td>
+                    <td>{b?.overs ?? "0.0"}</td>
+                    <td>{b?.runs ?? 0}</td>
+                    <td className="wicket">{b?.wickets ?? 0}</td>
+                    <td>{b?.economy ?? "0.00"}</td>
                   </tr>
                 ))}
               </tbody>
