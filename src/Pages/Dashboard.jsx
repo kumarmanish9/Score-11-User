@@ -48,13 +48,74 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-gray-50">
-        <div className="spinner-border text-blue-500 pulse-animation" style={{width: '3rem', height: '3rem'}} role="status">
+      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-gray-50 glass-container">
+        <div className="spinner-border text-primary pulse-glow" style={{width: '4rem', height: '4rem'}} role="status">
           <span className="visually-hidden">Loading dashboard...</span>
         </div>
       </div>
     );
   }
+
+  return (
+    <div className="dashboard-container app-container">
+      <div className="container-fluid px-4 py-4">
+        {/* Welcome Hero */}
+        <div className="hero-welcome card-premium fade-in-up p-4 mb-5">
+          <div className="row align-items-center">
+            <div className="col-md-8">
+              <h1 className="welcome-title mb-2 h1">Welcome back, {user?.name || 'Player'}!</h1>
+              <p className="lead text-gray-700 mb-0 fs-5">Here's what's happening in your Score11 world</p>
+            </div>
+            <div className="col-md-4 text-md-end">
+              <Link to="/create-team" className="btn btn-premium me-2 shadow-lg">Create Team</Link>
+              <Link to="/join-contest" className="btn btn-premium bg-success text-white shadow-lg">Join Contest</Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="dashboard-stats row g-4 mb-5">
+          <div className="col-lg-4 col-md-6">
+            <div className="card h-100 stat-card-premium hover-lift text-center p-4">
+              <div className="stat-icon mb-3 mx-auto">
+                <FaWallet />
+              </div>
+              <div className="stat-number h3 mb-2 score-highlight">₹{Number(stats.balance || 0).toLocaleString()}</div>
+              <div className="stat-label h6 fw-semibold text-gray-600">Wallet Balance</div>
+            </div>
+          </div>
+          <div className="col-lg-4 col-md-6">
+            <div className="card h-100 stat-card-premium hover-lift text-center p-4">
+              <div className="stat-icon mb-3 mx-auto bg-green-500 text-white">
+                <FaUsers />
+              </div>
+              <div className="stat-number h3 mb-2">{stats.teams}</div>
+              <div className="stat-label h6 fw-semibold text-gray-600">My Teams</div>
+            </div>
+          </div>
+          <div className="col-lg-4 col-md-6">
+            <div className="card h-100 stat-card-premium hover-lift text-center p-4">
+              <div className="stat-icon mb-3 mx-auto bg-gold-500 text-white">
+                <FaTrophy />
+              </div>
+              <div className="stat-number h3 mb-2">{stats.contests}</div>
+              <div className="stat-label h6 fw-semibold text-gray-600">Active Contests</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Header */}
+        <Header />
+
+        {/* Sections Grid */}
+        <div className="section-grid fade-in-up">
+          <LiveMatches />
+          <UpcomingMatches />
+          <Leaderboard />
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="dashboard-container">

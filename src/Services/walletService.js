@@ -24,7 +24,12 @@ export const getTransactions = async () => {
 };
 
 export const addMoney = async (data) => {
-  const response = await api.post('/add-money', data);
+  const response = await api.post('/deposit', data);
+  return response.data;
+};
+
+export const withdrawMoney = async (data) => {
+  const response = await api.post('/withdraw', data);
   return response.data;
 };
 

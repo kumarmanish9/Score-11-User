@@ -1,10 +1,52 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
+/* Score11 Index - Ultra Clean Base */
+
+@import url('./assets/Styles/Global.css');
+
+html {
+  scroll-behavior: smooth;
 }
 
+body {
+  /* Global handles font/background */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus Visible Only */
+*:focus-visible {
+  outline: 2px solid var(--primary-blue);
+  outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Remove default outlines - custom handles */
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: none;
+}
+
+/* Selection Premium */
+::selection {
+  background: var(--primary-blue);
+  color: var(--white);
+}
+
+::-moz-selection {
+  background: var(--primary-blue);
+  color: var(--white);
+}
+
+/* Overflow Hidden on html/body */
 html, body {
   overflow-x: hidden;
+  position: relative;
+}
+
+/* Emoji Fix */
+emoji {
+  font-family: inherit;
 }

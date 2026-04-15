@@ -55,11 +55,11 @@ function Home() {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center min-vh-90 bg-light p-5">
-        <div className="spinner-border text-primary pulse-animation" style={{width: '3rem', height: '3rem'}} role="status">
+      <div className="d-flex justify-content-center align-items-center min-vh-100 bg-gray-50 p-5 glass-container">
+        <div className="spinner-border text-primary pulse-glow" style={{width: '4rem', height: '4rem'}} role="status">
           <span className="visually-hidden">Loading Score11 Home...</span>
         </div>
-        <h4 className="ms-3 text-primary">Welcome to Score11</h4>
+        <h1 className="ms-4 display-hero text-primary fade-in-up">Welcome to Score11</h1>
       </div>
     );
   }

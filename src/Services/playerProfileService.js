@@ -2,9 +2,9 @@ import api from "../config/api";
 
 // ================= API FUNCTIONS =================
 
-// 👉 Get my profile
+// 👉 Get my profile (fixed to /users/me)
 export const getMyProfile = () => {
-  return api.get("/playerProfile/me");
+  return api.get("/users/me");
 };
 
 // 👉 Create profile
@@ -45,4 +45,18 @@ export const linkPlayer = (id, data) => {
 // 👉 Delete profile (Profile Owner / Admin)
 export const deleteProfile = (id) => {
   return api.delete(`/playerProfile/${id}`);
+};
+
+// 👉 Update my profile
+export const updateMyProfile = (data) => {
+  return api.put("/users/me", data);
+};
+
+// 👉 Upload profile avatar
+export const uploadProfileAvatar = (formData) => {
+  return api.post("/users/avatar", formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
 };

@@ -1,165 +1,125 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { getLeaderboard, getBatsmanLeaderboard, getBowlerLeaderboard, getTeamLeaderboard } from "../Services/leaderboardService";
 import "../assets/Styles/Global.css";
-import { getLeaderboardTop } from '../Services/dashboardService';
 
-function Leaderboard() {
-  const [activeTab, setActiveTab] = useState('weekly');
-  const [players, setPlayers] = useState([]);
-  const [loading, setLoading] = useState(false);
+const Leaderboard = () => {
+  const [activeTab, setActiveTab] = useState('overall');
+  const [leaderboardData, setLeaderboardData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const tabs = [
-    { id: 'weekly', label: 'Weekly' },
-    { id: 'monthly', label: 'Monthly' },
-    { id: 'all-time', label: 'All Time' },
-  ];
+  useEffect(() => {
+    loadLeaderboard(activeTab);
+  }, [activeTab]);
 
-  const fetchLeaderboard = async (tab) => {
+  const loadLeaderboard = async (tab) => {
     setLoading(true);
     try {
-      const period = tab; // 'weekly' | 'monthly' | 'all-time' - backend may support this
-      const data = await getLeaderboardTop(period);
-      const normalized = (data || []).map((p, idx) => ({
-        rank: p.rank || idx + 1,
-        name: p.name || p.playerName || p.displayName || 'Unknown',
-        points: p.points || p.score || p.value || 0,
-        avatar: p.avatar || p.image || `https://i.pravatar.cc/60?img=${idx + 10}`,
-        change: (p.change && String(p.change)) || (p.delta ? (p.delta > 0 ? `+${p.delta}` : String(p.delta)) : '+0'),
-      }));
-      setPlayers(normalized);
+      let data;
+      switch (tab) {
+        case 'overall':
+          data = await getLeaderboard();
+          break;
+        case 'batsmen':
+          data = await getBatsmanLeaderboard();
+          break;
+        case 'bowlers':
+          data = await getBowlerLeaderboard();
+          break;
+        case 'teams':
+          data = await getTeamLeaderboard();
+          break;
+        default:
+          data = [];
+      }
+      console.log('Leaderboard data sample:', data[0]);      setLeaderboardData(data);
     } catch (err) {
-      console.error('Error fetching leaderboard:', err);
-      setPlayers([]);
+      console.error('Leaderboard load error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchLeaderboard(activeTab);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const tabs = [
+    { id: 'overall', label: 'Overall Leaderboard' },
+    { id: 'batsmen', label: 'Top Batsmen' },
+    { id: 'bowlers', label: 'Top Bowlers' },
+    { id: 'teams', label: 'Top Teams' },
+  ];
 
   return (
-    <div className="py-5 bg-gray-50 min-vh-100">
+    <div className="min-vh-100 bg-gray-50 py-5">
       <div className="container">
-        <div className="row mb-5">
-          <div className="col-lg-8 mx-auto text-center d-flex flex-column align-items-center">            <nav className="d-flex gap-2 mb-4">
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                className={`btn px-4 py-2 rounded-pill fw-semibold border-0 ${activeTab === tab.id
-                    ? 'bg-blue-500 text-white shadow-sm'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
-                  }`}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  fetchLeaderboard(tab.id);
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-            <h1 className="display-4 fw-bold mb-3">Leaderboard</h1>
-            <p className="lead text-gray-700 mb-0">
-              Top players ranked by fantasy points. Climb the ranks and win rewards!
-            </p>
+        <div className="row justify-content-center mb-5">
+          <div className="col-lg-8 text-center">
+            <h1 className="display-4 fw-bold mb-3">🏆 Leaderboard</h1>
+            <p className="lead text-muted">Top performers across the season</p>
           </div>
         </div>
 
-        {loading ? (
-          <div className="text-center py-8">
-            <div className="spinner-border text-blue-500 mb-3" style={{ width: '3rem', height: '3rem' }} />
-            <p className="text-muted">Loading leaderboard...</p>
+        {/* Tabs */}
+        <div className="card shadow-lg border-0 mb-4">
+          <div className="card-body p-0">
+            <div className="nav nav-pills nav-fill">
+              {tabs.map(tab => (
+                <button key={tab.id} className={`nav-link px-4 py-3 fw-bold flex-grow-1 ${activeTab === tab.id ? 'active' : ''}`} onClick={() => setActiveTab(tab.id)}>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
-        ) : (
-          <div className="row justify-content-center">
-            <div className="col-lg-10">
+        </div>
+
+        {/* Leaderboard Table */}
+        <div className="card shadow-xl border-0">
+          <div className="card-body p-0">
+            {loading ? (
+              <div className="text-center py-5">
+                <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}} />
+                <p className="mt-3 text-muted">Loading leaderboard...</p>
+              </div>
+            ) : (
               <div className="table-responsive">
-                <table className="table table-hover align-middle">
-                  <thead className="table-light sticky-top">
+                <table className="table table-hover mb-0">
+                  <thead className="table-dark">
                     <tr>
                       <th>Rank</th>
-                      <th>Player</th>
-                      <th>Fantasy Points</th>
-                      <th>Change</th>
-                      <th>Action</th>
+                      <th>Player/Team</th>
+                      <th>Points</th>
+                      <th>Matches</th>
+                      <th>Avg</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {players.length ? (
-                      players.map((player, index) => (
-                        <tr key={index} className={player.rank <= 3 ? 'table-active fw-semibold' : ''}>
-                          <td className="fs-4 fw-bold text-primary">
-                            <div className="rank-badge p-3 rounded-circle bg-primary text-white d-inline-block text-center" style={{ width: '48px', height: '48px', lineHeight: '24px' }}>
-                              #{player.rank}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex align-items-center gap-3">
-                              <img
-                                src={player.avatar}
-                                alt={player.name}
-                                className="rounded-circle"
-                                style={{ width: '56px', height: '56px' }}
-                              />
-                              <div>
-                                <div className="fw-bold">{player.name}</div>
-                                <small className="text-muted">Score11 PRO</small>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="fw-bold fs-5 text-success">{Number(player.points).toLocaleString()}</div>
-                          </td>
-                          <td>
-                            <span className={`badge fs-6 px-3 py-2 fw-semibold ${String(player.change).startsWith('+') ? 'bg-success' : 'bg-danger'}`}>
-                              {player.change}
-                            </span>
-                          </td>
-                          <td>
-                            <Link to={`/players/${(player.name || '').toLowerCase().replace(/\s+/g, '-')}`} className="btn btn-outline-primary btn-sm px-4">
-                              View Profile
-                            </Link>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
+                    {leaderboardData.map((entry, index) => (
+                      <tr key={entry._id || index}>
+                        <td className="fw-bold fs-4 text-gold">
+                          #{index + 1}
+                        </td>
+                        <td>
+                          <div className="fw-bold">{entry.name || entry.teamName}</div>
+<small className="text-muted">{entry.team?.name || entry.team?.shortName || entry.category || 'N/A'}</small>
+                        </td>
+                        <td className="fw-bold fs-5 text-success">{entry.points?.toLocaleString() || 0}</td>
+                        <td>{entry.matches || entry.games || 0}</td>
+                        <td>{entry.average?.toFixed(1) || '-'}</td>
+                      </tr>
+                    ))}
+                    {leaderboardData.length === 0 && (
                       <tr>
-                        <td colSpan={5} className="text-center text-muted py-4">No leaderboard data available.</td>
+                        <td colSpan="5" className="text-center py-5 text-muted">
+                          No data available for this leaderboard
+                        </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
               </div>
-
-              <div className="text-center mt-5 p-5 bg-white rounded-3 shadow-sm">
-                <h3 className="mb-3">Your Rank</h3>
-                <div className="display-3 fw-bold text-muted mb-2">#47</div>
-                <p className="lead text-muted mb-4">8,450 points <span className="badge bg-success ms-2">+120 this week</span></p>
-                <div className="d-flex gap-3 justify-content-center flex-wrap">
-                  <Link to="/contests" className="btn btn-primary btn-lg px-5">
-                    Join Contests
-                  </Link>
-                  <Link to="/profile" className="btn btn-outline-primary btn-lg px-5">
-                    Improve Rank
-                  </Link>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
-        )}
-
-        <div className="text-center mt-8">
-          <Link to="/leaderboard" className="btn btn-outline-primary btn-lg px-5 me-3">
-            More Players
-          </Link>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Leaderboard;
-

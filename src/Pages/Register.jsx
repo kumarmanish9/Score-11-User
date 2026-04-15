@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../Components/PagesCss/Register.css";
-import { registerUser } from "../Services/AuthServices";
-import { FaUser, FaEnvelope, FaPhone, FaLock, FaUserPlus, FaStar, FaShieldAlt } from "react-icons/fa";
+import { registerUser, uploadAvatar } from "../Services/AuthServices";
+import { FaUser, FaEnvelope, FaPhone, FaLock, FaUserPlus, FaStar, FaShieldAlt, FaImage, FaTimes } from "react-icons/fa";
 
 function Register() {
   const navigate = useNavigate();
@@ -15,6 +15,8 @@ function Register() {
     role: "user",
     isPro: false
   });
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -41,6 +43,30 @@ function Register() {
       isPro: e.target.checked,
       role: e.target.checked ? "pro" : "user"
     });
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB
+        setError("Photo size must be less than 5MB");
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        setError("Please select a valid image file");
+        return;
+      }
+      setProfilePhoto(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      setError("");
+    }
+  };
+
+  const removePhoto = () => {
+    setProfilePhoto(null);
+    setPreviewUrl(null);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
   };
 
   const validateForm = () => {
@@ -110,7 +136,25 @@ function Register() {
         localStorage.setItem("token", res.data.accessToken);
       }
       
+      // Upload profile photo if selected
+      if (profilePhoto) {
+        try {
+          const formData = new FormData();
+          formData.append('avatar', profilePhoto);
+          await uploadAvatar(formData);
+          console.log("Profile photo uploaded successfully");
+        } catch (photoError) {
+          if (photoError.response?.status !== 401) {
+            console.warn("Photo upload failed, but registration succeeded:", photoError);
+          } else {
+            console.log("Token not ready for photo upload yet - user needs login");
+          }
+          // Don't fail registration on photo upload error
+        }
+      }
+      
       navigate("/dashboard");
+
     } catch (error) {
       const msg = error.response?.data?.message || error.message || "Registration failed";
       setError(msg);
@@ -261,11 +305,47 @@ function Register() {
                 <option value="user">Regular User</option>
                 <option value="player">Player</option>
                 <option value="scorer">Scorer</option>
-                <option value="pro">Pro Scorer</option>
-              </select>
-            </div>
+              <option value="pro">Pro Scorer</option>
+            </select>
+          </div>
 
-            {form.isPro && (
+          {/* Profile Photo Upload */}
+          <div className="form-group">
+            <label className="form-label">
+              <FaImage className="label-icon" />
+              Profile Photo (Optional)
+            </label>
+            <div className="photo-upload-container">
+              <input
+                id="profilePhoto"
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className="form-control"
+                style={{display: 'none'}}
+              />
+              <label htmlFor="profilePhoto" className="photo-upload-btn">
+                {previewUrl ? 'Change Photo' : 'Choose Photo'}
+              </label>
+              {previewUrl && (
+                <div className="photo-preview">
+                  <img src={previewUrl} alt="Preview" className="preview-img" />
+                  <button type="button" onClick={removePhoto} className="remove-photo-btn">
+                    <FaTimes />
+                  </button>
+                </div>
+              )}
+              {!previewUrl && (
+                <div className="photo-placeholder">
+                  <FaImage size={48} className="placeholder-icon" />
+                  <p>Upload your profile photo (JPG, PNG up to 5MB)</p>
+                </div>
+              )}
+            </div>
+            <small className="form-text text-muted">Add a nice profile photo to personalize your account</small>
+          </div>
+
+          {form.isPro && (
               <div className="pro-section">
                 <label className="pro-checkbox">
                   <FaShieldAlt className="pro-icon" /> Pro Account - Admin verification required
@@ -303,6 +383,76 @@ function Register() {
       </div>
 
       <style jsx>{`
+        .photo-upload-container {
+          border: 2px dashed #d1d5db;
+          border-radius: 12px;
+          padding: 24px;
+          text-align: center;
+          transition: all 0.2s;
+          background: #f9fafb;
+        }
+        .photo-upload-container:hover {
+          border-color: #3b82f6;
+          background: #eff6ff;
+        }
+        .photo-upload-btn {
+          display: inline-block;
+          padding: 12px 24px;
+          background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+          color: white;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          transition: all 0.2s;
+          border: none;
+        }
+        .photo-upload-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        .photo-preview {
+          position: relative;
+          display: inline-block;
+          margin-top: 12px;
+        }
+        .preview-img {
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 4px solid white;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .remove-photo-btn {
+          position: absolute;
+          top: -8px;
+          right: -8px;
+          background: #ef4444;
+          color: white;
+          border: none;
+          border-radius: 50%;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          box-shadow: 0 2px 8px rgba(239,68,68,0.4);
+        }
+        .remove-photo-btn:hover {
+          background: #dc2626;
+        }
+        .photo-placeholder {
+          color: #6b7280;
+        }
+        .placeholder-icon {
+          color: #9ca3af;
+          margin-bottom: 8px;
+        }
+        .form-text {
+          font-size: 0.875rem;
+          margin-top: 4px;
+        }
         .pro-section {
           background: linear-gradient(135deg, #fbbf24, #f59e0b);
           padding: 12px;

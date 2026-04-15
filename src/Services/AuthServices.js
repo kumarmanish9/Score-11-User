@@ -66,3 +66,13 @@ export const getCurrentUser = () => {
 export const changePassword = (data) => {
   return axiosInstance.post("/change-password", data);
 };
+
+// ✅ UPLOAD PROFILE AVATAR
+import api from "../config/api.js";
+export const uploadAvatar = (formData) => {
+  return api.post("/users/avatar", formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+};

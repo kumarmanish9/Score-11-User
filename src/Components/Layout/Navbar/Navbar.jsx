@@ -244,16 +244,25 @@ function Navbar() {
             ) : (
               <div className="dropdown">
                 <a className="d-flex align-items-center text-decoration-none dropdown-toggle cursor-pointer p-2 rounded-pill bg-gray-100" href="#" role="button" data-bs-toggle="dropdown" style={{textDecoration: 'none'}}>
-                  {user?.avatar?.url ? (
-                    <img 
-                      src={user.avatar.url} 
-                      alt="profile" 
-                      className="rounded-circle me-2" 
-                      style={{width: '40px', height: '40px', objectFit: 'cover', border: '2px solid #3B82F6'}}
-                    />
-                  ) : (
-                    <FaUserCircle size={32} className="me-2 text-primary" />
-                  )}
+{(() => {
+                    const safeUrl = user?.avatar?.url && !user.avatar.url.includes('users/avatar') && !user.avatar.url.includes('68.178.171.95') 
+                      ? user.avatar.url 
+                      : null;
+                    return safeUrl ? (
+                      <img 
+                        src={safeUrl} 
+                        alt="profile" 
+                        className="rounded-circle me-2" 
+                        style={{width: '40px', height: '40px', objectFit: 'cover', border: '2px solid #3B82F6'}}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'block';
+                        }}
+                      />
+                    ) : (
+                      <FaUserCircle size={32} className="me-2 text-primary user-avatar-fallback" style={{display: safeUrl ? 'none' : 'block'}} />
+                    );
+                  })()}
                   <span className="d-none d-md-inline fw-semibold text-dark small">{user.name?.split(' ')[0] || 'User'}</span>
                 </a>
                 <ul className="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 rounded-3 p-0" style={{minWidth: '240px'}}>
