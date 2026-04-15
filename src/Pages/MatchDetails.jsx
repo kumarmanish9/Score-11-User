@@ -28,18 +28,9 @@ function MatchDetails() {
   const [liveScore, setLiveScore] = useState(null);
   const [scorecard, setScorecard] = useState({});
 
-  // FETCH MATCH
+  // ✅ FETCH MATCH DETAILS
   useEffect(() => {
     fetchMatch();
-  }, [id]);
-
-  // LIVE SCORE POLLING
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const data = await getLiveScore(id).catch(() => null);
-      if (data) setLiveScore(data);
-    }, 5000);
-    return () => clearInterval(interval);
   }, [id]);
 
   const fetchMatch = async () => {
@@ -54,19 +45,52 @@ function MatchDetails() {
     }
   };
 
+  // ✅ LIVE SCORE (FIXED + IMPROVED)
+  useEffect(() => {
+    let interval;
+
+    const fetchLive = async () => {
+      const data = await getLiveScore(id).catch(() => null);
+
+      if (data) {
+        setLiveScore(prev => {
+          if (JSON.stringify(prev) !== JSON.stringify(data)) {
+            return data;
+          }
+          return prev;
+        });
+      }
+    };
+
+    fetchLive(); // 🔥 immediate call (no delay)
+
+    interval = setInterval(fetchLive, 3000); // 🔥 faster refresh
+
+    return () => clearInterval(interval);
+  }, [id]);
+
+  // ✅ TIMELINE
   const fetchTimeline = async () => {
     const data = await getMatchTimeline(id).catch(() => []);
     setTimeline(Array.isArray(data) ? data : data?.timeline || []);
   };
 
+  // ✅ SCORECARD
   const fetchScorecard = async () => {
     const data = await getScorecard(id).catch(() => ({}));
     setScorecard(data?.scorecard || {});
   };
 
+  // ✅ TAB BASED FETCH
   useEffect(() => {
     if (activeTab === "commentary") fetchTimeline();
-    if (activeTab === "scorecard") fetchScorecard();
+
+    if (activeTab === "scorecard") {
+      fetchScorecard();
+
+      const interval = setInterval(fetchScorecard, 5000); // 🔥 auto refresh
+      return () => clearInterval(interval);
+    }
   }, [activeTab]);
 
   if (loading) return <h3 className="text-center mt-5">Loading Match...</h3>;
@@ -81,30 +105,40 @@ function MatchDetails() {
 
         {/* 🔥 HEADER CARD */}
         <div className="card shadow-sm p-4 mb-4">
-          <h5 className="text-muted">{match?.tournament?.name}</h5>
-          <h3>{teamA?.shortName} vs {teamB?.shortName}</h3>
+          <Link
+            to={`/tournament/${match?.tournament?._id}`}
+            className="btn btn-outline-primary mb-2"
+          >
+            {match?.tournament?.name}
+          </Link>
+          <h3>{teamA?.shortName || "T1"} vs {teamB?.shortName || "T2"}</h3>
+
           <p className="text-muted">
             {match?.venue?.name}, {match?.venue?.city}
           </p>
 
           <div className="row text-center mt-3">
+
+            {/* TEAM A */}
             <div className="col-md-6">
-              <h4>{teamA?.name}</h4>
+              <h4>{teamA?.name || "Team A"}</h4>
               <h2>
-                {liveScore?.team1?.runs || 0}/
-                {liveScore?.team1?.wickets || 0}
+                {liveScore?.score?.team1?.runs || 0}/
+                {liveScore?.score?.team1?.wickets || 0}
               </h2>
-              <p>{liveScore?.team1?.overs || "0.0"} Ov</p>
+              <p>{liveScore?.score?.team1?.overs || "0.0"} Ov</p>
             </div>
 
+            {/* TEAM B */}
             <div className="col-md-6">
-              <h4>{teamB?.name}</h4>
+              <h4>{teamB?.name || "Team B"}</h4>
               <h2>
-                {liveScore?.team2?.runs || 0}/
-                {liveScore?.team2?.wickets || 0}
+                {liveScore?.score?.team2?.runs || 0}/
+                {liveScore?.score?.team2?.wickets || 0}
               </h2>
-              <p>{liveScore?.team2?.overs || "0.0"} Ov</p>
+              <p>{liveScore?.score?.team2?.overs || "0.0"} Ov</p>
             </div>
+
           </div>
 
           {/* RESULT */}
@@ -118,7 +152,7 @@ function MatchDetails() {
         {/* 🔥 MAIN LAYOUT */}
         <div className="row">
 
-          {/* LEFT CONTENT */}
+          {/* LEFT */}
           <div className="col-lg-8">
 
             {/* TABS */}
@@ -134,14 +168,14 @@ function MatchDetails() {
               ))}
             </div>
 
-            {/* TAB CONTENT */}
+            {/* CONTENT */}
             <div className="card p-3 shadow-sm">
 
               {activeTab === "live" && (
                 <div>
                   <h5>Live Updates</h5>
                   <p>Status: {match?.status}</p>
-                  <p>Overs: {liveScore?.team1?.overs}</p>
+                  <p>Overs: {liveScore?.score?.team1?.overs || "0.0"}</p>
                 </div>
               )}
 
@@ -161,17 +195,15 @@ function MatchDetails() {
 
           </div>
 
-          {/* RIGHT SIDEBAR */}
+          {/* RIGHT */}
           <div className="col-lg-4">
 
-            {/* MATCH OFFICIALS */}
             <div className="card p-3 mb-3 shadow-sm">
               <h5>Match Officials</h5>
               <p>👨‍⚖️ Umpire: {match?.officials?.umpire || "N/A"}</p>
               <p>🧾 Scorer: {match?.officials?.scorer || "N/A"}</p>
             </div>
 
-            {/* MATCH DETAILS */}
             <div className="card p-3 shadow-sm">
               <h5>Match Details</h5>
               <p>Format: {match?.format}</p>

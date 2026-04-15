@@ -128,7 +128,7 @@ function Navbar() {
                 Live Scores
               </a>
               <ul className="dropdown-menu shadow-lg border-0 mt-2 rounded-3">
-                <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/matches">All Matches</Link></li>
+                <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/matches">Matches</Link></li>
                 <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/tournaments">Tournaments</Link></li>
                 <li><hr className="dropdown-divider mx-3 my-0" /></li>
                 <li><Link className="dropdown-item px-4 py-3 fw-medium text-warning" to="/leaderboard">Leaderboard</Link></li>
