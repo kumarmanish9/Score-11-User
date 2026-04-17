@@ -29,6 +29,19 @@ import PlayerProfile from "../Pages/PlayerProfile";
 import MatchDetails from "../Pages/MatchDetails";
 import MyTeams from "../Pages/MyTeams";
 import TournamentPage from "../Pages/TournamentPage";
+import TeamHistory from "../Pages/TeamHistory";
+import InstantPlayerCreate from "../Pages/InstantPlayerCreate";
+import TeamDetails from "../Pages/TeamDetails";
+import TeamEdit from "../Pages/TeamEdit";
+import InstantPlayerList from "../Pages/InstantPlayerList";
+import Upcoming from "../Pages/Upcoming";
+import Support from "../Pages/Support";
+import MyPortfolio from "../Pages/MyPortfolio";
+import ReferEarn from "../Pages/ReferEarn";
+import CreateMatch from "../Pages/CreateMatch";
+import TossScreen from "../Pages/TossScreen";
+import LiveControl from "../Pages/LiveControl";
+
 
 function AppRoutes() {
   return (
@@ -38,6 +51,8 @@ function AppRoutes() {
       <Route path="/register" element={<Register />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/overview" element={<Dashboard />} />
+      <Route path="/upcoming" element={<Upcoming />} />
       <Route path="/create-team" element={<CreateTeam />} />
       <Route path="/join-contest" element={<JoinContest />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -46,15 +61,22 @@ function AppRoutes() {
       <Route path="/matches" element={<Matches />} />
       <Route path="/matches/:id" element={<MatchDetails />} />
       <Route path="/match/:id" element={<MatchDetails />} />
+      <Route path="/create-match" element={<CreateMatch />} />
+      <Route path="/match/:id/toss" element={<TossScreen />} />
+      <Route path="/match/:id/live-control" element={<LiveControl />} />
+
       <Route path="/tournaments" element={<TournamentList />} />
       <Route path="/players" element={<PlayerSearch />} />
       <Route path="/players/:id" element={<PlayerProfile />} />
       <Route path="/teams" element={<TeamList />} />
+      <Route path="/teams/:id" element={<TeamDetails />} />
+      <Route path="/teams/:id/edit" element={<TeamEdit />} />
       <Route path="/live" element={<LiveStreams />} />
       <Route path="/wallet" element={<Wallet />} />
       <Route path="/community" element={<Community />} />
       <Route path="/blogs" element={<Blogs />} />
       <Route path="/faq" element={<FAQ />} />
+      <Route path="/support" element={<Support />} />
       <Route path="/pro" element={<Pro />} />
       <Route path="/go-live" element={<GoLive />} />
       <Route path="/store" element={<Store />} />
@@ -63,9 +85,15 @@ function AppRoutes() {
       <Route path="/contests" element={<Contests />} />
       <Route path="/leaderboard" element={<Leaderboard />} />
       <Route path="/my-teams" element={<MyTeams />} />
+      <Route path="/team-history" element={<TeamHistory />} />
+      <Route path="/instant-player-create" element={<InstantPlayerCreate />} />
+      <Route path="/instant-player-list" element={<InstantPlayerList />} />
+      <Route path="/portfolio" element={<MyPortfolio />} />
+      <Route path="/refer-earn" element={<ReferEarn />} />
       <Route path="/tournament/:id" element={<TournamentPage />} />
     </Routes>
   );
 }
 
 export default AppRoutes;
+

@@ -30,7 +30,7 @@ api.interceptors.request.use((config) => {
 
 // ✅ Get logged-in user's teams
 export const getUserTeams = async () => {
-  const response = await api.get("/my-teams");
+  const response = await api.get('/');
   return response.data?.data || [];
 };
 
@@ -85,6 +85,18 @@ export const uploadTeamLogo = async (teamId, formData) => {
       "Content-Type": "multipart/form-data",
     },
   });
+  return response.data;
+};
+
+// 🗑 Delete team (soft delete)
+export const deleteTeam = async (id) => {
+  const response = await api.delete(`/${id}`);
+  return response.data;
+};
+
+// 🔄 Update team
+export const updateTeam = async (id, data) => {
+  const response = await api.put(`/${id}`, data);
   return response.data;
 };
 

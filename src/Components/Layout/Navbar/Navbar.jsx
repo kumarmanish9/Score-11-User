@@ -170,6 +170,7 @@ function Navbar() {
                 <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/blogs">Blogs</Link></li>
                 <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/store">Store</Link></li>
                 <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/wallet">Wallet</Link></li>
+                <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/support">Support</Link></li>
                 <li><hr className="dropdown-divider mx-3 my-0" /></li>
                 <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/faq">FAQ</Link></li>
               </ul>
@@ -274,7 +275,9 @@ function Navbar() {
                   </li>
                   <li><Link className="dropdown-item px-4 py-3 fw-semibold border-bottom" to="/profile">Profile</Link></li>
                   <li><Link className="dropdown-item px-4 py-3 fw-semibold" to="/dashboard">Dashboard</Link></li>
-                  <li><Link className="dropdown-item px-4 py-3 fw-semibold" to="/create-team">Create Team</Link></li>
+                <li><Link className="dropdown-item px-4 py-3 fw-semibold" to="/create-team">Create Team</Link></li>
+                <li><Link className="dropdown-item px-4 py-3 fw-semibold text-success" to="/create-match">⚽ Create Match</Link></li>
+
                   <li><Link className="dropdown-item px-4 py-3 fw-semibold" to="/wallet">Wallet</Link></li>
                   <li><Link className="dropdown-item px-4 py-3 fw-semibold" to="/teams">My Teams</Link></li>
                   <li><Link className="dropdown-item px-4 py-3 fw-semibold" to="/contests">Contests</Link></li>

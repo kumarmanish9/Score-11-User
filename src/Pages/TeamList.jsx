@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthContext } from "../Context/AuthContext";
 import { getUserTeams } from "../Services/teamService";
 import {
@@ -7,10 +7,12 @@ import {
   FaPlus,
   FaEye,
   FaSearch,
+  FaSyncAlt,
 } from "react-icons/fa";
 import "../assets/Styles/Global.css";
 
 const TeamList = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -22,6 +24,17 @@ const TeamList = () => {
   useEffect(() => {
     loadTeams();
   }, [user]);
+
+  // Auto-refresh on ?refresh=1 param
+  useEffect(() => {
+    if (searchParams.get('refresh')) {
+      loadTeams();
+      // Clear refresh param
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.delete('refresh');
+      setSearchParams(newParams);
+    }
+  }, [searchParams]);
 
   const loadTeams = async () => {
     try {
@@ -70,14 +83,18 @@ const TeamList = () => {
             My Teams ({filteredTeams.length})
           </h2>
 
-          {/* ✅ NAVIGATE TO CREATE TEAM PAGE */}
-          <button
-            className="btn btn-success"
-            onClick={() => navigate("/create-team")}
-          >
-            <FaPlus className="me-2" />
-            Create Team
-          </button>
+          <div className="btn-group" role="group">
+            <button className="btn btn-outline-secondary btn-sm" onClick={loadTeams} title="Refresh">
+              <FaSyncAlt />
+            </button>
+            <button
+              className="btn btn-success"
+              onClick={() => navigate("/create-team")}
+            >
+              <FaPlus className="me-2" />
+              Create Team
+            </button>
+          </div>
         </div>
 
         {/* ERROR */}
@@ -158,7 +175,7 @@ const TeamList = () => {
                     <div className="mb-3 text-center">
                       <small className="text-muted">Captain</small>
                       <div className="fw-bold">
-                        {team.captain?.name || "Not selected"}
+                        {team.captain?.playerName || team.captain?.name || "Not selected"}
                       </div>
                     </div>
 

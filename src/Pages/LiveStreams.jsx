@@ -18,7 +18,7 @@ const LiveStreams = () => {
     try {
       setLoading(true);
       const data = await getLiveStreams();
-      setStreams(data);
+      setStreams(Array.isArray(data) ? data : []);
     } catch (err) {
       setError('No live streams available');
     } finally {
