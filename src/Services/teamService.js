@@ -28,11 +28,19 @@ api.interceptors.request.use((config) => {
 //   return response.data.data || [];
 // };
 
-// ✅ Get logged-in user's teams
+// ✅ Get logged-in user's teams (FIXED: correct endpoint /team/teams)
 export const getUserTeams = async () => {
-  const response = await api.get('/');
+  const response = await api.get('/team/teams');
   return response.data?.data || [];
 };
+
+// ✅ Get all active teams (admin-like dropdown) - FIXED base path
+export const getAllTeams = async (params = {}) => {
+  const response = await api.get('/list', { params });
+  return response.data?.data?.teams || response.data?.data || [];
+};
+
+
 
 // ✅ Create new team
 export const createTeam = async (data) => {

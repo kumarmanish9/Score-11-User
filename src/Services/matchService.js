@@ -22,7 +22,8 @@ export const leaveMatchRoom = (matchId) => {
   if (socket) socket.emit("leave-match", matchId);
 };
 
-// Listen for events
+// Listen for events  
+export const onLiveScoreUpdate = (callback) => socket?.on("liveScoreUpdate", callback);
 export const onScoreUpdate = (callback) => socket?.on("scoreUpdated", callback);
 export const onTossUpdate = (callback) => socket?.on("tossUpdate", callback);
 export const onInningsStart = (callback) => socket?.on("inningsStart", callback);
@@ -65,9 +66,17 @@ export const searchMatches = async (query) => {
 
 // 🔥 NEW CREATION APIs
 export const createMatch = async (matchData) => {
-  const res = await api.post(BASE_URL, matchData);
-  return res.data?.data;
+  console.log('📤 Creating match with data:', matchData);
+  try {
+    const res = await api.post(BASE_URL, matchData);
+    console.log('✅ Match created:', res.data?.data);
+    return res.data?.data;
+  } catch (error) {
+    console.error('❌ Match create error:', error.response?.data || error.message);
+    throw error;
+  }
 };
+
 
 // 🔥 MATCH CONTROL APIs
 export const updateMatchStatus = async (id, status) => {

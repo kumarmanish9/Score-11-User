@@ -1,108 +1,136 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  getMatchDetails, 
+import {
+  getMatchDetails,
   initMatchSocket,
   joinMatchRoom,
+  leaveMatchRoom,
   getLiveScore,
   initializeMatch,
   setStriker,
-  setNonStriker,
+  setNonStriker, 
   setBowler,
   addBall,
   startInnings,
-  endInnings 
+  endInnings
 } from '../Services/matchService';
-import { getTeamById, getPublicTeam } from '../Services/teamService';
-import { getPublicTeam as getPlayerById } from '../Services/playerService';
+import { getTeamById } from '../Services/teamService';
+import { getPlayerById } from '../Services/playerService';
 import WagonWheel from '../Components/Match/WagonWheel';
-import "../assets/Styles/Global.css";
+import { io } from 'socket.io-client';
+import '../assets/Styles/Global.css';
+import './LiveControl.css'; // New styles
 
 const LiveControl = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  
+  // Match state
   const [match, setMatch] = useState(null);
   const [liveData, setLiveData] = useState(null);
-  const [team1, setTeam1] = useState(null);
-  const [team2, setTeam2] = useState(null);
   const [team1Players, setTeam1Players] = useState([]);
   const [team2Players, setTeam2Players] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  
   // Control state
-  const [striker, setStrikerLocal] = useState(null);
-  const [nonStriker, setNonStrikerLocal] = useState(null);
-  const [bowler, setBowlerLocal] = useState(null);
+  const [striker, setStrikerLocal] = useState('');
+  const [nonStriker, setNonStrikerLocal] = useState('');
+  const [bowler, setBowlerLocal] = useState('');
   const [currentOver, setCurrentOver] = useState(1);
   const [currentBall, setCurrentBall] = useState(1);
+  const [inningsNumber, setInningsNumber] = useState(1);
   const [shotData, setShotData] = useState({ direction: 'straight', distance: 50 });
-
+  
+  // Socket
   useEffect(() => {
-    fetchMatch();
+    let socket;
     const token = localStorage.getItem('token');
-    if (token) initMatchSocket(token);
-    const socket = getMatchSocket();
-    if (socket) joinMatchRoom(id);
+    if (token) {
+      socket = initMatchSocket(token);
+      joinMatchRoom(id);
+      
+      socket.on('liveScoreUpdate', (data) => {
+        setLiveData(data);
+        // Auto-update over/ball from backend
+        if (data.currentOver) setCurrentOver(data.currentOver);
+        if (data.currentBall) setCurrentBall(data.currentBall);
+      });
+    }
 
-    const interval = setInterval(fetchLive, 2000);
     return () => {
-      clearInterval(interval);
-      if (socket) leaveMatchRoom(id);
+      if (socket) {
+        leaveMatchRoom(id);
+        socket.disconnect();
+      }
     };
   }, [id]);
 
-  const getMatchSocket = () => {
+  // Fetch match data
+  const fetchMatch = useCallback(async () => {
     try {
-      return matchService.getSocket();
-    } catch {
-      return null;
-    }
-  };
-
-  const fetchMatch = async () => {
-    try {
+      setLoading(true);
       const matchData = await getMatchDetails(id);
       setMatch(matchData);
-      setTeam1(await getPublicTeam(matchData.team1._id));
-      setTeam2(await getPublicTeam(matchData.team2._id));
       
-      // Load players
-      const p1 = await Promise.all(matchData.team1.players.slice(0,11).map(id => getPlayerById(id)));
-      const p2 = await Promise.all(matchData.team2.players.slice(0,11).map(id => getPlayerById(id)));
+      // Load playing XI
+      const team1 = await getTeamById(matchData.team1._id);
+      const team2 = await getTeamById(matchData.team2._id);
+      
+      const p1 = await Promise.all(team1.players.slice(0,11).map(getPlayerById));
+      const p2 = await Promise.all(team2.players.slice(0,11).map(getPlayerById));
       setTeam1Players(p1);
       setTeam2Players(p2);
     } catch (err) {
+      console.error('Match load error:', err);
       navigate('/matches');
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate]);
 
-  const fetchLive = async () => {
-    try {
-      const data = await getLiveScore(id);
-      setLiveData(data);
-    } catch {}
-  };
+  // Live score polling backup
+  useEffect(() => {
+    const interval = setInterval(() => {
+      getLiveScore(id).then(setLiveData).catch(console.error);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [id]);
 
-  const handleQuickShot = async (runs, type = 'run') => {
-    const ballData = { 
-      runs, 
+  useEffect(() => {
+    fetchMatch();
+  }, [fetchMatch]);
+
+  // 🔥 QUICK ACTION HANDLERS (CricHero Style)
+  const handleQuickShot = async (runs, type = 'normal', extras = 0) => {
+    if (!striker || !bowler) {
+      alert('Select striker and bowler first!');
+      return;
+    }
+
+    const ballData = {
+      batsman: striker,
+      bowler,
+      runs,
       type,
+      extras,
       overNumber: currentOver,
       ballNumber: currentBall,
-      direction: shotData.direction,
-      distance: shotData.distance
+      ...shotData
     };
+
     try {
       await addBall(id, ballData);
-      setCurrentBall(currentBall + 1);
-      if (currentBall >= 6) {
-        setCurrentOver(currentOver + 1);
-        setCurrentBall(1);
+      // Auto-advance ball counter
+      let nextBall = currentBall + 1;
+      let nextOver = currentOver;
+      if (nextBall > 6) {
+        nextBall = 1;
+        nextOver += 1;
       }
+      setCurrentBall(nextBall);
+      setCurrentOver(nextOver);
     } catch (err) {
-      alert('Error adding ball');
+      alert('Error: ' + err.message);
     }
   };
 
@@ -110,86 +138,146 @@ const LiveControl = () => {
   const handleDot = () => handleQuickShot(0);
   const handleSingle = () => handleQuickShot(1);
   const handleTwo = () => handleQuickShot(2);
+  const handleThree = () => handleQuickShot(3);
   const handleFour = () => handleQuickShot(4);
   const handleSix = () => handleQuickShot(6);
-  const handleWide = () => handleQuickShot(1, 'wide');
+  const handleWide = () => handleQuickShot(1, 'wide', 1);
+  const handleNoBall = () => handleQuickShot(1, 'no_ball', 1);
+  const handleBye = () => handleQuickShot(1, 'bye', 1);
 
-  if (loading) return <div className="text-center p-5">Loading live control...</div>;
+  // Player controls
+  const handleSetStriker = async () => {
+    if (striker) await setStriker(id, striker);
+  };
+  const handleSetNonStriker = async () => {
+    if (nonStriker) await setNonStriker(id, nonStriker);
+  };  
+  const handleSetBowler = async () => {
+    if (bowler) await setBowler(id, bowler);
+  };
+
+  // Innings controls
+  const handleStartInnings = async () => {
+    await startInnings(id, inningsNumber);
+  };
+  const handleEndInnings = async () => {
+    await endInnings(id);
+    setInningsNumber(prev => prev + 1);
+  };
+
+  if (loading) {
+    return (
+      <div className="live-control-loading">
+        <div className="spinner-border text-primary" style={{width: '3rem', height: '3rem'}}>
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <h3>Loading Live Control...</h3>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4">
-      <div className="d-flex justify-content-between mb-4">
-        <h2>Live Control - {match?.matchId}</h2>
-        <button className="btn btn-outline-secondary" onClick={() => navigate(`/match/${id}`)}>
-          ← View Match
+    <div className="live-control-container">
+      {/* 🔥 HEADER */}
+      <div className="live-control-header">
+        <button className="btn-back" onClick={() => navigate(`/match/${id}`)}>
+          ← Live Match
         </button>
+        <h1>🎮 LIVE CONTROL</h1>
+        <div className="match-info">
+          <h3>{match?.matchId}</h3>
+          <div className="live-score">
+            {liveData?.score?.team1?.runs || 0}/{liveData?.score?.team1?.wickets || 0} 
+            ({liveData?.score?.team1?.overs || '0.0'} Ov)
+          </div>
+        </div>
       </div>
 
-      <div className="row">
-        <div className="col-md-8">
-          <div className="card shadow">
-            <div className="card-body">
-              <WagonWheel shotData={shotData} onShotChange={setShotData} />
+      <div className="live-control-grid">
+        {/* 🔥 MAIN CONTROL PANEL */}
+        <div className="control-panel">
+          {/* OVERS DISPLAY */}
+          <div className="overs-display">
+            <h2>{currentOver}.{currentBall}</h2>
+            <span>Innings {inningsNumber}</span>
+          </div>
+
+          {/* WAGON WHEEL */}
+          <div className="wagon-wheel">
+            <WagonWheel shotData={shotData} onShotChange={setShotData} />
+          </div>
+
+          {/* 🔥 QUICK RUNS - CRICHERO STYLE */}
+          <div className="quick-actions">
+            <h4>QUICK SHOTS</h4>
+            <div className="runs-grid">
+              <button className="btn-dot" onClick={handleDot}>.</button>
+              <button className="btn-run" onClick={handleSingle}>1</button>
+              <button className="btn-run" onClick={handleTwo}>2</button>
+              <button className="btn-run" onClick={handleThree}>3</button>
+              <button className="btn-four" onClick={handleFour}>4</button>
+              <button className="btn-six" onClick={handleSix}>6</button>
+            </div>
+            <div className="extras-grid">
+              <button className="btn-wide" onClick={handleWide}>WD</button>
+              <button className="btn-noball" onClick={handleNoBall}>NB</button>
+              <button className="btn-bye" onClick={handleBye}>BYE</button>
+              <button className="btn-wicket" onClick={handleWicket}>WKT</button>
             </div>
           </div>
 
-          <div className="card mt-4 shadow">
-            <div className="card-header bg-primary text-white">
-              <h5>Quick Actions</h5>
-            </div>
-            <div className="card-body">
-              <div className="row g-2 text-center">
-                <div className="col-2"><button className="btn btn-outline-secondary py-3 fw-bold" onClick={handleDot}>.</button></div>
-                <div className="col-2"><button className="btn btn-outline-primary py-3 fw-bold" onClick={handleSingle}>1</button></div>
-                <div className="col-2"><button className="btn btn-outline-primary py-3 fw-bold" onClick={handleTwo}>2</button></div>
-                <div className="col-2"><button className="btn btn-warning py-3 fw-bold" onClick={handleFour}>4</button></div>
-                <div className="col-2"><button className="btn btn-danger py-3 fw-bold" onClick={handleSix}>6</button></div>
-                <div className="col-2"><button className="btn btn-info py-3 fw-bold" onClick={handleWide}>WD</button></div>
-              </div>
-              <hr />
-              <button className="btn btn-danger w-100 py-3 fw-bold" onClick={handleWicket}>WICKET</button>
-            </div>
+          {/* INNINGS CONTROL */}
+          <div className="innings-control">
+            <button className="btn-start-innings" onClick={handleStartInnings}>
+              ▶️ Start Innings {inningsNumber}
+            </button>
+            <button className="btn-end-innings" onClick={handleEndInnings}>
+              ⏹️ End Innings
+            </button>
           </div>
         </div>
 
-        <div className="col-md-4">
-          <div className="card shadow">
-            <div className="card-body">
-              <h5>Current Batsmen</h5>
-              <select className="form-select mb-2" onChange={(e) => setStrikerLocal(e.target.value)}>
-                <option>Striker</option>
-                {[...team1Players, ...team2Players].map(p => (
-                  <option key={p._id} value={p._id}>{p.playerName}</option>
-                ))}
-              </select>
-              <select className="form-select mb-3" onChange={(e) => setNonStrikerLocal(e.target.value)}>
-                <option>Non-Striker</option>
-                {[...team1Players, ...team2Players].map(p => (
-                  <option key={p._id} value={p._id}>{p.playerName}</option>
-                ))}
-              </select>
-
-              <h5>Bowler</h5>
-              <select className="form-select mb-3" onChange={(e) => setBowlerLocal(e.target.value)}>
-                <option>Bowler</option>
-                {[...team1Players, ...team2Players].map(p => (
-                  <option key={p._id} value={p._id}>{p.playerName}</option>
-                ))}
-              </select>
-
-              <div className="d-grid gap-2">
-                <button className="btn btn-primary" onClick={() => setStriker(id, striker)}>Set Striker</button>
-                <button className="btn btn-primary" onClick={() => setNonStriker(id, nonStriker)}>Set Non-Striker</button>
-                <button className="btn btn-primary" onClick={() => setBowler(id, bowler)}>Set Bowler</button>
-              </div>
-            </div>
+        {/* 🔥 PLAYER SELECTION */}
+        <div className="player-panel">
+          <h4>PLAYERS</h4>
+          
+          {/* STRIKER */}
+          <div className="player-select">
+            <label>Striker</label>
+            <select value={striker} onChange={(e) => setStrikerLocal(e.target.value)}>
+              <option value="">Select Striker</option>
+              {team1Players.map(p => (
+                <option key={p._id} value={p._id}>{p.playerName}</option>
+              ))}
+              {team2Players.map(p => (
+                <option key={p._id} value={p._id}>{p.playerName}</option>
+              ))}
+            </select>
+            <button className="btn-set-player" onClick={handleSetStriker}>SET</button>
           </div>
 
-          <div className="card mt-3 shadow">
-            <div className="card-body">
-              <h6>Live Score: {liveData?.score?.team1?.runs || 0}/{liveData?.score?.team1?.wickets || 0}</h6>
-              <h6>Overs: {liveData?.score?.team1?.overs || '0.0'}</h6>
-            </div>
+          {/* NON-STRIKER */}
+          <div className="player-select">
+            <label>Non-Striker</label>
+            <select value={nonStriker} onChange={(e) => setNonStrikerLocal(e.target.value)}>
+              <option value="">Select Non-Striker</option>
+              {[...team1Players, ...team2Players].map(p => (
+                <option key={p._id} value={p._id}>{p.playerName}</option>
+              ))}
+            </select>
+            <button className="btn-set-player" onClick={handleSetNonStriker}>SET</button>
+          </div>
+
+          {/* BOWLER */}
+          <div className="player-select">
+            <label>Bowler</label>
+            <select value={bowler} onChange={(e) => setBowlerLocal(e.target.value)}>
+              <option value="">Select Bowler</option>
+              {[...team1Players, ...team2Players].map(p => (
+                <option key={p._id} value={p._id}>{p.playerName}</option>
+              ))}
+            </select>
+            <button className="btn-set-player" onClick={handleSetBowler}>SET</button>
           </div>
         </div>
       </div>

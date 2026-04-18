@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createMatch } from '../Services/matchService';
-import { getUserTeams } from '../Services/teamService';
+import { getAllTeams } from '../Services/teamService';
 import { getTournaments } from '../Services/tournamentService';
+
+
 import "../assets/Styles/Global.css";
 
 const CreateMatch = () => {
@@ -28,22 +30,26 @@ format: 't20',
 
   const fetchData = async () => {
     try {
-      const [userTeams, allTournaments] = await Promise.all([
-        getUserTeams(),
+      console.log('📥 Fetching all teams and tournaments...');
+      const [allTeamsRes, allTournaments] = await Promise.all([
+        getAllTeams(),
         getTournaments()
       ]);
-      setTeams(Array.isArray(userTeams) ? userTeams : []);
+      const allTeams = Array.isArray(allTeamsRes) ? allTeamsRes : [];
+      console.log(`✅ Loaded ${allTeams.length} teams, ${allTournaments.length} tournaments`);
+      setTeams(allTeams);
       setTournaments(Array.isArray(allTournaments) ? allTournaments : []);
     } catch (err) {
-      console.error('Fetch error:', err);
+      console.error('🚫 Fetch error:', err);
     }
   };
 
-  const validateForm = () => {
+
+const validateForm = () => {
     const newErrors = {};
     if (!formData.team1) newErrors.team1 = 'Team 1 required';
     if (!formData.team2) newErrors.team2 = 'Team 2 required';
-    if (formData.team1 === formData.team2) newErrors.team2 = 'Teams must be different';
+    if (String(formData.team1) === String(formData.team2) && formData.team1) newErrors.team2 = 'Teams must be different';
     if (!formData.scheduledDate) newErrors.scheduledDate = 'Date required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -101,10 +107,11 @@ format: 't20',
                         onChange={handleChange}
                       >
                         <option value="">Select Team 1</option>
-                        {teams.map(team => (
-                          <option key={team._id} value={team._id}>
-                            {team.name} ({team.shortName})
+{teams.map(team => (
+                        <option key={String(team._id)} value={String(team._id)}>
+                            {team.name || 'Unnamed'} ({team.shortName || 'N/A'})
                           </option>
+
                         ))}
                       </select>
                       {errors.team1 && <small className="text-danger">{errors.team1}</small>}
@@ -120,10 +127,11 @@ format: 't20',
                       >
                         <option value="">Select Team 2</option>
                         {teams.map(team => (
-                          <option key={team._id} value={team._id}>
-                            {team.name} ({team.shortName})
+                          <option key={String(team._id)} value={String(team._id)}>
+                            {team.name || 'Unnamed'} ({team.shortName || 'N/A'})
                           </option>
                         ))}
+
                       </select>
                       {errors.team2 && <small className="text-danger">{errors.team2}</small>}
                     </div>
