@@ -16,10 +16,10 @@ import {
 } from '../Services/matchService';
 import { getTeamById } from '../Services/teamService';
 import { getPlayerById } from '../Services/playerService';
-import WagonWheel from '../Components/Match/WagonWheel';
+import CompleteLiveControl from './CompleteLiveControl';
 import { io } from 'socket.io-client';
 import '../assets/Styles/Global.css';
-import './LiveControl.css'; // New styles
+import '../assets/Styles/CompleteLiveControl.css';
 
 const LiveControl = () => {
   const { id } = useParams();
@@ -55,6 +55,11 @@ const LiveControl = () => {
         if (data.currentOver) setCurrentOver(data.currentOver);
         if (data.currentBall) setCurrentBall(data.currentBall);
       });
+      socket.on('turnUpdate', (data) => {
+        setStrikerLocal(data.striker || '');
+        setNonStrikerLocal(data.nonStriker || '');
+        setBowlerLocal(data.bowler || '');
+      });
     }
 
     return () => {
@@ -73,13 +78,20 @@ const LiveControl = () => {
       setMatch(matchData);
       
       // Load playing XI
-      const team1 = await getTeamById(matchData.team1._id);
-      const team2 = await getTeamById(matchData.team2._id);
-      
-      const p1 = await Promise.all(team1.players.slice(0,11).map(getPlayerById));
-      const p2 = await Promise.all(team2.players.slice(0,11).map(getPlayerById));
-      setTeam1Players(p1);
-      setTeam2Players(p2);
+      try {
+        const team1 = await getTeamById(matchData.team1._id);
+        const team2 = await getTeamById(matchData.team2._id);
+        
+        const p1 = await Promise.allSettled(team1.players.slice(0,11).map(getPlayerById));
+        const p2 = await Promise.allSettled(team2.players.slice(0,11).map(getPlayerById));
+        
+        setTeam1Players(p1.filter(r => r.status === 'fulfilled').map(r => r.value));
+        setTeam2Players(p2.filter(r => r.status === 'fulfilled').map(r => r.value));
+      } catch (playerErr) {
+        console.warn('Player load partial fail:', playerErr);
+        setTeam1Players([]);
+        setTeam2Players([]);
+      }
     } catch (err) {
       console.error('Match load error:', err);
       navigate('/matches');
@@ -202,10 +214,7 @@ const LiveControl = () => {
             <span>Innings {inningsNumber}</span>
           </div>
 
-          {/* WAGON WHEEL */}
-          <div className="wagon-wheel">
-            <WagonWheel shotData={shotData} onShotChange={setShotData} />
-          </div>
+          <CompleteLiveControl matchId={id} />
 
           {/* 🔥 QUICK RUNS - CRICHERO STYLE */}
           <div className="quick-actions">

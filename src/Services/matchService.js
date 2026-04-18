@@ -30,13 +30,27 @@ export const onInningsStart = (callback) => socket?.on("inningsStart", callback)
 export const onWicketFall = (callback) => socket?.on("wicketFall", callback);
 export const onBoundary = (callback) => socket?.on("boundary", callback);
 export const onWagonWheelUpdate = (callback) => socket?.on("wagonWheelUpdate", callback);
+export const onLineupsUpdate = (callback) => socket?.on("lineupsUpdate", callback);
+export const onTurnUpdate = (callback) => socket?.on("turnUpdate", callback);
 
 // ✅ Existing GET APIs
-export const getMatches = async (type) => {
-  const url = type ? `${BASE_URL}/${type}` : `${BASE_URL}`;
+export const getMatches = async (type, query = {}) => {
+  let url = BASE_URL;
+  const params = new URLSearchParams(query);
+  if (type) {
+    url += `/${type}`;
+  }
+  if (params.toString()) {
+    url += `?${params.toString()}`;
+  }
   const res = await api.get(url);
-  return res.data?.data;
+  return res.data?.data?.matches || res.data?.data || [];
 };
+
+export const getAllMatchesWithFilter = async (status) => {
+  return getMatches(null, { status });
+};
+
 
 export const getMatchDetails = async (id) => {
   const res = await api.get(`${BASE_URL}/${id}`);
@@ -80,8 +94,15 @@ export const createMatch = async (matchData) => {
 
 // 🔥 MATCH CONTROL APIs
 export const updateMatchStatus = async (id, status) => {
-  const res = await api.patch(`${BASE_URL}/${id}/status`, { status });
-  return res.data?.data;
+  try {
+    const res = await api.patch(`${BASE_URL}/${id}/status`, { status });
+    return res.data?.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      throw new Error('Match status update endpoint not available. Use Live Control screen instead.');
+    }
+    throw error;
+  }
 };
 
 export const updateToss = async (id, tossData) => {
@@ -127,6 +148,11 @@ export const setNonStriker = async (matchId, batsmanId) => {
 
 export const setBowler = async (matchId, bowlerId) => {
   const res = await api.patch(`/scoring/match/${matchId}/bowler`, { bowlerId });
+  return res.data?.data;
+};
+
+export const setMatchLineups = async (matchId, lineups) => {
+  const res = await api.patch(`/matches/${matchId}/lineups`, lineups);
   return res.data?.data;
 };
 

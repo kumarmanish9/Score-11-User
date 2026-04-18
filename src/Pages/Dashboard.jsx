@@ -229,8 +229,8 @@ function Dashboard() {
     { label: "Create Player", icon: "➕", to: "/instant-player-create", color: "#ec4899" },
 { label: "My Teams", icon: "🏏", to: "/team-history", color: "#f97316" },
     { label: "Create Match", icon: "⚽", to: "/create-match", color: "#ef4444" },
-    { label: "Live Control", icon: "🎮", to: "/match/123/live-control", color: "#22c55e" }  ,
-    { label: "Toss Screen", icon: "🎲", to: "/match/123/toss", color: "#eab308" }
+    { label: "Live Control", icon: "🎮", to: "/scheduled-matches", color: "#22c55e" },
+    { label: "Toss Screen", icon: "🎲", to: "/scheduled-matches", color: "#eab308" }
   ].map(({ label, icon, color, to }) => (
               to ? (
                 <Link 

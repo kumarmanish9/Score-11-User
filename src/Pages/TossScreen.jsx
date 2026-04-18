@@ -49,11 +49,9 @@ const TossScreen = () => {
       // Update toss
       const updatedMatch = await updateToss(id, tossData);
       
-      // Auto start match
-      await updateMatchStatus(id, 'live');
-      
+      // Go to team selection instead of live
       alert(`✅ Toss won by ${tossData.winner === match.team1._id ? team1.name : team2.name} - ${tossData.decision.toUpperCase()} first!`);
-      navigate(`/match/${id}/live-control`);
+      navigate(`/match/${id}/team-select`);
     } catch (err) {
       alert('Error: ' + (err.response?.data?.message || err.message));
     } finally {

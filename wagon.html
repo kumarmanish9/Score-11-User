@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cricket Live · Wagon Wheel</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b1118;
+  --panel:#111a24;
+  --panel2:#15212f;
+  --border:#1c2d3f;
+  --border2:#243445;
+  --gold:#f0b429;
+  --gold2:#ffd166;
+  --cyan:#06d6a0;
+  --red:#ff4757;
+  --blue:#3d9de8;
+  --purple:#b388ff;
+  --white:#f0f4f8;
+  --muted:#5a7a90;
+  --muted2:#3d5a6e;
+  --grass1:#2d6a2d;
+  --grass2:#245c24;
+  --grass3:#1f5220;
+  --pitch:#c8a96e;
+  --pitch2:#b8995e;
+  --font-h:'Oswald',sans-serif;
+  --font-b:'DM Sans',sans-serif;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--white);font-family:var(--font-b);display:flex;flex-direction:column}
+
+/* ── HEADER ─────────────────────────────────── */
+header{
+  height:52px;min-height:52px;
+  background:linear-gradient(90deg,#0b1118 0%,#0f1c28 40%,#0b1118 100%);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;z-index:50;
+  box-shadow:0 2px 20px rgba(0,0,0,0.5);
+}
+.logo{font-family:var(--font-h);font-size:20px;font-weight:700;letter-spacing:3px;color:var(--white)}
+.logo em{color:var(--gold);font-style:normal}
+.hdr-score{display:flex;align-items:center;gap:24px}
+.hdr-team{display:flex;align-items:center;gap:8px}
+.hdr-flag{font-size:18px}
+.hdr-name{font-family:var(--font-h);font-size:13px;font-weight:600;letter-spacing:2px;color:var(--muted)}
+.hdr-runs{font-family:var(--font-h);font-size:18px;font-weight:700;color:var(--white)}
+.hdr-bat .hdr-runs{color:var(--cyan)}
+.hdr-vs{font-family:var(--font-h);font-size:11px;font-weight:600;color:var(--muted2);letter-spacing:3px}
+.live-badge{display:flex;align-items:center;gap:5px;background:rgba(255,71,87,0.12);border:1px solid rgba(255,71,87,0.35);padding:4px 10px;border-radius:20px}
+.live-dot{width:6px;height:6px;background:var(--red);border-radius:50%;animation:blink 1.1s infinite}
+.live-badge span{font-size:10px;font-weight:700;color:var(--red);letter-spacing:2px}
+.hdr-meta{display:flex;align-items:center;gap:16px}
+.crr-chip{text-align:center}
+.crr-chip .lbl{font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.crr-chip .val{font-family:var(--font-h);font-size:15px;font-weight:700;color:var(--cyan)}
+.rrr-chip .val{color:var(--red)}
+
+/* ── BODY LAYOUT ─────────────────────────────── */
+.app-body{flex:1;display:grid;grid-template-columns:220px 1fr 240px;overflow:hidden}
+
+/* ── LEFT PANEL ──────────────────────────────── */
+.left-panel{
+  background:var(--panel);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+.pnl-head{
+  padding:10px 14px 8px;border-bottom:1px solid var(--border);
+  font-family:var(--font-h);font-size:10px;font-weight:600;letter-spacing:2px;color:var(--muted);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.pnl-head span{color:var(--gold);font-size:10px}
+
+/* Batters */
+.batter-card{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s}
+.batter-card:hover{background:rgba(6,214,160,0.04)}
+.batter-card.active-batter{background:rgba(6,214,160,0.07);border-left:2px solid var(--cyan)}
+.bc-top{display:flex;align-items:center;justify-content:space-between}
+.bc-name{font-family:var(--font-h);font-size:13px;font-weight:600;letter-spacing:0.5px;color:var(--white)}
+.bc-runs{font-family:var(--font-h);font-size:20px;font-weight:700;color:var(--gold)}
+.bc-sub{display:flex;justify-content:space-between;margin-top:3px}
+.bc-detail{font-size:10px;color:var(--muted);font-weight:500}
+.bc-sr{font-size:10px;color:var(--cyan);font-weight:600}
+.strike-tag{font-size:8px;background:rgba(240,180,41,0.15);border:1px solid rgba(240,180,41,0.4);color:var(--gold);padding:1px 5px;border-radius:3px;letter-spacing:1px;font-weight:700}
+.part-strip{padding:8px 14px;border-bottom:1px solid var(--border)}
+.part-label{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.part-nums{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:500;margin-bottom:4px}
+.part-nums strong{color:var(--white);font-weight:600}
+.part-bar-bg{height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+.part-bar-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--gold));border-radius:2px;transition:width .5s}
+
+/* Bowler */
+.bowler-strip{padding:8px 14px;border-bottom:1px solid var(--border)}
+.bowler-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.bowler-name{font-family:var(--font-h);font-size:12px;font-weight:600;letter-spacing:0.5px}
+.bowler-fig{font-family:var(--font-h);font-size:14px;font-weight:700;color:var(--red)}
+.bowler-eco{font-size:10px;color:var(--muted)}
+
+/* Over balls */
+.over-strip{padding:8px 14px;border-bottom:1px solid var(--border)}
+.over-balls-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.oball{
+  width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;font-family:var(--font-h);
+  border:1.5px solid var(--border2);background:var(--panel2);color:var(--muted);
+}
+.oball.dot{background:rgba(90,122,144,0.15);color:#5a7a90;border-color:#2a3d50}
+.oball.one{background:rgba(240,244,248,0.08);color:var(--white);border-color:#3d5a6e}
+.oball.two{background:rgba(61,157,232,0.15);color:var(--blue);border-color:var(--blue)}
+.oball.three{background:rgba(179,136,255,0.15);color:var(--purple);border-color:var(--purple)}
+.oball.four{background:rgba(240,180,41,0.2);color:var(--gold);border-color:var(--gold)}
+.oball.six{background:rgba(6,214,160,0.2);color:var(--cyan);border-color:var(--cyan)}
+.oball.wicket{background:rgba(255,71,87,0.2);color:var(--red);border-color:var(--red)}
+.oball.wide,.oball.nb,.oball.lb,.oball.bye{background:rgba(179,136,255,0.12);color:var(--purple);border-color:var(--purple)}
+.oball.empty{border-style:dashed;opacity:0.3}
+
+/* Over history */
+.oh-row{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid rgba(28,45,63,0.5)}
+.oh-num{font-size:9px;font-weight:700;color:var(--muted2);width:22px;flex-shrink:0;font-family:var(--font-h)}
+.oh-balls{display:flex;gap:3px}
+.oh-ball{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;font-family:var(--font-h)}
+.oh-total{margin-left:auto;font-family:var(--font-h);font-size:12px;font-weight:700;color:var(--white);min-width:20px;text-align:right}
+
+/* ── MIDDLE (FIELD) ───────────────────────────── */
+.field-wrap{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 50%, #12202e 0%,#0b1118 100%);
+  position:relative;overflow:hidden;padding:12px 10px;gap:10px;
+}
+.field-top-bar{
+  display:flex;align-items:center;justify-content:space-between;width:100%;max-width:580px;
+}
+.ftb-title{font-family:var(--font-h);font-size:11px;font-weight:600;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase}
+.filter-tabs{display:flex;gap:4px}
+.ftab{background:none;border:1px solid var(--border2);color:var(--muted);padding:4px 10px;border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font-h);letter-spacing:1px;transition:all 0.2s}
+.ftab:hover{border-color:var(--cyan);color:var(--cyan)}
+.ftab.active{background:rgba(6,214,160,0.12);border-color:var(--cyan);color:var(--cyan)}
+
+/* Canvas container */
+.field-canvas-outer{position:relative;flex-shrink:0}
+#fieldCanvas{display:block;cursor:crosshair}
+.field-tooltip{
+  position:absolute;background:rgba(11,17,24,0.96);border:1px solid var(--cyan);
+  border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;color:var(--cyan);
+  pointer-events:none;display:none;z-index:20;white-space:nowrap;font-family:var(--font-h);letter-spacing:0.5px;
+}
+
+/* Shot controls bar */
+.shot-ctrl-bar{
+  background:rgba(17,26,36,0.97);border:1px solid var(--border);border-radius:12px;
+  padding:10px 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  width:100%;max-width:580px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.4);
+}
+.ctrl-group{display:flex;flex-direction:column;gap:5px}
+.ctrl-label{font-size:8px;font-weight:700;color:var(--muted2);letter-spacing:2px;text-transform:uppercase}
+.run-pills{display:flex;gap:4px}
+.rpill{
+  width:34px;height:34px;border-radius:8px;border:1.5px solid var(--border2);
+  background:var(--panel2);color:var(--muted);font-family:var(--font-h);
+  font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;
+  display:flex;align-items:center;justify-content:center;letter-spacing:0.5px;
+}
+.rpill:hover{transform:translateY(-1px)}
+.rpill[data-r="0"]{color:#4a6070}
+.rpill[data-r="0"].sel{background:rgba(74,96,112,0.25);border-color:#4a6070;color:#7a96aa}
+.rpill[data-r="1"].sel{background:rgba(240,244,248,0.08);border-color:#6a8090;color:var(--white)}
+.rpill[data-r="2"].sel{background:rgba(61,157,232,0.18);border-color:var(--blue);color:var(--blue)}
+.rpill[data-r="3"].sel{background:rgba(179,136,255,0.18);border-color:var(--purple);color:var(--purple)}
+.rpill[data-r="4"].sel{background:rgba(240,180,41,0.2);border-color:var(--gold);color:var(--gold)}
+.rpill[data-r="6"].sel{background:rgba(6,214,160,0.2);border-color:var(--cyan);color:var(--cyan)}
+.rpill[data-r="W"].sel{background:rgba(255,71,87,0.2);border-color:var(--red);color:var(--red)}
+.rpill[data-r="4"]{border-color:rgba(240,180,41,0.3);color:rgba(240,180,41,0.5)}
+.rpill[data-r="6"]{border-color:rgba(6,214,160,0.3);color:rgba(6,214,160,0.5)}
+.rpill[data-r="W"]{border-color:rgba(255,71,87,0.3);color:rgba(255,71,87,0.5);width:auto;padding:0 10px}
+
+.extra-pills{display:flex;gap:4px}
+.epill{background:none;border:1px solid var(--border2);color:var(--muted);padding:4px 9px;border-radius:5px;font-size:9px;font-weight:700;cursor:pointer;font-family:var(--font-h);letter-spacing:1px;transition:all 0.2s}
+.epill:hover{border-color:var(--purple);color:var(--purple)}
+.epill.active{background:rgba(179,136,255,0.12);border-color:var(--purple);color:var(--purple)}
+
+.batter-pills{display:flex;gap:4px}
+.bpill{background:none;border:1px solid var(--border2);color:var(--muted);padding:5px 10px;border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font-h);letter-spacing:1px;transition:all 0.2s}
+.bpill.active{background:rgba(240,180,41,0.1);border-color:var(--gold);color:var(--gold)}
+
+.ctrl-actions{display:flex;flex-direction:column;gap:5px;margin-left:auto}
+.btn-add{
+  background:linear-gradient(135deg,var(--cyan),#04b885);border:none;color:#071a14;
+  padding:7px 16px;border-radius:7px;font-family:var(--font-h);font-size:12px;font-weight:700;
+  cursor:pointer;letter-spacing:1.5px;transition:all 0.2s;white-space:nowrap;
+}
+.btn-add:hover{opacity:0.85;transform:scale(1.02)}
+.btn-add:disabled{opacity:0.25;cursor:not-allowed;transform:none}
+.btn-undo{
+  background:none;border:1px solid var(--border2);color:var(--muted);
+  padding:6px 16px;border-radius:7px;font-family:var(--font-h);font-size:11px;font-weight:700;
+  cursor:pointer;letter-spacing:1px;transition:all 0.2s;
+}
+.btn-undo:hover{border-color:var(--red);color:var(--red)}
+
+/* Zone legend */
+.zone-legend{
+  display:flex;align-items:center;gap:10px;width:100%;max-width:580px;
+  padding:0 4px;flex-wrap:wrap;
+}
+.zl-item{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--muted);font-weight:600;letter-spacing:0.5px}
+.zl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* ── RIGHT PANEL ──────────────────────────────── */
+.right-panel{
+  background:var(--panel);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+
+/* Scorecard */
+.sc-tabs{display:flex;border-bottom:1px solid var(--border)}
+.sc-tab{flex:1;background:none;border:none;padding:8px 0;font-family:var(--font-h);font-size:10px;font-weight:600;letter-spacing:2px;color:var(--muted);cursor:pointer;transition:all 0.2s;border-bottom:2px solid transparent}
+.sc-tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.sc-table{width:100%;font-size:10px;border-collapse:collapse}
+.sc-table th{color:var(--muted2);font-weight:700;text-align:left;padding:5px 6px;font-size:8px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.sc-table td{padding:6px 6px;border-bottom:1px solid rgba(28,45,63,0.5);color:var(--white);font-weight:500}
+.sc-table td:not(:first-child){text-align:right}
+.sc-table th:not(:first-child){text-align:right}
+.sc-batting{font-family:var(--font-h);font-size:13px;font-weight:700;color:var(--gold2)}
+.sc-out{color:var(--muted);font-size:9px;font-weight:400}
+.sc-wkt{color:var(--red)}
+.sc-eco{color:var(--muted)}
+.sc-hi{background:rgba(6,214,160,0.04)}
+
+/* Commentary */
+.comm-list{padding:8px 12px;display:flex;flex-direction:column;gap:6px;overflow-y:auto;flex:1;min-height:0}
+.comm-item{display:flex;gap:8px;padding:7px 8px;background:var(--panel2);border-radius:6px;border-left:2px solid var(--border2)}
+.comm-item.b4{border-left-color:var(--gold)}
+.comm-item.b6{border-left-color:var(--cyan)}
+.comm-item.wk{border-left-color:var(--red)}
+.comm-over{font-family:var(--font-h);font-size:11px;font-weight:700;color:var(--cyan);white-space:nowrap;padding-top:1px}
+.comm-text{font-size:10px;color:var(--white);line-height:1.5;font-weight:400}
+.comm-badge{font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;white-space:nowrap;margin-top:2px;display:inline-block}
+.comm-badge.b4{background:rgba(240,180,41,0.15);color:var(--gold)}
+.comm-badge.b6{background:rgba(6,214,160,0.15);color:var(--cyan)}
+.comm-badge.wk{background:rgba(255,71,87,0.15);color:var(--red)}
+
+/* Pitch + speed */
+.pitch-speed-wrap{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:flex-start}
+#pitchMini{border-radius:4px;flex-shrink:0}
+.speed-col{flex:1}
+.speed-label{font-size:8px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.speed-val{font-family:var(--font-h);font-size:30px;font-weight:700;color:var(--cyan);line-height:1}
+.speed-unit{font-size:9px;color:var(--muted)}
+.speed-bar-bg{height:5px;background:var(--border2);border-radius:3px;overflow:hidden;margin:6px 0}
+.speed-bar-fill{height:100%;background:linear-gradient(90deg,#06d6a0,#f0b429,#ff4757);border-radius:3px;transition:width .5s}
+.speed-range{display:flex;justify-content:space-between;font-size:8px;color:var(--muted2)}
+.zone-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:8px 12px;border-top:1px solid var(--border)}
+.zs-cell{background:var(--panel2);border-radius:6px;padding:6px 8px;border:1px solid var(--border)}
+.zs-name{font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.zs-runs{font-family:var(--font-h);font-size:16px;font-weight:700;color:var(--white)}
+.zs-balls{font-size:9px;color:var(--muted2)}
+
+/* Scrollbars */
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#1c2d3f;border-radius:2px}
+
+/* Animations */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+@keyframes popin{0%{transform:scale(0.5);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.shot-pop{animation:popin 0.25s ease forwards}
+
+/* Pending pulse */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+.divider{height:1px;background:var(--border);margin:0}
+.pnl-section{padding:8px 14px;border-bottom:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">CRICK<em>LIVE</em></div>
+  <div class="hdr-score">
+    <div class="hdr-team hdr-bat">
+      <span class="hdr-flag">🇮🇳</span>
+      <span class="hdr-name">IND</span>
+      <span class="hdr-runs" id="hdr-ind">187/3</span>
+      <span style="font-size:10px;color:var(--muted);font-family:var(--font-h);letter-spacing:1px" id="hdr-overs">(28.4)</span>
+    </div>
+    <div class="hdr-vs">VS</div>
+    <div class="hdr-team">
+      <span class="hdr-runs" style="color:var(--gold)">284/7</span>
+      <span class="hdr-name">AUS</span>
+      <span class="hdr-flag">🇦🇺</span>
+    </div>
+  </div>
+  <div class="hdr-meta">
+    <div class="crr-chip"><div class="lbl">CRR</div><div class="val" id="hdr-crr">6.52</div></div>
+    <div class="live-badge"><div class="live-dot"></div><span>LIVE</span></div>
+    <div class="crr-chip rrr-chip"><div class="lbl">RRR</div><div class="val" id="hdr-rrr">8.17</div></div>
+  </div>
+</header>
+
+<!-- BODY -->
+<div class="app-body">
+
+  <!-- LEFT -->
+  <div class="left-panel">
+    <div class="pnl-head">BATTING <span>3rd ODI · Mumbai</span></div>
+
+    <div class="batter-card active-batter" id="bc-kohli" onclick="selectBatter('kohli')">
+      <div class="bc-top">
+        <div>
+          <span class="bc-name">V. Kohli</span>
+          <span class="strike-tag" id="kohli-strike">★ STRIKE</span>
+        </div>
+        <div class="bc-runs" id="bc-kohli-runs">97</div>
+      </div>
+      <div class="bc-sub">
+        <span class="bc-detail" id="bc-kohli-det">72b · 6×4 · 2×6</span>
+        <span class="bc-sr" id="bc-kohli-sr">SR 134.7</span>
+      </div>
+    </div>
+
+    <div class="batter-card" id="bc-dhawan" onclick="selectBatter('dhawan')">
+      <div class="bc-top">
+        <div>
+          <span class="bc-name">S. Dhawan</span>
+          <span class="strike-tag" id="dhawan-strike" style="display:none">★ STRIKE</span>
+        </div>
+        <div class="bc-runs" id="bc-dhawan-runs">78</div>
+      </div>
+      <div class="bc-sub">
+        <span class="bc-detail" id="bc-dhawan-det">58b · 5×4 · 1×6</span>
+        <span class="bc-sr" id="bc-dhawan-sr">SR 134.5</span>
+      </div>
+    </div>
+
+    <div class="part-strip">
+      <div class="part-label">Partnership</div>
+      <div class="part-nums">
+        <span>Runs <strong id="part-r">83</strong></span>
+        <span>Balls <strong id="part-b">61</strong></span>
+        <span>RR <strong id="part-rr">8.16</strong></span>
+      </div>
+      <div class="part-bar-bg"><div class="part-bar-fill" id="part-fill" style="width:62%"></div></div>
+    </div>
+
+    <div class="bowler-strip">
+      <div class="pnl-head" style="padding:0 0 6px">BOWLING</div>
+      <div class="bowler-row">
+        <span class="bowler-name">M. Starc ★</span>
+        <span class="bowler-fig">2/33</span>
+      </div>
+      <div class="bowler-row">
+        <span style="font-size:9px;color:var(--muted)">5.4 ov · Eco 5.8 · Last: </span>
+        <span style="font-size:9px;color:var(--muted)">· · 4 · W · 1</span>
+      </div>
+      <div style="height:6px"></div>
+      <div class="bowler-row">
+        <span class="bowler-name" style="color:var(--muted);font-size:11px">P. Cummins</span>
+        <span class="bowler-fig" style="font-size:12px">1/41</span>
+      </div>
+      <div class="bowler-row">
+        <span class="bowler-name" style="color:var(--muted);font-size:11px">A. Zampa</span>
+        <span class="bowler-fig" style="font-size:12px;color:var(--muted)">0/38</span>
+      </div>
+    </div>
+
+    <div class="over-strip">
+      <div class="pnl-head" style="padding:0 0 6px;display:flex;justify-content:space-between">
+        <span>CURRENT OVER 29</span>
+        <span id="ov-runs-label" style="color:var(--white)">0 runs</span>
+      </div>
+      <div class="over-balls-row" id="overBallsRow"></div>
+    </div>
+
+    <div class="pnl-section">
+      <div class="pnl-head" style="padding:0 0 6px">OVER HISTORY</div>
+      <div id="overHistory" style="display:flex;flex-direction:column;gap:0"></div>
+    </div>
+  </div>
+
+  <!-- MIDDLE FIELD -->
+  <div class="field-wrap">
+    <div class="field-top-bar">
+      <span class="ftb-title">⚾ Wagon Wheel · Click Field to Place Shot</span>
+      <div class="filter-tabs">
+        <button class="ftab active" onclick="setFilter('all',this)">ALL</button>
+        <button class="ftab" onclick="setFilter('4',this)">4s</button>
+        <button class="ftab" onclick="setFilter('6',this)">6s</button>
+        <button class="ftab" onclick="setFilter('kohli',this)">KOHLI</button>
+        <button class="ftab" onclick="setFilter('dhawan',this)">DHAWAN</button>
+        <button class="ftab" onclick="setFilter('dots',this)">DOTS</button>
+      </div>
+    </div>
+
+    <div class="field-canvas-outer">
+      <canvas id="fieldCanvas"></canvas>
+      <div class="field-tooltip" id="fieldTip"></div>
+    </div>
+
+    <div class="shot-ctrl-bar">
+      <div class="ctrl-group">
+        <span class="ctrl-label">Runs</span>
+        <div class="run-pills">
+          <button class="rpill" data-r="0" onclick="pickRun(0,this)">•</button>
+          <button class="rpill" data-r="1" onclick="pickRun(1,this)">1</button>
+          <button class="rpill" data-r="2" onclick="pickRun(2,this)">2</button>
+          <button class="rpill" data-r="3" onclick="pickRun(3,this)">3</button>
+          <button class="rpill" data-r="4" onclick="pickRun(4,this)">4</button>
+          <button class="rpill" data-r="6" onclick="pickRun(6,this)">6</button>
+          <button class="rpill" data-r="W" onclick="pickRun('W',this)">OUT</button>
+        </div>
+      </div>
+      <div class="ctrl-group">
+        <span class="ctrl-label">Extra</span>
+        <div class="extra-pills">
+          <button class="epill" id="ep-nb" onclick="pickExtra('NB',this)">NB</button>
+          <button class="epill" id="ep-wd" onclick="pickExtra('WD',this)">WD</button>
+          <button class="epill" id="ep-lb" onclick="pickExtra('LB',this)">LB</button>
+          <button class="epill" id="ep-b" onclick="pickExtra('B',this)">BYE</button>
+        </div>
+      </div>
+      <div class="ctrl-group">
+        <span class="ctrl-label">Batter</span>
+        <div class="batter-pills">
+          <button class="bpill active" id="bp-kohli" onclick="selectBatter('kohli')">KOHLI</button>
+          <button class="bpill" id="bp-dhawan" onclick="selectBatter('dhawan')">DHAWAN</button>
+        </div>
+      </div>
+      <div class="ctrl-actions">
+        <button class="btn-add" id="btnAdd" onclick="commitShot()" disabled>+ ADD SHOT</button>
+        <button class="btn-undo" onclick="undoShot()">↩ UNDO</button>
+      </div>
+    </div>
+
+    <div class="zone-legend">
+      <div class="zl-item"><div class="zl-dot" style="background:#f0b429"></div>Four</div>
+      <div class="zl-item"><div class="zl-dot" style="background:#06d6a0"></div>Six</div>
+      <div class="zl-item"><div class="zl-dot" style="background:#f0f4f8"></div>1·2·3</div>
+      <div class="zl-item"><div class="zl-dot" style="background:#3d5a6e"></div>Dot</div>
+      <div class="zl-item"><div class="zl-dot" style="background:#ff4757"></div>Wicket</div>
+      <div class="zl-item" style="margin-left:auto;color:var(--muted)">
+        <span id="stat-shots">0 shots</span> &nbsp;·&nbsp;
+        <span style="color:var(--gold)"><span id="stat-fours">0</span>×4</span> &nbsp;·&nbsp;
+        <span style="color:var(--cyan)"><span id="stat-sixes">0</span>×6</span> &nbsp;·&nbsp;
+        <span style="color:var(--muted)"><span id="stat-dots">0</span> dots</span> &nbsp;·&nbsp;
+        <span style="color:var(--red)"><span id="stat-wkts">0</span> wkts</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-panel">
+    <div class="sc-tabs">
+      <button class="sc-tab active" onclick="scTab('bat',this)">BATTING</button>
+      <button class="sc-tab" onclick="scTab('bowl',this)">BOWLING</button>
+      <button class="sc-tab" onclick="scTab('comm',this)">BALL×BALL</button>
+    </div>
+
+    <div id="sc-bat-panel">
+      <table class="sc-table" style="margin:0;padding:4px 0">
+        <thead><tr><th style="padding-left:12px">Batter</th><th>R</th><th>B</th><th>4s</th><th>6s</th><th>SR</th></tr></thead>
+        <tbody>
+          <tr><td style="padding-left:12px;color:var(--muted)">R. Sharma <span class="sc-out">c Maxwell b Cummins</span></td><td>12</td><td>15</td><td>2</td><td>0</td><td class="sc-eco">80.0</td></tr>
+          <tr class="sc-hi"><td style="padding-left:12px"><strong>S. Dhawan ★</strong></td><td class="sc-batting" id="sc-dhawan-r">78</td><td id="sc-dhawan-b">58</td><td id="sc-dhawan-4">5</td><td id="sc-dhawan-6">1</td><td class="sc-eco" id="sc-dhawan-sr">134.5</td></tr>
+          <tr class="sc-hi"><td style="padding-left:12px"><strong>V. Kohli ★</strong></td><td class="sc-batting" id="sc-kohli-r">97</td><td id="sc-kohli-b">72</td><td id="sc-kohli-4">6</td><td id="sc-kohli-6">2</td><td class="sc-eco" id="sc-kohli-sr">134.7</td></tr>
+          <tr><td style="padding-left:12px;color:var(--muted)">KL Rahul</td><td colspan="5" style="color:var(--muted2);font-size:9px">Yet to bat</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="sc-bowl-panel" style="display:none">
+      <table class="sc-table">
+        <thead><tr><th style="padding-left:12px">Bowler</th><th>O</th><th>M</th><th>R</th><th>W</th><th>Eco</th></tr></thead>
+        <tbody>
+          <tr class="sc-hi"><td style="padding-left:12px"><strong>M. Starc ★</strong></td><td>5.4</td><td>0</td><td>33</td><td class="sc-wkt">2</td><td class="sc-eco">5.8</td></tr>
+          <tr><td style="padding-left:12px">P. Cummins</td><td>8</td><td>1</td><td>41</td><td class="sc-wkt">1</td><td class="sc-eco">5.1</td></tr>
+          <tr><td style="padding-left:12px">A. Zampa</td><td>7</td><td>0</td><td>38</td><td class="sc-wkt">0</td><td class="sc-eco">5.4</td></tr>
+          <tr><td style="padding-left:12px">N. Lyon</td><td>6</td><td>0</td><td>31</td><td class="sc-wkt">0</td><td class="sc-eco">5.1</td></tr>
+          <tr><td style="padding-left:12px">D. Warner</td><td>2</td><td>0</td><td>18</td><td class="sc-wkt">0</td><td class="sc-eco">9.0</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="sc-comm-panel" style="display:none;flex:1;overflow:hidden;flex-direction:column">
+      <div class="comm-list" id="commList">
+        <div style="color:var(--muted2);font-size:10px;text-align:center;padding:20px">Add shots to see commentary</div>
+      </div>
+    </div>
+
+    <div class="pitch-speed-wrap">
+      <canvas id="pitchMini" width="70" height="130"></canvas>
+      <div class="speed-col">
+        <div class="speed-label">Ball Speed</div>
+        <div class="speed-val" id="spd-val">143</div>
+        <div class="speed-unit">km/h</div>
+        <div class="speed-bar-bg"><div class="speed-bar-fill" id="spd-fill" style="width:64%"></div></div>
+        <div class="speed-range"><span>100</span><span id="spd-type">Good length</span><span>160</span></div>
+      </div>
+    </div>
+
+    <div class="zone-stat-grid">
+      <div class="zs-cell"><div class="zs-name">Off Side</div><div class="zs-runs" id="z-off-r">0</div><div class="zs-balls" id="z-off-b">0 balls</div></div>
+      <div class="zs-cell"><div class="zs-name">On Side</div><div class="zs-runs" id="z-on-r">0</div><div class="zs-balls" id="z-on-b">0 balls</div></div>
+      <div class="zs-cell"><div class="zs-name">Straight</div><div class="zs-runs" id="z-str-r">0</div><div class="zs-balls" id="z-str-b">0 balls</div></div>
+      <div class="zs-cell"><div class="zs-name">Fine Leg/3rd</div><div class="zs-runs" id="z-beh-r">0</div><div class="zs-balls" id="z-beh-b">0 balls</div></div>
+    </div>
+  </div>
+
+</div><!-- /app-body -->
+
+<script>
+// ═══════════════════════════ STATE ═══════════════════════════
+const S = {
+  shots: [],
+  filter: 'all',
+  pickedRun: null,
+  pickedExtra: null,
+  activeBatter: 'kohli',
+  pendingX: null, pendingY: null,
+  currentOver: [],
+  overNum: 29,
+  history: [],
+  commentary: [],
+  batters: {
+    kohli:  { runs:97, balls:72, fours:6, sixes:2 },
+    dhawan: { runs:78, balls:58, fours:5, sixes:1 }
+  },
+  part: { runs:83, balls:61 },
+  total: { runs:187, wkts:3, balls:172 }
+};
+
+// Pre-load demo shots spread around field
+const DEMO = [
+  {x:0.62,y:0.18,run:4,b:'kohli',ex:null},
+  {x:0.78,y:0.46,run:6,b:'kohli',ex:null},
+  {x:0.28,y:0.20,run:4,b:'dhawan',ex:null},
+  {x:0.14,y:0.42,run:6,b:'dhawan',ex:null},
+  {x:0.50,y:0.09,run:4,b:'kohli',ex:null},
+  {x:0.82,y:0.38,run:1,b:'kohli',ex:null},
+  {x:0.30,y:0.70,run:2,b:'dhawan',ex:null},
+  {x:0.52,y:0.82,run:0,b:'kohli',ex:null},
+  {x:0.68,y:0.73,run:4,b:'kohli',ex:null},
+  {x:0.22,y:0.58,run:1,b:'dhawan',ex:null},
+  {x:0.42,y:0.12,run:6,b:'kohli',ex:null},
+  {x:0.12,y:0.26,run:4,b:'dhawan',ex:null},
+  {x:0.86,y:0.66,run:2,b:'kohli',ex:null},
+  {x:0.50,y:0.78,run:0,b:'dhawan',ex:null},
+  {x:0.35,y:0.40,run:'W',b:'kohli',ex:null},
+  {x:0.72,y:0.30,run:4,b:'kohli',ex:null},
+  {x:0.26,y:0.46,run:1,b:'dhawan',ex:null},
+  {x:0.56,y:0.56,run:6,b:'kohli',ex:null},
+  {x:0.18,y:0.78,run:4,b:'dhawan',ex:null},
+  {x:0.76,y:0.60,run:3,b:'kohli',ex:null},
+  {x:0.60,y:0.88,run:1,b:'dhawan',ex:null},
+  {x:0.88,y:0.52,run:2,b:'kohli',ex:null},
+  {x:0.08,y:0.52,run:6,b:'dhawan',ex:null},
+  {x:0.44,y:0.06,run:4,b:'kohli',ex:null},
+];
+
+// Commentary templates
+const CMT = {
+  0:["Dot ball. Tight on the stumps, batsman defends solidly.","Back of a length, pushed back to the bowler.","Maiden ball! Nothing doing there.","Defended watchfully, no run."],
+  1:["Tucked away to mid-wicket for a quick single.","Punched to point, they scamper a single.","Worked to covers for one.","Dabbed to third man — single."],
+  2:["Driven to long-off, they come back for two!","Pushed through mid-on, excellent running, two runs.","Plays it to deep cover, two more to India."],
+  3:["Three runs! Driven beautifully, they push hard.","Great running between the wickets — three!"],
+  4:["FOUR! Driven elegantly through the covers!","FOUR! Whipped off the pads to deep mid-wicket!","FOUR! Late cut races to the third man boundary!","FOUR! Pulled hard through backward square leg!","FOUR! Lofted over mid-off, one bounce four!"],
+  6:["SIX! Enormous hit over long-on — that's massive!","SIX! Pulled mightily over deep mid-wicket!","SIX! Launched over the bowler's head — straight six!","SIX! Maximum! Cleared the ropes at deep backward square!","SIX! Deposited into the second tier!"],
+  W:["OUT! Bowled — middle stump cartwheeling!","OUT! Caught at slip — fabulous edge!","OUT! LBW — struck in front, plumb!","OUT! Caught at covers — poor shot!","OUT! Run out — direct hit!"]
+};
+
+// ═══════════════════════════ CANVAS SETUP ═══════════════════════════
+const fc = document.getElementById('fieldCanvas');
+const ctx = fc.getContext('2d');
+let CX, CY, R;
+
+function sizeCanvas() {
+  const wrap = document.querySelector('.field-wrap');
+  const W = wrap.clientWidth - 20;
+  const H = wrap.clientHeight - 180;
+  const sz = Math.min(W, H, 520);
+  fc.width = sz; fc.height = sz;
+  CX = sz/2; CY = sz/2; R = sz/2 - 8;
+}
+
+// ═══════════════════════════ DRAW FIELD ═══════════════════════════
+const COL = {0:'#3d5a6e',1:'#b0c4d0',2:'#3d9de8',3:'#b388ff',4:'#f0b429',6:'#06d6a0',W:'#ff4757'};
+
+function drawField() {
+  ctx.clearRect(0,0,fc.width,fc.height);
+  const sz = fc.width;
+
+  // ── Outer boundary ellipse fill
+  ctx.save();
+  const outerGrad = ctx.createRadialGradient(CX,CY,0,CX,CY,R);
+  outerGrad.addColorStop(0,'#2a6e2a');
+  outerGrad.addColorStop(0.55,'#266226');
+  outerGrad.addColorStop(0.85,'#1f5220');
+  outerGrad.addColorStop(1,'#173d17');
+  ctx.beginPath(); ctx.ellipse(CX,CY,R,R*0.97,0,0,Math.PI*2);
+  ctx.fillStyle = outerGrad; ctx.fill();
+
+  // Mown grass stripes
+  for(let i=0;i<14;i++){
+    const t = i/14;
+    ctx.save();
+    ctx.beginPath(); ctx.ellipse(CX,CY,R,R*0.97,0,0,Math.PI*2);
+    ctx.clip();
+    const y0 = CY - R + i*(R*2/14);
+    const y1 = y0 + R*2/14;
+    ctx.fillStyle = i%2===0?'rgba(0,0,0,0.06)':'rgba(255,255,255,0.03)';
+    ctx.fillRect(CX-R-1,y0,R*2+2,y1-y0);
+    ctx.restore();
+  }
+
+  // Outfield circle
+  ctx.beginPath(); ctx.arc(CX,CY,R*0.62,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1.5; ctx.setLineDash([6,6]); ctx.stroke(); ctx.setLineDash([]);
+
+  // 30-yard circle label
+  ctx.font=`bold ${sz*0.018}px 'Oswald'`; ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.textAlign='center';
+  ctx.fillText('30 YD CIRCLE', CX, CY-R*0.63);
+
+  // Boundary rope
+  ctx.beginPath(); ctx.arc(CX,CY,R-3,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,255,255,0.25)'; ctx.lineWidth=2.5; ctx.stroke();
+  ctx.beginPath(); ctx.arc(CX,CY,R-6,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=1; ctx.stroke();
+
+  // Field positions
+  const pos = [
+    {a:90,d:0.92,lbl:'FINE LEG'},{a:60,d:0.90,lbl:'THIRD MAN'},{a:30,d:0.88,lbl:'POINT'},
+    {a:0,d:0.88,lbl:'COVER POINT'},{a:-30,d:0.88,lbl:'EXTRA COVER'},{a:-60,d:0.88,lbl:'LONG OFF'},
+    {a:-90,d:0.92,lbl:'LONG ON'},{a:-120,d:0.90,lbl:'MID WICKET'},{a:120,d:0.88,lbl:'SQUARE LEG'},
+    {a:150,d:0.85,lbl:'MID ON'},{a:-150,d:0.85,lbl:'MID OFF'},{a:180,d:0.60,lbl:'COVERS'},{a:0,d:0.60,lbl:'MID ON'},
+  ];
+  ctx.font=`600 ${sz*0.016}px 'DM Sans'`; ctx.fillStyle='rgba(255,255,255,0.18)'; ctx.textAlign='center';
+  pos.forEach(p=>{
+    const rad=(p.a-90)*Math.PI/180;
+    const px=CX+Math.cos(rad)*R*p.d;
+    const py=CY+Math.sin(rad)*R*p.d;
+    ctx.fillText(p.lbl,px,py);
+  });
+
+  // Fielder dots
+  const fielders=[
+    {a:75,d:0.82},{a:45,d:0.80},{a:20,d:0.75},{a:-10,d:0.78},{a:-45,d:0.80},
+    {a:-80,d:0.83},{a:-110,d:0.80},{a:110,d:0.80},{a:140,d:0.70},{a:-140,d:0.70},
+    {a:165,d:0.55},{a:-165,d:0.55}
+  ];
+  fielders.forEach(f=>{
+    const rad=(f.a-90)*Math.PI/180;
+    const fx=CX+Math.cos(rad)*R*f.d, fy=CY+Math.sin(rad)*R*f.d;
+    ctx.beginPath(); ctx.arc(fx,fy,5,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(fx,fy,8,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fill();
+  });
+
+  // ── PITCH ─────────────────────────────────────────
+  const pitchW=sz*0.07, pitchH=sz*0.32;
+  ctx.save();
+  ctx.translate(CX,CY);
+  const pg = ctx.createLinearGradient(-pitchW/2,0,pitchW/2,0);
+  pg.addColorStop(0,'#b89050'); pg.addColorStop(0.3,'#d4a864'); pg.addColorStop(0.7,'#c8a256'); pg.addColorStop(1,'#a87840');
+  ctx.fillStyle=pg;
+  roundRect(ctx,-pitchW/2,-pitchH/2,pitchW,pitchH,4,true,false);
+
+  // Cracks on pitch
+  ctx.strokeStyle='rgba(100,60,20,0.3)'; ctx.lineWidth=0.8;
+  [[-5,20,8,40],[2,-30,-10,-10],[6,0,0,20],[-3,-20,5,-5]].forEach(([x1,y1,x2,y2])=>{
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  });
+
+  // Creases
+  ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=1.5;
+  [[-pitchW/2,-pitchH*0.43,pitchW/2,-pitchH*0.43],
+   [-pitchW/2,pitchH*0.43,pitchW/2,pitchH*0.43],
+   [-pitchW*0.3,-pitchH*0.5,-pitchW*0.3,pitchH*0.5],
+   [pitchW*0.3,-pitchH*0.5,pitchW*0.3,pitchH*0.5]].forEach(([x1,y1,x2,y2])=>{
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  });
+
+  // Stumps
+  const stumpY = pitchH*0.42;
+  [-pitchW*0.08,0,pitchW*0.08].forEach(ox=>{
+    ctx.beginPath();ctx.moveTo(ox,-stumpY);ctx.lineTo(ox,-stumpY-sz*0.04);
+    ctx.strokeStyle='#f5deb3';ctx.lineWidth=2;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(ox,stumpY);ctx.lineTo(ox,stumpY+sz*0.04);
+    ctx.stroke();
+  });
+  // Bails
+  [[-stumpY-sz*0.04],[ stumpY+sz*0.04]].forEach(([y])=>{
+    ctx.beginPath();ctx.moveTo(-pitchW*0.12,y);ctx.lineTo(pitchW*0.12,y);
+    ctx.strokeStyle='#f5deb3';ctx.lineWidth=1.5;ctx.stroke();
+  });
+  ctx.restore();
+
+  // Umpire dots
+  [[CX,CY-pitchH/2-20],[CX,CY+pitchH/2+20]].forEach(([x,y])=>{
+    ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.fill();
+  });
+
+  // ── Draw shots ─────────────────────────────────────
+  S.shots.forEach((s,i)=>{
+    const sx = s.fx * sz, sy = s.fy * sz;
+    if(!passFilter(s)) return;
+    const col = COL[s.run] || '#b0c4d0';
+    const isB = s.run===4||s.run===6;
+
+    // Line from pitch to shot
+    ctx.beginPath();
+    ctx.moveTo(CX, CY);
+    ctx.lineTo(sx, sy);
+    ctx.strokeStyle = col + (s.run===0?'44':'77');
+    ctx.lineWidth = isB ? 2.2 : 1.4;
+    if(s.run===0){ctx.setLineDash([4,4]);}
+    ctx.stroke(); ctx.setLineDash([]);
+
+    // Outer glow for boundaries
+    if(isB){
+      ctx.beginPath(); ctx.arc(sx,sy,14,0,Math.PI*2);
+      ctx.fillStyle=col+'18'; ctx.fill();
+      ctx.beginPath(); ctx.arc(sx,sy,9,0,Math.PI*2);
+      ctx.fillStyle=col+'30'; ctx.fill();
+    }
+    // Dot
+    const dotR = s.run===6?7:s.run===4?6:s.run===0?3.5:4.5;
+    ctx.beginPath(); ctx.arc(sx,sy,dotR,0,Math.PI*2);
+    ctx.fillStyle = col; ctx.globalAlpha = s.run===0?0.45:0.9; ctx.fill(); ctx.globalAlpha=1;
+
+    // Run number label for boundaries
+    if(isB){
+      ctx.font=`bold ${sz*0.022}px 'Oswald'`;
+      ctx.fillStyle='#000000cc';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(s.run,sx,sy);
+    }
+  });
+
+  // Pending preview
+  if(S.pendingX!==null){
+    ctx.beginPath(); ctx.moveTo(CX,CY); ctx.lineTo(S.pendingX,S.pendingY);
+    ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.setLineDash([6,5]); ctx.lineWidth=1.5; ctx.stroke(); ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(S.pendingX,S.pendingY,7,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=2; ctx.stroke();
+    ctx.beginPath(); ctx.arc(S.pendingX,S.pendingY,3,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.fill();
+    // Pulsing ring
+    ctx.beginPath(); ctx.arc(S.pendingX,S.pendingY,12,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1.5; ctx.stroke();
+  }
+
+  // Centre dot
+  ctx.beginPath(); ctx.arc(CX,CY,3,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.fill();
+
+  // Compass labels
+  ctx.font=`700 ${sz*0.022}px 'Oswald'`; ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('STRAIGHT',CX,CY-R+18);
+  ctx.fillText('FINE LEG / 3RD MAN',CX,CY+R-18);
+  ctx.font=`700 ${sz*0.018}px 'Oswald'`;
+  ctx.fillText('ON SIDE',CX-R+24,CY);
+  ctx.fillText('OFF SIDE',CX+R-28,CY);
+  ctx.textBaseline='alphabetic';
+
+  updateStats();
+}
+
+function passFilter(s){
+  if(S.filter==='all') return true;
+  if(S.filter==='4') return s.run===4;
+  if(S.filter==='6') return s.run===6;
+  if(S.filter==='kohli') return s.b==='kohli';
+  if(S.filter==='dhawan') return s.b==='dhawan';
+  if(S.filter==='dots') return s.run===0;
+  return true;
+}
+
+function roundRect(c,x,y,w,h,r,fill,stroke){
+  c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.arcTo(x+w,y,x+w,y+r,r);
+  c.lineTo(x+w,y+h-r);c.arcTo(x+w,y+h,x+w-r,y+h,r);c.lineTo(x+r,y+h);
+  c.arcTo(x,y+h,x,y+h-r,r);c.lineTo(x,y+r);c.arcTo(x,y,x+r,y,r);c.closePath();
+  if(fill)c.fill();if(stroke)c.stroke();
+}
+
+// ═══════════════════════════ CANVAS EVENTS ═══════════════════════════
+fc.addEventListener('click', e=>{
+  const rect=fc.getBoundingClientRect();
+  const scl=fc.width/rect.width;
+  const mx=(e.clientX-rect.left)*scl, my=(e.clientY-rect.top)*scl;
+  const dx=mx-CX, dy=my-CY;
+  if(Math.sqrt(dx*dx+dy*dy)>R) return;
+  S.pendingX=mx; S.pendingY=my;
+  document.getElementById('btnAdd').disabled = S.pickedRun===null;
+  drawField();
+});
+
+fc.addEventListener('mousemove', e=>{
+  const rect=fc.getBoundingClientRect();
+  const scl=fc.width/rect.width;
+  const mx=(e.clientX-rect.left)*scl, my=(e.clientY-rect.top)*scl;
+  const tip=document.getElementById('fieldTip');
+  let found=null;
+  S.shots.forEach(s=>{
+    const sx=s.fx*fc.width, sy=s.fy*fc.width;
+    if(Math.sqrt((mx-sx)**2+(my-sy)**2)<12) found=s;
+  });
+  if(found){
+    tip.style.display='block';
+    const nm=found.run==='W'?'WICKET':found.run===0?'DOT':found.run+' RUN'+(found.run!==1?'S':'');
+    tip.textContent=`${nm} · ${found.b==='kohli'?'KOHLI':'DHAWAN'}${found.ex?' ('+found.ex+')':''}`;
+    const px=(found.fx*fc.width/fc.getBoundingClientRect().width)+fc.getBoundingClientRect().left-fc.getBoundingClientRect().left+found.fx*fc.getBoundingClientRect().width;
+    tip.style.left=(found.fx*rect.width+12)+'px';
+    tip.style.top=(found.fy*rect.height-28)+'px';
+  } else {
+    tip.style.display='none';
+  }
+});
+
+// ═══════════════════════════ CONTROLS ═══════════════════════════
+function setFilter(f,btn){
+  S.filter=f;
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  drawField();
+}
+
+function pickRun(r,btn){
+  S.pickedRun=r;
+  document.querySelectorAll('.rpill').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('btnAdd').disabled = S.pendingX===null;
+}
+
+function pickExtra(ex,btn){
+  if(S.pickedExtra===ex){ S.pickedExtra=null; btn.classList.remove('active'); }
+  else{
+    S.pickedExtra=ex;
+    document.querySelectorAll('.epill').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+}
+
+function selectBatter(b){
+  S.activeBatter=b;
+  document.querySelectorAll('.bpill').forEach(x=>x.classList.remove('active'));
+  document.getElementById('bp-'+b).classList.add('active');
+  document.querySelectorAll('.batter-card').forEach(x=>x.classList.remove('active-batter'));
+  document.getElementById('bc-'+b).classList.add('active-batter');
+  document.getElementById('kohli-strike').style.display = b==='kohli'?'':'none';
+  document.getElementById('dhawan-strike').style.display = b==='dhawan'?'':'none';
+}
+
+// ═══════════════════════════ ADD / UNDO ═══════════════════════════
+function commitShot(){
+  if(S.pendingX===null||S.pickedRun===null) return;
+  const shot={
+    fx:S.pendingX/fc.width, fy:S.pendingY/fc.width,
+    run:S.pickedRun, b:S.activeBatter, ex:S.pickedExtra
+  };
+  S.shots.push(shot);
+  applyShot(shot);
+  S.pendingX=null; S.pendingY=null;
+  document.getElementById('btnAdd').disabled=true;
+  drawField();
+}
+
+function applyShot(shot){
+  const r = shot.run==='W'?0:shot.run;
+  const btr = S.batters[shot.b];
+
+  // Update batter
+  btr.balls++;
+  if(shot.run!=='W'){
+    btr.runs+=r;
+    if(shot.run===4) btr.fours++;
+    if(shot.run===6) btr.sixes++;
+    S.part.runs+=r; S.part.balls++;
+    S.total.runs+=r;
+  } else {
+    S.total.wkts++;
+  }
+  S.total.balls++;
+
+  // Over ball
+  const cls = shot.run==='W'?'wicket':shot.run===0?'dot':shot.run===1?'one':shot.run===2?'two':shot.run===3?'three':shot.run===4?'four':'six';
+  const label = shot.run==='W'?'W':shot.run===0?'·':shot.run;
+  S.currentOver.push({cls,label,r:shot.run==='W'?0:shot.run,ex:shot.ex});
+
+  if(S.currentOver.length===6){
+    S.history.unshift({num:S.overNum, balls:[...S.currentOver]});
+    S.overNum++; S.currentOver=[];
+  }
+
+  // Commentary
+  const texts = CMT[shot.run]||CMT[0];
+  const text = texts[Math.floor(Math.random()*texts.length)];
+  const ovLabel = `${S.overNum}.${S.currentOver.length||6}`;
+  S.commentary.unshift({
+    over:ovLabel, text, cls:shot.run===4?'b4':shot.run===6?'b6':shot.run==='W'?'wk':'',
+    badge:shot.run===4?'FOUR':shot.run===6?'SIX':shot.run==='W'?'OUT':''
+  });
+
+  // Speed
+  const spd = 110 + Math.floor(Math.random()*52);
+  document.getElementById('spd-val').textContent=spd;
+  document.getElementById('spd-fill').style.width=((spd-100)/65*100)+'%';
+  const types=['Yorker','Full toss','Full length','Good length','Back of length','Short of length','Bouncer'];
+  document.getElementById('spd-type').textContent=types[Math.floor(Math.random()*types.length)];
+
+  refreshUI();
+  drawMiniPitch();
+}
+
+function undoShot(){
+  if(!S.shots.length) return;
+  S.shots.pop();
+  S.pendingX=null; S.pendingY=null;
+  document.getElementById('btnAdd').disabled=true;
+  drawField();
+  updateStats();
+}
+
+// ═══════════════════════════ UI REFRESH ═══════════════════════════
+function refreshUI(){
+  const k=S.batters.kohli, d=S.batters.dhawan;
+  const ksr = k.balls ? (k.runs/k.balls*100).toFixed(1):0;
+  const dsr = d.balls ? (d.runs/d.balls*100).toFixed(1):0;
+
+  document.getElementById('bc-kohli-runs').textContent=k.runs;
+  document.getElementById('bc-kohli-det').textContent=`${k.balls}b · ${k.fours}×4 · ${k.sixes}×6`;
+  document.getElementById('bc-kohli-sr').textContent=`SR ${ksr}`;
+  document.getElementById('bc-dhawan-runs').textContent=d.runs;
+  document.getElementById('bc-dhawan-det').textContent=`${d.balls}b · ${d.fours}×4 · ${d.sixes}×6`;
+  document.getElementById('bc-dhawan-sr').textContent=`SR ${dsr}`;
+
+  document.getElementById('sc-kohli-r').textContent=k.runs;
+  document.getElementById('sc-kohli-b').textContent=k.balls;
+  document.getElementById('sc-kohli-4').textContent=k.fours;
+  document.getElementById('sc-kohli-6').textContent=k.sixes;
+  document.getElementById('sc-kohli-sr').textContent=ksr;
+  document.getElementById('sc-dhawan-r').textContent=d.runs;
+  document.getElementById('sc-dhawan-b').textContent=d.balls;
+  document.getElementById('sc-dhawan-4').textContent=d.fours;
+  document.getElementById('sc-dhawan-6').textContent=d.sixes;
+  document.getElementById('sc-dhawan-sr').textContent=dsr;
+
+  document.getElementById('part-r').textContent=S.part.runs;
+  document.getElementById('part-b').textContent=S.part.balls;
+  const prr = S.part.balls ? (S.part.runs/(S.part.balls/6)).toFixed(1):0;
+  document.getElementById('part-rr').textContent=prr;
+  document.getElementById('part-fill').style.width=Math.min(100,(S.part.runs/150)*100)+'%';
+
+  const overs=Math.floor(S.total.balls/6)+'.'+( S.total.balls%6);
+  document.getElementById('hdr-ind').textContent=S.total.runs+'/'+S.total.wkts;
+  document.getElementById('hdr-overs').textContent='('+overs+')';
+  const crr=S.total.balls?(S.total.runs/(S.total.balls/6)).toFixed(2):0;
+  document.getElementById('hdr-crr').textContent=crr;
+  const remain=300-S.total.balls;
+  const rrr=remain>0?((284-S.total.runs+1)/(remain/6)).toFixed(2):'-';
+  document.getElementById('hdr-rrr').textContent=rrr;
+
+  refreshOverBalls();
+  refreshOverHistory();
+  refreshCommentary();
+  updateStats();
+}
+
+function refreshOverBalls(){
+  const row=document.getElementById('overBallsRow');
+  row.innerHTML='';
+  const filled=S.currentOver.length;
+  const ovRuns=S.currentOver.reduce((a,b)=>a+(typeof b.r==='number'?b.r:0),0);
+  document.getElementById('ov-runs-label').textContent=ovRuns+' runs';
+  for(let i=0;i<6;i++){
+    const el=document.createElement('div');
+    if(i<filled){
+      const b=S.currentOver[i];
+      el.className='oball '+(b.ex?b.ex.toLowerCase():b.cls);
+      el.textContent=b.label;
+    } else {
+      el.className='oball empty';
+    }
+    row.appendChild(el);
+  }
+}
+
+function refreshOverHistory(){
+  const oh=document.getElementById('overHistory');
+  oh.innerHTML='';
+  S.history.slice(0,6).forEach(ov=>{
+    const tot=ov.balls.reduce((a,b)=>a+(typeof b.r==='number'?b.r:0),0);
+    const row=document.createElement('div');
+    row.className='oh-row';
+    row.innerHTML=`<span class="oh-num">${ov.num}</span>`;
+    const bd=document.createElement('div'); bd.className='oh-balls';
+    ov.balls.forEach(b=>{
+      const el=document.createElement('div'); el.className='oh-ball';
+      const cls=b.cls;
+      const cols={dot:'#3d5a6e',one:'#6a8090',two:'#3d9de8',three:'#b388ff',four:'#f0b429',six:'#06d6a0',wicket:'#ff4757',wide:'#b388ff',nb:'#b388ff',lb:'#9090d0',bye:'#8090b0'};
+      const c=cols[cls]||'#3d5a6e';
+      el.style.cssText=`background:${c}22;color:${c};border:1px solid ${c}55;`;
+      el.textContent=b.label;
+      bd.appendChild(el);
+    });
+    row.appendChild(bd);
+    const t=document.createElement('span'); t.className='oh-total'; t.textContent=tot;
+    row.appendChild(t);
+    oh.appendChild(row);
+  });
+}
+
+function refreshCommentary(){
+  const cl=document.getElementById('commList');
+  if(!S.commentary.length) return;
+  cl.innerHTML='';
+  S.commentary.slice(0,20).forEach(c=>{
+    const el=document.createElement('div');
+    el.className='comm-item '+(c.cls||'');
+    el.innerHTML=`<span class="comm-over">${c.over}</span><div><div class="comm-text">${c.text}</div>${c.badge?`<span class="comm-badge ${c.cls}">${c.badge}</span>`:''}</div>`;
+    cl.appendChild(el);
+  });
+}
+
+function updateStats(){
+  let fours=0,sixes=0,dots=0,wkts=0;
+  let zOff={r:0,b:0},zOn={r:0,b:0},zStr={r:0,b:0},zBeh={r:0,b:0};
+  S.shots.forEach(s=>{
+    if(s.run===4)fours++;
+    if(s.run===6)sixes++;
+    if(s.run===0)dots++;
+    if(s.run==='W')wkts++;
+    const dx=s.fx-0.5, dy=s.fy-0.5;
+    const ang=(Math.atan2(dy,dx)*180/Math.PI+360)%360;
+    const r=s.run==='W'?0:s.run;
+    if(ang>=315||ang<45){zStr.r+=r;zStr.b++;}
+    else if(ang>=45&&ang<180){zOff.r+=r;zOff.b++;}
+    else if(ang>=180&&ang<315){zOn.r+=r;zOn.b++;}
+    if(ang>=100&&ang<260){zBeh.r+=r;zBeh.b++;}
+  });
+  document.getElementById('stat-shots').textContent=S.shots.length+' shots';
+  document.getElementById('stat-fours').textContent=fours;
+  document.getElementById('stat-sixes').textContent=sixes;
+  document.getElementById('stat-dots').textContent=dots;
+  document.getElementById('stat-wkts').textContent=wkts;
+  document.getElementById('z-off-r').textContent=zOff.r;document.getElementById('z-off-b').textContent=zOff.b+' balls';
+  document.getElementById('z-on-r').textContent=zOn.r;document.getElementById('z-on-b').textContent=zOn.b+' balls';
+  document.getElementById('z-str-r').textContent=zStr.r;document.getElementById('z-str-b').textContent=zStr.b+' balls';
+  document.getElementById('z-beh-r').textContent=zBeh.r;document.getElementById('z-beh-b').textContent=zBeh.b+' balls';
+}
+
+// ═══════════════════════════ MINI PITCH ═══════════════════════════
+function drawMiniPitch(){
+  const c=document.getElementById('pitchMini');
+  const cx=c.getContext('2d');
+  cx.clearRect(0,0,70,130);
+
+  // Background
+  cx.fillStyle='#1a3320'; cx.roundRect(0,0,70,130,4); cx.fill();
+  // Strip
+  const g=cx.createLinearGradient(20,0,50,0);
+  g.addColorStop(0,'#b89050');g.addColorStop(0.5,'#d4a864');g.addColorStop(1,'#b89050');
+  cx.fillStyle=g; cx.fillRect(22,8,26,114);
+  // Creases
+  cx.strokeStyle='rgba(255,255,255,0.6)';cx.lineWidth=1;
+  [[22,22,48,22],[22,108,48,108]].forEach(([x1,y1,x2,y2])=>{cx.beginPath();cx.moveTo(x1,y1);cx.lineTo(x2,y2);cx.stroke();});
+  // Stumps
+  [-3,0,3].forEach(ox=>{
+    cx.beginPath();cx.moveTo(35+ox,10);cx.lineTo(35+ox,21);
+    cx.strokeStyle='#f5deb3';cx.lineWidth=1.5;cx.stroke();
+    cx.beginPath();cx.moveTo(35+ox,109);cx.lineTo(35+ox,120);
+    cx.stroke();
+  });
+  // Zones
+  const zones=[
+    {y:14,h:12,col:'rgba(255,71,87,0.3)',lbl:'YKR'},
+    {y:26,h:20,col:'rgba(240,180,41,0.25)',lbl:'FULL'},
+    {y:46,h:38,col:'rgba(6,214,160,0.2)',lbl:'GOOD'},
+    {y:84,h:18,col:'rgba(61,157,232,0.25)',lbl:'SHT'},
+    {y:102,h:12,col:'rgba(179,136,255,0.25)',lbl:'BNC'},
+  ];
+  zones.forEach(z=>{
+    cx.fillStyle=z.col; cx.fillRect(22,z.y,26,z.h);
+    cx.font='bold 6px Oswald'; cx.fillStyle='rgba(255,255,255,0.5)'; cx.textAlign='center';
+    cx.fillText(z.lbl,35,z.y+z.h/2+2);
+  });
+  // Recent deliveries
+  const recent=S.shots.slice(-6);
+  recent.forEach((s,i)=>{
+    const zIdx=[4,3,2,1,0];
+    const zi=zIdx[Math.floor(Math.random()*4)];
+    const zy=zones[zi];
+    const dx=(Math.random()-0.5)*10;
+    const px=35+dx;
+    const py=zy.y+zy.h/2+( Math.random()-0.5)*6;
+    cx.beginPath();cx.arc(px,py,3.5,0,Math.PI*2);
+    cx.fillStyle=(COL[s.run]||'#b0c4d0')+'cc';cx.fill();
+  });
+}
+
+// ═══════════════════════════ SCORECARD TABS ═══════════════════════════
+function scTab(t,btn){
+  document.querySelectorAll('.sc-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('sc-bat-panel').style.display=t==='bat'?'':'none';
+  document.getElementById('sc-bowl-panel').style.display=t==='bowl'?'':'none';
+  const cp=document.getElementById('sc-comm-panel');
+  cp.style.display=t==='comm'?'flex':'none';
+}
+
+// ═══════════════════════════ INIT ═══════════════════════════
+function init(){
+  sizeCanvas();
+  // Convert demo to field coords
+  S.shots = DEMO.map(d=>({...d, fx:d.x, fy:d.y}));
+
+  // Pre-load over history
+  S.history=[
+    {num:27,balls:[{cls:'four',label:4,r:4},{cls:'dot',label:'·',r:0},{cls:'one',label:1,r:1},{cls:'six',label:6,r:6},{cls:'one',label:1,r:1},{cls:'two',label:2,r:2}]},
+    {num:26,balls:[{cls:'two',label:2,r:2},{cls:'one',label:1,r:1},{cls:'dot',label:'·',r:0},{cls:'four',label:4,r:4},{cls:'one',label:1,r:1},{cls:'dot',label:'·',r:0}]},
+    {num:25,balls:[{cls:'six',label:6,r:6},{cls:'dot',label:'·',r:0},{cls:'four',label:4,r:4},{cls:'one',label:1,r:1},{cls:'two',label:2,r:2},{cls:'wicket',label:'W',r:0}]},
+  ];
+  S.currentOver=[
+    {cls:'four',label:4,r:4},{cls:'dot',label:'·',r:0},{cls:'one',label:1,r:1},{cls:'six',label:6,r:6}
+  ];
+  S.commentary=[
+    {over:'28.4',text:'SIX! Kohli launches it over deep mid-wicket — absolute missile!',cls:'b6',badge:'SIX'},
+    {over:'28.3',text:'Single tucked away to mid-on by Dhawan.',cls:'',badge:''},
+    {over:'28.2',text:'Dot ball. Starc bowls a tight good-length delivery outside off.',cls:'',badge:''},
+    {over:'28.1',text:'FOUR! Kohli drives elegantly through the covers!',cls:'b4',badge:'FOUR'},
+    {over:'27.6',text:'Two runs — pushed through mid-on, good running.',cls:'',badge:''},
+    {over:'27.5',text:'Single to long-on by Dhawan.',cls:'',badge:''},
+    {over:'27.4',text:'SIX! What a pull from Kohli over deep backward square!',cls:'b6',badge:'SIX'},
+    {over:'27.3',text:'Dot. Defended back solidly.',cls:'',badge:''},
+  ];
+
+  drawField();
+  drawMiniPitch();
+  refreshUI();
+  refreshOverBalls();
+  refreshOverHistory();
+  refreshCommentary();
+}
+
+window.addEventListener('resize',()=>{ sizeCanvas(); drawField(); });
+init();
+</script>
+</body>
+</html>

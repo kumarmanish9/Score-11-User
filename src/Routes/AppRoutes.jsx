@@ -8,7 +8,7 @@ import CreateTeam from "../Pages/CreateTeam";
 import JoinContest from "../Pages/JoinContest";
 import ForgotPassword from "../Pages/ForgotPassword";
 import VerifyOtp from "../Pages/VerifyOtp";
-import ResetPassword from "../Pages/ResetPassord";
+import ResetPassword from "../Pages/ResetPassword";
 import Matches from "../Pages/Matches";
 import TournamentList from "../Pages/TournamentList";
 import PlayerSearch from "../Pages/PlayerSearch";
@@ -41,6 +41,9 @@ import ReferEarn from "../Pages/ReferEarn";
 import CreateMatch from "../Pages/CreateMatch";
 import TossScreen from "../Pages/TossScreen";
 import LiveControl from "../Pages/LiveControl";
+import TeamSelection from "../Pages/TeamSelection";
+import ScheduledMatches from "../Pages/ScheduledMatches";
+import { Navigate } from "react-router-dom";
 
 
 function AppRoutes() {
@@ -63,9 +66,13 @@ function AppRoutes() {
       <Route path="/match/:id" element={<MatchDetails />} />
       <Route path="/create-match" element={<CreateMatch />} />
       <Route path="/match/:id/toss" element={<TossScreen />} />
-      <Route path="/match/:id/live-control" element={<LiveControl />} />
+      <Route path="/match/:id/live-control" element={<ProtectedLiveControl />} />
+      <Route path="/match/:id/team-select" element={<TeamSelection />} />
+      <Route path="/live-control/:id" element={<Navigate to={`/match/$1/live-control`} replace />} />
+      <Route path="/scheduled-matches" element={<ScheduledMatches />} />
 
       <Route path="/tournaments" element={<TournamentList />} />
+
       <Route path="/players" element={<PlayerSearch />} />
       <Route path="/players/:id" element={<PlayerProfile />} />
       <Route path="/teams" element={<TeamList />} />

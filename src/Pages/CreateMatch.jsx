@@ -86,8 +86,8 @@ const validateForm = () => {
     try {
       const match = await createMatch(safePayload);
       console.log('✅ Match created:', match._id);
-      alert(`✅ Match created successfully! ID: ${match._id}`);
-      navigate(`/match/${match._id}`);
+      alert(`✅ Match created successfully! ID: ${match._id}\\nView & start it from Scheduled Matches!`);
+      navigate(`/scheduled-matches`);
     } catch (err) {
       console.error('❌ Match create full error:', err.response?.data || err);
       alert('❌ Create failed: ' + (err.response?.data?.message || err.message));
