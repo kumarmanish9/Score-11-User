@@ -51,6 +51,12 @@ const validateForm = () => {
     if (!formData.team2) newErrors.team2 = 'Team 2 required';
     if (String(formData.team1) === String(formData.team2) && formData.team1) newErrors.team2 = 'Teams must be different';
     if (!formData.scheduledDate) newErrors.scheduledDate = 'Date required';
+    
+    // 🔥 ObjectId format validation
+    const isValidObjectId = (id) => /^[0-9a-fA-F]{24}$/.test(String(id));
+    if (formData.team1 && !isValidObjectId(formData.team1)) newErrors.team1 = 'Invalid Team 1 ID format';
+    if (formData.team2 && !isValidObjectId(formData.team2)) newErrors.team2 = 'Invalid Team 2 ID format';
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -59,13 +65,32 @@ const validateForm = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    setLoading(true);
+    // 🔥 BULLETPROOF PAYLOAD VALIDATION + LOGGING
+    const safePayload = {
+      ...formData,
+      team1: formData.team1 ? String(formData.team1).trim() : '',
+      team2: formData.team2 ? String(formData.team2).trim() : '',
+      tournament: formData.tournament ? String(formData.tournament).trim() : null
+    };
+
+    console.log('🚀 CREATE MATCH PAYLOAD:', JSON.stringify(safePayload, null, 2));
+    
+    // VALIDATE ObjectId format (24 hex chars)
+    const isValidObjectId = (id) => /^[0-9a-fA-F]{24}$/.test(String(id));
+    if (!isValidObjectId(safePayload.team1) || !isValidObjectId(safePayload.team2)) {
+      alert('❌ Invalid Team ID(s). Must be proper MongoDB ObjectId (24 hex chars)');
+      setLoading(false);
+      return;
+    }
+    
     try {
-      const match = await createMatch(formData);
-      alert('✅ Match created! ID: ' + match._id);
+      const match = await createMatch(safePayload);
+      console.log('✅ Match created:', match._id);
+      alert(`✅ Match created successfully! ID: ${match._id}`);
       navigate(`/match/${match._id}`);
     } catch (err) {
-      alert('Error: ' + (err.response?.data?.message || err.message));
+      console.error('❌ Match create full error:', err.response?.data || err);
+      alert('❌ Create failed: ' + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);
     }
