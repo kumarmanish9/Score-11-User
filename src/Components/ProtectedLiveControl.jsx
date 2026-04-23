@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import CompleteLiveControl from '../Pages/CompleteLiveControl';
+import LiveControl from '../Pages/LiveControl';
 import { getCurrentUser } from '../Services/AuthServices';
 
 const ProtectedLiveControl = () => {
@@ -42,7 +42,7 @@ const ProtectedLiveControl = () => {
     return <div>Loading...</div>;
   }
 
-  return <CompleteLiveControl />;
+  return <LiveControl />;
 };
 
 export default ProtectedLiveControl;
