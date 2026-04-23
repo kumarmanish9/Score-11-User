@@ -1,29 +1,26 @@
-# 🚀 Live Control - Complete Wagon Wheel Implementation
+# Live Control Implementation TODO
 
-## ✅ COMPLETED (v1.0)
-- [x] Complete HTML demo → React component conversion
-- [x] White theme CSS (100% pixel-perfect)
-- [x] 3-panel layout (Batters | Field | Scorecard)
-- [x] Wagon wheel canvas with shots, filters, hover tooltips
-- [x] Backend API integration (addBall, setStriker, etc.)
-- [x] Socket real-time updates
-- [x] Batter cards, partnership bar, bowler info
-- [x] Current over balls visualization
-- [x] Scorecard tabs (Batting/Bowling/Commentary)
-- [x] Shot controls (0-6, W, extras)
-- [x] Zone legend & stats
+## Status: ✅ PLAN APPROVED - In Progress
 
-## 🔄 NEXT PRIORITY (v1.1)
-- [ ] Real player data integration (match teams → batter dropdowns)
-- [ ] Complete field drawing (pitch, stumps, fielders, 30yd circle)
-- [ ] Dynamic stats calculation (zone stats, over history)
-- [ ] Commentary generation
-- [ ] Undo/Redo functionality
-- [ ] Mobile responsive layout
-
-## 🎯 PRODUCTION READY
-Run `npm run dev` → Navigate to `/live-control/:matchId`
-Test with any live match ID from dashboard
-
-**Status: 95% Complete - Ready for testing!** 🎉
+### 1. [ ] Create TODO.md (DONE)
+### 2. [✅] Update ProtectedLiveControl.jsx - Add role check + CompleteLiveControl
+### 3. [ ] Update AppRoutes.jsx - Route /match/:id/live-control → Protected → CompleteLiveControl
+### 4. [ ] Rewrite CompleteLiveControl.jsx 
+   - Load match/teams/players dynamically
+   - Dynamic batter list from scorecard (not_out)
+   - Player selects for striker/non-striker (batting team), bowler (bowling team)
+   - Real current bowler/figures from liveData
+   - Current over balls from recentBalls
+   - Dynamic scorecards (batting/bowling)
+   - Commentary from recent balls or backend
+   - Innings start/end buttons
+   - Fix commitShot with proper batsmanId/bowlerId
+   - UX: Toasts/spinners, no alerts
+### 5. [✅] Deprecate LiveControl.jsx - Rename to LiveControl.OLD
+### 6. [ ] Test
+   - cd Score-11-User && npm run dev
+   - Create match with teams/players
+   - Access /match/:id/live-control
+   - Verify: Teams/players load, set striker/bowler, add balls, real-time updates, scorecards
+### 7. [ ] Complete - attempt_completion
 

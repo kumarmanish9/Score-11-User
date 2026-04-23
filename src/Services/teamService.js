@@ -9,6 +9,7 @@ const api = axios.create({
 // ✅ Attach token automatically
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
+  console.log('🔑 Request to:', config.url, 'Token present:', !!token);
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -16,6 +17,18 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('🚫 API Error:', error.response?.status, error.config?.url);
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 
 // =============================
@@ -28,15 +41,20 @@ api.interceptors.request.use((config) => {
 //   return response.data.data || [];
 // };
 
-// ✅ Get logged-in user's teams (FIXED: correct endpoint /team/teams)
-export const getUserTeams = async () => {
-  const response = await api.get('/team/teams');
-  return response.data?.data || [];
+// ✅ Get logged-in user's teams (calls /teams endpoint)
+export const getMyTeams = async () => {
+  const response = await api.get('/teams');
+  return Array.isArray(response.data?.data) ? response.data.data : [];
 };
 
-// ✅ Get all active teams (admin-like dropdown) - FIXED base path
+// ✅ Alias for getUserTeams (used in JoinContest.jsx and other pages)
+export const getUserTeams = getMyTeams;
+
+  // ✅ Get all active teams (public /list) - Keep for future admin use
 export const getAllTeams = async (params = {}) => {
+  console.log('🔍 Fetching ALL teams from /list...');
   const response = await api.get('/list', { params });
+  console.log('✅ All teams loaded:', response.data?.data?.teams?.length || 0);
   return response.data?.data?.teams || response.data?.data || [];
 };
 

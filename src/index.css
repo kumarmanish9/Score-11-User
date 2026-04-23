@@ -1,6 +1,8 @@
 /* Score11 Index - Ultra Clean Base */
 
-@import url('./assets/Styles/Global.css');
+@import './assets/Styles/Global.css';
+
+
 
 html {
   scroll-behavior: smooth;

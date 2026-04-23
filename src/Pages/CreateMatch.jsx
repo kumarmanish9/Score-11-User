@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createMatch } from '../Services/matchService';
-import { getAllTeams } from '../Services/teamService';
+import { getMyTeams } from '../Services/teamService';
 import { getTournaments } from '../Services/tournamentService';
 
 
@@ -14,15 +14,18 @@ const CreateMatch = () => {
     team1: '',
     team2: '',
     tournament: '',
-format: 't20',
+    format: 't20',
     matchType: 'league',
     venue: { name: '', city: '' },
     scheduledDate: new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0], // Tomorrow
+    scheduledTime: '14:00',
     overs: 20
   });
+
   const [teams, setTeams] = useState([]);
   const [tournaments, setTournaments] = useState([]);
   const [errors, setErrors] = useState({});
+  const [fetchError, setFetchError] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -30,17 +33,19 @@ format: 't20',
 
   const fetchData = async () => {
     try {
-      console.log('📥 Fetching all teams and tournaments...');
-      const [allTeamsRes, allTournaments] = await Promise.all([
-        getAllTeams(),
+      setFetchError('');
+      console.log('📥 Fetching MY teams and tournaments...');
+      const [myTeamsRes, allTournaments] = await Promise.all([
+        getMyTeams(),
         getTournaments()
       ]);
-      const allTeams = Array.isArray(allTeamsRes) ? allTeamsRes : [];
-      console.log(`✅ Loaded ${allTeams.length} teams, ${allTournaments.length} tournaments`);
-      setTeams(allTeams);
+      const myTeams = Array.isArray(myTeamsRes) ? myTeamsRes : [];
+      console.log(`✅ Loaded ${myTeams.length} MY teams, ${allTournaments.length} tournaments`);
+      setTeams(myTeams);
       setTournaments(Array.isArray(allTournaments) ? allTournaments : []);
     } catch (err) {
       console.error('🚫 Fetch error:', err);
+      setFetchError(`Failed to load data: ${err.message}. Backend may be down or no teams exist.`);
     }
   };
 
@@ -51,6 +56,7 @@ const validateForm = () => {
     if (!formData.team2) newErrors.team2 = 'Team 2 required';
     if (String(formData.team1) === String(formData.team2) && formData.team1) newErrors.team2 = 'Teams must be different';
     if (!formData.scheduledDate) newErrors.scheduledDate = 'Date required';
+    if (!formData.scheduledTime) newErrors.scheduledTime = 'Time required';
     
     // 🔥 ObjectId format validation
     const isValidObjectId = (id) => /^[0-9a-fA-F]{24}$/.test(String(id));
@@ -61,16 +67,22 @@ const validateForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    // 🔥 BULLETPROOF PAYLOAD VALIDATION + LOGGING
+    // 🔥 Fix: Map to backend schema - scheduledDate (ISO date) + startTime (HH:MM)
     const safePayload = {
-      ...formData,
       team1: formData.team1 ? String(formData.team1).trim() : '',
       team2: formData.team2 ? String(formData.team2).trim() : '',
-      tournament: formData.tournament ? String(formData.tournament).trim() : null
+      tournament: formData.tournament ? String(formData.tournament).trim() : null,
+      venue: formData.venue,
+      scheduledDate: formData.scheduledDate,  // Backend expects ISO date string (YYYY-MM-DD)
+      startTime: formData.scheduledTime,      // Backend expects HH:MM
+      format: formData.format,
+      matchType: formData.matchType || 'league',
+      overs: parseInt(formData.overs)
     };
 
     console.log('🚀 CREATE MATCH PAYLOAD:', JSON.stringify(safePayload, null, 2));
@@ -114,7 +126,7 @@ const validateForm = () => {
             <div className="card shadow-lg border-0">
               <div className="card-header bg-white border-0 pb-0">
                 <div className="d-flex justify-content-between align-items-center">
-                  <h2 className="h4 mb-0 fw-bold text-gray-900">Create New Match ⚽</h2>
+                      <h2 className="h4 mb-0 fw-bold text-gray-900">Create New Match 🏏</h2>
                   <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
                     ← Back
                   </button>
@@ -124,7 +136,7 @@ const validateForm = () => {
                 <form onSubmit={handleSubmit}>
                   <div className="row g-4">
                     <div className="col-md-6">
-                      <label className="form-label fw-bold">Team 1 *</label>
+                      <label className="form-label fw-bold">My Team 1 *</label>
                       <select 
                         name="team1" 
                         className="form-select" 
@@ -132,18 +144,21 @@ const validateForm = () => {
                         onChange={handleChange}
                       >
                         <option value="">Select Team 1</option>
-{teams.map(team => (
-                        <option key={String(team._id)} value={String(team._id)}>
-                            {team.name || 'Unnamed'} ({team.shortName || 'N/A'})
-                          </option>
-
-                        ))}
+                        {teams.length === 0 ? (
+                          <option disabled>No MY teams - Create your team first from Teams → My Teams!</option>
+                        ) : (
+                          teams.map(team => (
+                            <option key={String(team._id)} value={String(team._id)}>
+                              {team.name || 'Unnamed'} ({team.shortName || 'N/A'}) - {team.players?.length || 0} players
+                            </option>
+                          ))
+                        )}
                       </select>
                       {errors.team1 && <small className="text-danger">{errors.team1}</small>}
                     </div>
 
                     <div className="col-md-6">
-                      <label className="form-label fw-bold">Team 2 *</label>
+                      <label className="form-label fw-bold">Opponent Team 2 *</label>
                       <select 
                         name="team2" 
                         className="form-select" 
@@ -197,6 +212,18 @@ const validateForm = () => {
                     </div>
 
                     <div className="col-md-6">
+                      <label className="form-label fw-bold">Match Time *</label>
+                      <input 
+                        type="time" 
+                        name="scheduledTime"
+                        className="form-control" 
+                        value={formData.scheduledTime}
+                        onChange={handleChange}
+                      />
+                      {errors.scheduledTime && <small className="text-danger">{errors.scheduledTime}</small>}
+                    </div>
+
+                    <div className="col-md-6">
                       <label className="form-label fw-bold">Overs per innings</label>
                       <input 
                         type="number" 
@@ -207,6 +234,7 @@ const validateForm = () => {
                         onChange={handleChange}
                       />
                     </div>
+
 
                     <div className="col-md-6">
                       <label className="form-label fw-bold">Venue Name</label>
@@ -233,15 +261,30 @@ const validateForm = () => {
                     </div>
                   </div>
 
-                  <div className="text-center mt-5">
-                    <button 
-                      type="submit" 
-                      className="btn btn-success btn-lg px-5 py-3 fw-bold shadow-lg" 
-                      disabled={loading}
-                    >
-                      {loading ? 'Creating...' : '🚀 Create Match'}
-                    </button>
-                  </div>
+                    {fetchError && (
+                      <div className="alert alert-warning">
+                        ⚠️ {fetchError}
+                        <button className="btn btn-sm btn-outline-dark ms-2" onClick={fetchData}>
+                          🔄 Retry
+                        </button>
+                      </div>
+                    )}
+                    <div className="text-center mt-5">
+                      <button 
+                        type="submit" 
+                        className="btn btn-success btn-lg px-5 py-3 fw-bold shadow-lg me-3" 
+                        disabled={loading || teams.length === 0}
+                      >
+                        {loading ? 'Creating...' : '🚀 Create Match'}
+                      </button>
+                      <button 
+                        type="button"
+                        className="btn btn-info btn-lg px-4 py-3" 
+                        onClick={fetchData}
+                      >
+                        🔍 Test Backend
+                      </button>
+                    </div>
                 </form>
               </div>
             </div>

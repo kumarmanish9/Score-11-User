@@ -8,9 +8,19 @@ let socket = null;
 // Socket connection helper
 export const initMatchSocket = (token) => {
   if (socket) socket.disconnect();
-  socket = io(API_BASE, {
-    auth: { token }
+  
+const socketBase = import.meta.env.VITE_SOCKET_URL;
+  socket = io(socketBase, {
+    auth: { token },
+    // transports: ['websocket', 'polling'],
+    timeout: 20000,
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    path: '/socket.io/'
   });
+  console.log('🔌 Socket connected to:', socketBase);
+  console.log("🌐 Socket URL:", socketBase);
   return socket;
 };
 
@@ -47,15 +57,52 @@ export const getMatches = async (type, query = {}) => {
   return res.data?.data?.matches || res.data?.data || [];
 };
 
+
+
+// Get user's own matches - PRIVATE (owner only)
+export const getMyMatches = async (params = {}) => {
+  try {
+    const query = { ...params };
+    if (query.status && !query.owner) {
+      query.owner = true; // Filter for user's matches when status provided
+    }
+    const url = BASE_URL;
+    console.log('🔍 getMyMatches URL:', `${url}?${new URLSearchParams(query).toString()}`);
+    const res = await api.get(url, { params: query });
+    return res.data?.data?.matches || res.data?.data || res.data || [];
+  } catch (error) {
+    console.error('getMyMatches error:', error.response?.data || error.message);
+    console.warn('🔄 Falling back to public matches');
+    const fallbackStatus = params.status?.[0] || 'scheduled';
+    return getAllMatchesWithFilter(fallbackStatus);
+  }
+};
+
+
 export const getAllMatchesWithFilter = async (status) => {
   return getMatches(null, { status });
 };
 
 
+
+
 export const getMatchDetails = async (id) => {
-  const res = await api.get(`${BASE_URL}/${id}`);
-  return res.data?.data;
+  // ✅ FIXED: Validate ID before API call
+  const idStr = id ? String(id).trim() : '';
+  if (!idStr || idStr.length !== 24 || !/^[0-9a-fA-F]{24}$/.test(idStr)) {
+    console.error('❌ getMatchDetails: Invalid ID:', idStr);
+    throw new Error(`Invalid match ID format: ${idStr}`);
+  }
+  
+  try {
+    const res = await api.get(`${BASE_URL}/${idStr}`);
+    return res.data?.data;
+  } catch (error) {
+    console.error('getMatchDetails failed for ID:', idStr, error.response?.data || error.message);
+    throw error;
+  }
 };
+
 
 export const getMatchTimeline = async (id) => {
   const res = await api.get(`/matches/${id}/timeline`);
@@ -93,6 +140,18 @@ export const createMatch = async (matchData) => {
 
 
 // 🔥 MATCH CONTROL APIs
+export const startMatch = async (id) => {
+  try {
+    const res = await api.patch(`${BASE_URL}/${id}/start`);
+    console.log('✅ Start match response:', res.data?.data);
+    return res.data?.data;
+  } catch (error) {
+    console.error('❌ Start match error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
 export const updateMatchStatus = async (id, status) => {
   try {
     const res = await api.patch(`${BASE_URL}/${id}/status`, { status });
@@ -157,4 +216,3 @@ export const setMatchLineups = async (matchId, lineups) => {
 };
 
 export const getSocket = () => socket;
-

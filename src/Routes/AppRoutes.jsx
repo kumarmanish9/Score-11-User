@@ -14,6 +14,7 @@ import TournamentList from "../Pages/TournamentList";
 import PlayerSearch from "../Pages/PlayerSearch";
 import TeamList from "../Pages/TeamList";
 import LiveStreams from "../Pages/LiveStreams";
+import LiveStreamViewer from "../Pages/LiveStreamViewer";
 import Wallet from "../Pages/Wallet";
 import Community from "../Pages/Community";
 import Blogs from "../Pages/Blogs";
@@ -42,9 +43,12 @@ import CreateMatch from "../Pages/CreateMatch";
 import TossScreen from "../Pages/TossScreen";
 import LiveControl from "../Pages/LiveControl";
 import TeamSelection from "../Pages/TeamSelection";
+import ProtectedLiveControl from "../Components/ProtectedLiveControl";
+import ProtectedRoute from "./ProtectedRoute";
+import LineupPage from "../Pages/LineupPage";
+
 import ScheduledMatches from "../Pages/ScheduledMatches";
 import { Navigate } from "react-router-dom";
-
 
 function AppRoutes() {
   return (
@@ -68,8 +72,14 @@ function AppRoutes() {
       <Route path="/match/:id/toss" element={<TossScreen />} />
       <Route path="/match/:id/live-control" element={<ProtectedLiveControl />} />
       <Route path="/match/:id/team-select" element={<TeamSelection />} />
+      <Route path="/match/:id/start" element={<ProtectedLiveControl />} />
       <Route path="/live-control/:id" element={<Navigate to={`/match/$1/live-control`} replace />} />
-      <Route path="/scheduled-matches" element={<ScheduledMatches />} />
+      <Route path="/scheduled-matches" element={<Navigate to="/my-matches" replace />} />
+      <Route path="/my-matches" element={<ScheduledMatches />} />
+      <Route path="/lineup" element={<ProtectedRoute><LineupPage /></ProtectedRoute>} />
+      <Route path="/match/:id/lineup" element={<ProtectedRoute><TeamSelection /></ProtectedRoute>} />
+
+
 
       <Route path="/tournaments" element={<TournamentList />} />
 
@@ -79,6 +89,7 @@ function AppRoutes() {
       <Route path="/teams/:id" element={<TeamDetails />} />
       <Route path="/teams/:id/edit" element={<TeamEdit />} />
       <Route path="/live" element={<LiveStreams />} />
+      <Route path="/live/:streamId" element={<LiveStreamViewer />} />
       <Route path="/wallet" element={<Wallet />} />
       <Route path="/community" element={<Community />} />
       <Route path="/blogs" element={<Blogs />} />
@@ -98,6 +109,7 @@ function AppRoutes() {
       <Route path="/portfolio" element={<MyPortfolio />} />
       <Route path="/refer-earn" element={<ReferEarn />} />
       <Route path="/tournament/:id" element={<TournamentPage />} />
+      
     </Routes>
   );
 }

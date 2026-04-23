@@ -39,8 +39,17 @@ export const useLiveScore = (matchId) => {
 
     const handleLiveUpdate = (data) => {
       console.log('Socket live update:', data);
-      setLiveData((prev) => ({ ...prev, ...data }));
+      setLiveData((prev) => ({ 
+        ...prev, 
+        ...data,
+        scorecard: {
+          ...prev?.scorecard,
+          ...data.scorecard
+        },
+        score: data.score || prev.score
+      }));
     };
+
 
     const handleTurnUpdate = (data) => {
       console.log('Socket turn update:', data);
