@@ -1,33 +1,105 @@
 .hero-section {
-  background: #0f3357;
+  position: relative;
+  background: radial-gradient(circle at top, #123a63, #081c33);
   color: #fff;
-  padding: 240px 0;
+  padding: 140px 0;
+  overflow: hidden;
+}
+
+/* GLOW EFFECT */
+.hero-section::before {
+  content: "";
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: rgba(0, 153, 255, 0.2);
+  filter: blur(150px);
+  top: -150px;
+  left: -150px;
+}
+
+/* CONTENT */
+.hero-content {
+  z-index: 2;
+  position: relative;
+}
+
+/* BADGE */
+.hero-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.1);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  margin-bottom: 15px;
+  animation: fadeUp 1s ease;
 }
 
 /* TITLE */
 .hero-title {
-  font-size: 48px;
-  font-weight: bold;
+  font-size: 52px;
+  font-weight: 800;
   line-height: 1.2;
+  animation: fadeUp 1.2s ease;
 }
 
-/* SUBTEXT */
+.hero-title span {
+  color: #00c6ff;
+}
+
+/* SUBTITLE */
 .hero-subtitle {
   font-size: 16px;
   margin: 20px 0;
-  color: #ddd;
+  color: #bbb;
+  animation: fadeUp 1.4s ease;
 }
 
 /* BUTTONS */
 .hero-buttons .btn {
-  padding: 10px 20px;
+  padding: 12px 26px;
   border-radius: 30px;
+  transition: all 0.3s ease;
 }
 
-/* IMAGE */
-.hero-img {
-  width: 100%;
+.hero-buttons .btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+/* LOTTIE ANIMATION */
+.hero-animation {
   max-width: 450px;
+  margin: auto;
+  animation: slideIn 1.5s ease;
+}
+
+.lottie-player {
+  width: 100%;
+  height: auto;
+}
+
+/* ENTRY ANIMATIONS */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(80px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* RESPONSIVE */
@@ -37,13 +109,11 @@
   }
 
   .hero-section {
-    padding: 70px 0;
+    padding: 80px 0;
   }
-}
-.hero-section {
-  background: 
-    linear-gradient(rgba(15, 51, 87, 0.85), rgba(15, 51, 87, 0.85)),
-    url('../../assets/Styles/Section1.png');
-  background-size: cover;
-  background-position: center;
+
+  .hero-animation {
+    max-width: 300px;
+    margin-top: 30px;
+  }
 }
