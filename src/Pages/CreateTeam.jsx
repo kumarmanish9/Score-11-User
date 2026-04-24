@@ -1,15 +1,499 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { createTeam, uploadTeamLogo, getUserTeams } from "../Services/teamService";
+import { FaArrowLeft, FaTrophy, FaUsers, FaSearch, FaPlus, FaTimes, FaCrown, FaStar, FaUpload, FaInfoCircle, FaMapMarkerAlt, FaUserTie, FaBuilding, FaGlobe, FaCalendarAlt, FaCheckCircle } from "react-icons/fa";
+import { AuthContext } from "../Context/AuthContext";  // 🔥 NEW: Auth for user ID
+import { createTeam, uploadTeamLogo, getMyTeams } from "../Services/teamService";
 import { getMatches, getMatchDetails } from "../Services/matchService";
-import { searchPlayers } from "../Services/playerService";
+import { searchMyPlayers } from "../Services/playerService";  // 🔥 CHANGED: Use searchMyPlayers only
 
-import "../assets/Styles/Global.css";
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+  .create-team-page {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    padding: 40px 0;
+  }
+
+  /* Header */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .header-left h1 {
+    font-size: 36px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
+  }
+
+  .header-left p {
+    font-size: 15px;
+    color: #64748b;
+  }
+
+  .btn-back-header {
+    background: white;
+    color: #475569;
+    padding: 12px 24px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .btn-back-header:hover {
+    background: #f8fafc;
+    transform: translateX(-2px);
+  }
+
+  /* Grid Layout */
+  .two-column-grid {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 30px;
+  }
+
+  /* Card Styles */
+  .form-card {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 24px;
+  }
+
+  .card-header-custom {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    padding: 18px 24px;
+    color: white;
+  }
+
+  .card-header-custom h3 {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-body-custom {
+    padding: 24px;
+  }
+
+  /* Form Elements */
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .form-control-custom {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    transition: all 0.2s ease;
+    background: #f8fafc;
+  }
+
+  .form-control-custom:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+
+  select.form-control-custom {
+    cursor: pointer;
+  }
+
+  textarea.form-control-custom {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  /* Logo Upload */
+  .logo-upload-area {
+    border: 2px dashed #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #f8fafc;
+  }
+
+  .logo-upload-area:hover {
+    border-color: #3b82f6;
+    background: #f1f5f9;
+  }
+
+  .logo-preview {
+    margin-top: 16px;
+    width: 100%;
+    height: 120px;
+    border-radius: 16px;
+    object-fit: cover;
+  }
+
+  /* Match Selector */
+  .match-selector-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .match-type-select {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: white;
+  }
+
+  .matches-list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .match-item {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    background: white;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .match-item:hover {
+    border-color: #3b82f6;
+    transform: translateX(4px);
+  }
+
+  .match-item.selected {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-color: #3b82f6;
+    color: white;
+  }
+
+  .match-name {
+    font-weight: 800;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .match-date {
+    font-size: 11px;
+    opacity: 0.7;
+  }
+
+  /* Player Search */
+  .search-wrapper {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .search-icon-input {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+  }
+
+  .search-input-player {
+    width: 100%;
+    padding: 14px 16px 14px 48px;
+    font-size: 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .search-input-player:focus {
+    outline: none;
+    border-color: #3b82f6;
+  }
+
+  .players-list {
+    max-height: 350px;
+    overflow-y: auto;
+  }
+
+  .player-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+  }
+
+  .player-item:hover {
+    background: #f8fafc;
+  }
+
+  .player-info h4 {
+    font-size: 14px;
+    font-weight: 800;
+    margin: 0 0 4px 0;
+    color: #1e293b;
+  }
+
+  .player-role-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #e2e8f0;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #475569;
+  }
+
+  .btn-add-player {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-add-player:hover {
+    transform: scale(1.05);
+  }
+
+  /* Team Grid */
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .player-slot {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 16px;
+    position: relative;
+    transition: all 0.2s ease;
+    min-height: 160px;
+  }
+
+  .player-slot.filled {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: #667eea;
+    color: white;
+  }
+
+  .player-slot.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #94a3b8;
+  }
+
+  .slot-number {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    opacity: 0.5;
+  }
+
+  .captain-badge {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    color: #fbbf24;
+    font-size: 14px;
+  }
+
+  .vice-captain-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 12px;
+    color: #60a5fa;
+    font-size: 12px;
+  }
+
+  .player-name-slot {
+    font-size: 13px;
+    font-weight: 800;
+    text-align: center;
+    margin-top: 24px;
+    margin-bottom: 4px;
+  }
+
+  .player-role-slot {
+    font-size: 10px;
+    text-align: center;
+    opacity: 0.8;
+  }
+
+  .slot-actions {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .slot-btn {
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .slot-btn-captain {
+    background: rgba(255,255,255,0.2);
+    color: #fbbf24;
+  }
+
+  .slot-btn-vice {
+    background: rgba(255,255,255,0.2);
+    color: #60a5fa;
+  }
+
+  .slot-btn-remove {
+    background: rgba(255,255,255,0.2);
+    color: #ef4444;
+  }
+
+  /* Submit Button */
+  .btn-submit-team {
+    width: 100%;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    padding: 16px;
+    border: none;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 800;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .btn-submit-team:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+  }
+
+  .btn-submit-team:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Loading Spinner */
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  .custom-spinner {
+    width: 60px;
+    height: 60px;
+    border: 3px solid rgba(59, 130, 246, 0.2);
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .two-column-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .create-team-page {
+      padding: 20px 0;
+    }
+    .header-left h1 {
+      font-size: 24px;
+    }
+    .team-grid {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+  }
+`;
+
+// 🔥 NEW: Filter players to user's only
+const normalizePlayer = (p) => {
+  if (!p || typeof p !== "object") {
+    return { name: "Unknown Player" };
+  }
+
+  const name =
+    p.name ||
+    p.fullName ||
+    p.playerName ||
+    p.shortName ||
+    p.short_name ||
+    p.displayName ||
+    (p.player && (p.player.name || p.player.fullName)) ||
+    "Unknown Player";
+
+  const role = p.role || p.playerRole || p.roleType || 'BAT';
+
+  return { ...p, name, role: role.toUpperCase() };
+};
 
 function CreateTeam() {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);  // 🔥 NEW: Get user ID
 
-  // Team Info State
   const [teamInfo, setTeamInfo] = useState({
     name: "",
     shortName: "",
@@ -22,7 +506,6 @@ function CreateTeam() {
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState("");
 
-  // Existing states
   const [matches, setMatches] = useState([]);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [matchType, setMatchType] = useState("upcoming");
@@ -37,37 +520,8 @@ function CreateTeam() {
 
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [noPlayersMsg, setNoPlayersMsg] = useState('');
 
-  // Player categories (fantasy standard)
-  const categories = {
-    1: {name: 'WicketKeepers', count: 1, max: 4, color: 'bg-yellow-500'},
-    3: {name: 'Batsmen', count: 0, max: 6, color: 'bg-green-500'},
-    4: {name: 'AllRounders', count: 0, max: 4, color: 'bg-purple-500'},
-    2: {name: 'Bowlers', count: 0, max: 6, color: 'bg-red-500'}
-  };
-
-  // Normalize Player
-  const normalizePlayer = (p) => {
-    if (!p || typeof p !== "object") {
-      return { name: "Unknown Player" };
-    }
-
-    const name =
-      p.name ||
-      p.fullName ||
-      p.playerName ||
-      p.shortName ||
-      p.short_name ||
-      p.displayName ||
-      (p.player && (p.player.name || p.player.fullName)) ||
-      "Unknown Player";
-
-    const role = p.role || p.playerRole || p.roleType || 'BAT';
-
-    return { ...p, name, role: role.toUpperCase() };
-  };
-
-  // Fetch Matches
   useEffect(() => {
     fetchMatches();
   }, [matchType]);
@@ -81,7 +535,6 @@ function CreateTeam() {
     }
   };
 
-  // Load Match Players
   useEffect(() => {
     const loadMatchPlayers = async () => {
       if (!selectedMatch?._id) return;
@@ -114,7 +567,6 @@ function CreateTeam() {
     loadMatchPlayers();
   }, [selectedMatch]);
 
-  // Search Players
   useEffect(() => {
     fetchPlayers();
   }, [searchQuery, selectedMatch]);
@@ -131,18 +583,18 @@ function CreateTeam() {
         return;
       }
 
-      const apiData = await searchPlayers(query);
+      // 🔥 CHANGED: Use searchMyPlayers() - user's players only
+      const apiData = await searchMyPlayers(query);
       const normalizedAPI = (apiData || []).map(normalizePlayer);
+      setNoPlayersMsg(normalizedAPI.length === 0 ? 'No matching players in your profile. Create players first.' : '');
 
       if (selectedMatch) {
         const localFiltered = availablePlayers.filter((p) =>
           (p.name || "").toLowerCase().includes(query)
         );
-
         const combined = [...localFiltered, ...normalizedAPI];
         const unique = [];
         const seen = new Set();
-
         for (let p of combined) {
           const key = p._id || p.name;
           if (!seen.has(key)) {
@@ -150,38 +602,36 @@ function CreateTeam() {
             unique.push(p);
           }
         }
-
         setPlayers(unique.slice(0, 24));
       } else {
         setPlayers(normalizedAPI);
       }
-    } catch (err) {
-      console.error("Error searching players:", err);
-    }
+   } catch (err) {
+  console.error("FULL ERROR 👉", err);
+  console.log("STATUS 👉", err?.response?.status);
+  console.log("DATA 👉", err?.response?.data);
+  setNoPlayersMsg(err?.response?.data?.message || 'API Error');
+}
   };
 
-  // Add to Team
   const addToTeam = (player) => {
     if (!player || !player._id) return;
-
     if (team.some((p) => p && p._id === player._id)) return;
-
     const firstEmpty = team.findIndex((p) => !p);
     if (firstEmpty === -1) return;
-
     const newTeam = [...team];
     newTeam[firstEmpty] = player;
     setTeam(newTeam);
   };
 
-  // Remove from Team
   const removeFromTeam = (position) => {
     const newTeam = [...team];
-    newTeam[position - 1] = null;
+    newTeam[position] = null;
     setTeam(newTeam);
+    if (captain === team[position]) setCaptain(null);
+    if (viceCaptain === team[position]) setViceCaptain(null);
   };
 
-  // Logo Upload Preview
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -194,7 +644,6 @@ function CreateTeam() {
     }
   };
 
-  // Submit Team
   const handleSubmit = async () => {
     try {
       const validPlayers = team.filter((p) => p && p._id);
@@ -237,14 +686,13 @@ function CreateTeam() {
       const response = await createTeam(teamData);
       const newTeamId = response.data?._id;
 
-      // Upload logo if selected
       if (logoFile && newTeamId) {
         const formData = new FormData();
         formData.append('logo', logoFile);
         await uploadTeamLogo(newTeamId, formData);
       }
 
-      alert("Team created successfully! Check your teams list →");
+      alert("Team created successfully! (Your players only)");
       navigate("/teams?refresh=1");
     } catch (err) {
       console.error("Error:", err);
@@ -254,300 +702,188 @@ function CreateTeam() {
     }
   };
 
-  // Set Captain/VC
   const setCaptainHandler = (player) => setCaptain(player);
   const setViceCaptainHandler = (player) => setViceCaptain(player);
 
+  if (loading) {
+    return (
+      <>
+        <style>{styles}</style>
+        <div className="loading-container">
+          <div className="custom-spinner"></div>
+          <p style={{ marginTop: 20, color: '#64748b' }}>Loading...</p>
+        </div>
+      </>
+    );
+  }
+
   return (
-    <div className="min-vh-100 bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-6">
-      <div className="container-xl px-4">
-        <div className="row justify-content-center">
-          <div className="col-12 col-lg-11 col-xl-10">
-            {/* Header */}
-            <div className="d-flex justify-content-between align-items-center mb-5">
-              <div>
-                <h1 className="display-5 fw-bold text-dark mb-2">Create Pro Team</h1>
-                <p className="lead text-muted mb-0">Build your ultimate fantasy XI</p>
+    <>
+      <style>{styles}</style>
+      <div className="create-team-page">
+        <div className="container">
+          <div className="page-header">
+            <div className="header-left">
+              <h1><FaTrophy style={{ color: '#f59e0b', marginRight: 12 }} /> Create Pro Team</h1>
+              <p>Build your ultimate fantasy XI with 11 <strong>YOUR</strong> players only 🔒</p>
+            </div>
+            <button className="btn-back-header" onClick={() => navigate(-1)}>
+              <FaArrowLeft /> Back to Dashboard
+            </button>
+          </div>
+
+          <div className="two-column-grid">
+            {/* Left Column - Team Details */}
+            <div>
+              <div className="form-card">
+                <div className="card-header-custom">
+                  <h3><FaInfoCircle /> Team Details</h3>
+                </div>
+                <div className="card-body-custom">
+                  {/* Logo Upload */}
+                  <div className="form-group">
+                    <label className="form-label"><FaUpload /> Team Logo</label>
+                    <div className="logo-upload-area" onClick={() => document.getElementById('logoInput').click()}>
+                      <FaUpload style={{ fontSize: 24, color: '#94a3b8' }} />
+                      <p style={{ fontSize: 12, color: '#64748b', marginTop: 8 }}>Click to upload logo</p>
+                      <input id="logoInput" type="file" accept="image/*" onChange={handleLogoChange} style={{ display: 'none' }} />
+                    </div>
+                    {logoPreview && <img src={logoPreview} alt="Preview" className="logo-preview" />}
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Team Name *</label>
+                    <input type="text" className="form-control-custom" placeholder="Enter team name" value={teamInfo.name} onChange={(e) => setTeamInfo({...teamInfo, name: e.target.value})} />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label"><FaInfoCircle /> Short Name</label>
+                    <input type="text" className="form-control-custom" placeholder="MI, CSK..." value={teamInfo.shortName} onChange={(e) => setTeamInfo({...teamInfo, shortName: e.target.value})} maxLength={10} />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label"><FaUserTie /> Coach</label>
+                    <input type="text" className="form-control-custom" placeholder="Ricky Ponting" value={teamInfo.coach} onChange={(e) => setTeamInfo({...teamInfo, coach: e.target.value})} />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Description</label>
+                    <textarea className="form-control-custom" placeholder="Tell about your team strategy..." value={teamInfo.description} onChange={(e) => setTeamInfo({...teamInfo, description: e.target.value})} />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label"><FaMapMarkerAlt /> Location</label>
+                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>                      <input type="text" className="form-control-custom" placeholder="City" value={teamInfo.city} onChange={(e) => setTeamInfo({...teamInfo, city: e.target.value})} />
+                      <select className="form-control-custom" value={teamInfo.state} onChange={(e) => setTeamInfo({...teamInfo, state: e.target.value})}>
+                        <option>Maharashtra</option>
+                        <option>Delhi</option>
+                        <option>Karnataka</option>
+                        <option>Uttar Pradesh</option>
+                        <option>Tamil Nadu</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <button 
-                className="btn btn-outline-secondary btn-lg px-4 py-2"
-                onClick={() => navigate(-1)}
-              >
-                ← Back to Dashboard
-              </button>
             </div>
 
-            <div className="row g-5">
-              {/* Team Info Form */}
-              <div className="col-lg-4">
-                <div className="card border-0 shadow-lg h-100 bg-white/80 backdrop-blur-sm">
-                  <div className="card-body p-5">
-                    <h3 className="h5 fw-bold mb-4 text-dark">
-                      <i className="fas fa-crown me-2 text-warning"></i>
-                      Team Details
-                    </h3>
-
-                    {/* Logo Upload */}
-                    <div className="mb-4">
-                      <label className="form-label fw-semibold text-muted mb-2 d-block">
-                        Team Logo
-                      </label>
-                      <div className="position-relative">
-                        <input 
-                          type="file" 
-                          className="form-control" 
-                          accept="image/*"
-                          onChange={handleLogoChange}
-                        />
-                        {logoPreview && (
-                          <img 
-                            src={logoPreview} 
-                            alt="Preview" 
-                            className="mt-2 rounded shadow-sm w-100" 
-                            style={{height: '120px', objectFit: 'cover'}}
-                          />
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Name */}
-                    <div className="mb-3">
-                      <label className="form-label fw-semibold text-dark">Team Name *</label>
-                      <input
-                        type="text"
-                        className="form-control form-control-lg shadow-sm"
-                        placeholder="Enter team name"
-                        value={teamInfo.name}
-                        onChange={(e) => setTeamInfo({...teamInfo, name: e.target.value})}
-                        maxLength={100}
-                      />
-                    </div>
-
-                    {/* Short Name */}
-                    <div className="mb-3">
-                      <label className="form-label fw-semibold text-muted">Short Name</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="MI, CSK..."
-                        value={teamInfo.shortName}
-                        onChange={(e) => setTeamInfo({...teamInfo, shortName: e.target.value})}
-                        maxLength={10}
-                      />
-                    </div>
-
-                    {/* Coach */}
-                    <div className="mb-3">
-                      <label className="form-label fw-semibold text-muted">Coach</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Ricky Ponting"
-                        value={teamInfo.coach}
-                        onChange={(e) => setTeamInfo({...teamInfo, coach: e.target.value})}
-                      />
-                    </div>
-
-                    {/* Description */}
-                    <div className="mb-3">
-                      <label className="form-label fw-semibold text-muted">Description</label>
-                      <textarea
-                        className="form-control"
-                        rows="3"
-                        placeholder="Tell about your team strategy..."
-                        value={teamInfo.description}
-                        onChange={(e) => setTeamInfo({...teamInfo, description: e.target.value})}
-                        maxLength={1000}
-                      />
-                    </div>
-
-                    {/* Location */}
-                    <div className="row g-2 mb-4">
-                      <div className="col-6">
-                        <label className="form-label fw-semibold text-muted small d-block mb-1">City</label>
-                        <input type="text" className="form-control form-control-sm" value={teamInfo.city} onChange={(e) => setTeamInfo({...teamInfo, city: e.target.value})} />
-                      </div>
-                      <div className="col-6">
-                        <label className="form-label fw-semibold text-muted small d-block mb-1">State</label>
-                        <select className="form-select form-select-sm" value={teamInfo.state} onChange={(e) => setTeamInfo({...teamInfo, state: e.target.value})}>
-                          <option>Maharashtra</option>
-                          <option>Delhi</option>
-                          <option>Karnataka</option>
-                          <option>Uttar Pradesh</option>
-                          <option>Tamil Nadu</option>
-                        </select>
-                      </div>
-                    </div>
+            {/* Right Column - Match & Lineup */}
+            <div>
+              {/* Match Selection */}
+              <div className="form-card">
+                <div className="card-header-custom">
+                  <h3><FaCalendarAlt /> Select Match</h3>
+                </div>
+                <div className="card-body-custom">
+                  <div className="match-selector-row">
+                    <select className="match-type-select" value={matchType} onChange={(e) => setMatchType(e.target.value)}>
+                      <option value="upcoming">Upcoming</option>
+                      <option value="live">Live</option>
+                      <option value="recent">Recent</option>
+                    </select>
+                  </div>
+                  <div className="matches-list">
+                    {matches.map((match) => (
+                      <button key={match._id} className={`match-item ${selectedMatch?._id === match._id ? 'selected' : ''}`} onClick={() => setSelectedMatch(match)}>
+                        <div className="match-name">{match.team1?.name || 'Team1'} vs {match.team2?.name || 'Team2'}</div>
+                        <div className="match-date">{match.date || 'Date TBD'}</div>
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
 
-              {/* Match & Lineup */}
-              <div className="col-lg-8">
-                {/* Match Selector */}
-                <div className="card border-0 shadow-lg mb-4 bg-white/80 backdrop-blur-sm">
-                  <div className="card-body p-5">
-                    <h5 className="fw-bold mb-3">
-                      <i className="fas fa-calendar-alt me-2 text-info"></i>
-                      Select Match
-                    </h5>
-                    <div className="row g-3">
-                      <div className="col-md-6">
-                        <select 
-                          className="form-select form-select-lg"
-                          value={matchType}
-                          onChange={(e) => setMatchType(e.target.value)}
-                        >
-                          <option value="upcoming">Upcoming</option>
-                          <option value="live">Live</option>
-                          <option value="recent">Recent</option>
-                        </select>
-                      </div>
-                      <div className="col-md-6">
-                        {matches.map((match) => (
-                          <button
-                            key={match._id}
-                            className={`btn w-100 p-3 mb-2 shadow-sm border-0 rounded-3 text-start ${
-                              selectedMatch?._id === match._id 
-                                ? 'btn-primary bg-gradient text-white' 
-                                : 'btn-outline-primary'
-                            }`}
-                            onClick={() => setSelectedMatch(match)}
-                          >
-                            <strong>{match.team1?.name || 'Team1'} vs {match.team2?.name || 'Team2'}</strong>
-                            <small className="d-block">{match.date || 'Soon'}</small>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+              {/* Player Search - YOUR PLAYERS ONLY */}
+              <div className="form-card">
+                <div className="card-header-custom" style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}>
+                  <h3><FaSearch /> Your Players Only 🔒</h3>
                 </div>
-
-                {/* Player Search */}
-                <div className="card border-0 shadow-lg mb-4 bg-white/80 backdrop-blur-sm">
-                  <div className="card-body p-4">
-                    <div className="input-group input-group-lg">
-                      <span className="input-group-text bg-white border-end-0">
-                        <i className="fas fa-search text-muted"></i>
-                      </span>
-                      <input
-                        type="text"
-                        className="form-control border-start-0 ps-0 shadow-none"
-                        placeholder="Search players by name..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
+                <div className="card-body-custom">
+                  <div className="search-wrapper">
+                    <FaSearch className="search-icon-input" />
+                    <input type="text" className="search-input-player" placeholder="Search YOUR players by name..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                  </div>
+                  {noPlayersMsg && (
+                    <div style={{ padding: '12px', background: '#fef3c7', borderRadius: '8px', marginBottom: '12px', fontSize: '13px', color: '#92400e' }}>
+                      ⚠️ {noPlayersMsg}
                     </div>
-                    <div className="mt-3">
-                      {players.slice(0, 12).map((player) => (
-                        <div key={player._id || player.name} className="p-2 border-bottom player-item hover-bg">
-                          <div className="d-flex justify-content-between align-items-center">
-                            <div>
-                              <strong>{player.name}</strong>
-                              <small className="d-block text-muted badge bg-secondary">{player.role}</small>
-                            </div>
-                            <button 
-                              className="btn btn-sm btn-success"
-                              onClick={() => addToTeam(player)}
-                            >
-                              Add
-                            </button>
-                          </div>
+                  )}
+                  <div className="players-list">
+                    {players.slice(0, 12).map((player) => (
+                      <div key={player._id || player.name} className="player-item">
+                        <div className="player-info">
+                          <h4>{player.name}</h4>
+                          <span className="player-role-badge">{player.role}</span>
+                          <div style={{ fontSize: '11px', color: '#10b981', marginTop: '4px' }}>👤 Yours</div>
                         </div>
-                      ))}
-                    </div>
+                        <button className="btn-add-player" onClick={() => addToTeam(player)}><FaPlus /> Add</button>
+                      </div>
+                    ))}
                   </div>
                 </div>
+              </div>
 
-                {/* Team Lineup */}
-                <div className="card border-0 shadow-xl bg-white/80 backdrop-blur-sm">
-                  <div className="card-body p-5">
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                      <h5 className="fw-bold mb-0">
-                        <i className="fas fa-list-ol me-2 text-success"></i>
-                        Your Team Lineup ({team.filter(p => p).length}/11)
-                      </h5>
-                      <button 
-                        className="btn btn-success btn-lg px-4"
-                        onClick={handleSubmit}
-                        disabled={submitLoading || team.filter(p => p).length !== 11}
-                      >
-                        {submitLoading ? (
+              {/* Team Lineup */}
+              <div className="form-card">
+                <div className="card-header-custom" style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}>
+                  <h3><FaUsers /> Your Team Lineup ({team.filter(p => p).length}/11)</h3>
+                </div>
+                <div className="card-body-custom">
+                  <div className="team-grid">
+                    {team.map((player, index) => (
+                      <div key={index} className={`player-slot ${player ? 'filled' : 'empty'}`}>
+                        <div className="slot-number">#{index + 1}</div>
+                        {player ? (
                           <>
-                            <span className="spinner-border spinner-border-sm me-2"></span>
-                            Creating...
+                            {captain === player && <FaCrown className="captain-badge" />}
+                            {viceCaptain === player && <FaStar className="vice-captain-badge" />}
+                            <div className="player-name-slot">{player.name?.split(' ').slice(0, 2).join(' ')}</div>
+                            <div className="player-role-slot">{player.role}</div>
+                            <div className="slot-actions">
+                              <button className="slot-btn slot-btn-captain" onClick={() => setCaptainHandler(player)}>C</button>
+                              <button className="slot-btn slot-btn-vice" onClick={() => setViceCaptainHandler(player)}>VC</button>
+                              <button className="slot-btn slot-btn-remove" onClick={() => removeFromTeam(index)}>×</button>
+                            </div>
                           </>
                         ) : (
-                          'Create Team'
+                          <>
+                            <FaPlus style={{ fontSize: 24, marginBottom: 8 }} />
+                            <div>Slot {index + 1}</div>
+                          </>
                         )}
-                      </button>
-                    </div>
-
-                    <div className="row g-3">
-                      {team.map((player, index) => (
-                        <div key={index} className="col-md-6 col-lg-4 col-xl-3">
-                          <div className={`player-slot p-3 rounded-3 shadow-sm border position-relative ${player ? 'bg-gradient-primary text-white' : 'bg-light border-dashed'}`}>
-                            {player ? (
-                              <>
-                                <i 
-                                  className={`fas fa-crown position-absolute top-0 end-0 p-2 ${captain === player ? 'text-yellow-400' : 'd-none'}`} 
-                                  title="Captain"
-                                ></i>
-                                <i 
-                                  className={`fas fa-star position-absolute top-0 start-0 p-2 ${viceCaptain === player ? 'text-amber-400' : 'd-none'}`} 
-                                  title="Vice Captain"
-                                ></i>
-                                <div className="text-center">
-                                  <div className="fw-bold mb-1">{player.name}</div>
-                                  <small className="badge bg-light text-dark">{player.role}</small>
-                                </div>
-                                <div className="mt-2">
-                                  <button 
-                                    className="btn btn-sm btn-warning me-1"
-                                    onClick={() => setCaptainHandler(player)}
-                                  >
-                                    C
-                                  </button>
-                                  <button 
-                                    className="btn btn-sm btn-info text-white"
-                                    onClick={() => setViceCaptainHandler(player)}
-                                  >
-                                    VC
-                                  </button>
-                                  <button 
-                                    className="btn btn-sm btn-outline-light ms-1"
-                                    onClick={() => removeFromTeam(index + 1)}
-                                  >
-                                    ×
-                                  </button>
-                                </div>
-                              </>
-                            ) : (
-                              <div className="text-center text-muted py-4">
-                                <i className="fas fa-plus-circle fa-2x mb-2"></i>
-                                <small>Slot {index + 1}</small>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
+                  <button className="btn-submit-team" onClick={handleSubmit} disabled={submitLoading || team.filter(p => p).length !== 11}>
+                    {submitLoading ? <><div className="custom-spinner" style={{ width: 20, height: 20 }}></div> Creating...</> : <><FaCheckCircle /> Create Team</>}
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .bg-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; }
-        .hover-bg:hover { background-color: #f8f9fa !important; }
-        .player-slot { min-height: 140px; transition: all 0.3s ease; }
-        .player-slot:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important; }
-        @media (max-width: 768px) { .player-slot { min-height: 120px; } }
-      `}</style>
-    </div>
+    </>
   );
 }
 

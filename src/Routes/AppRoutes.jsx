@@ -8,12 +8,13 @@ import CreateTeam from "../Pages/CreateTeam";
 import JoinContest from "../Pages/JoinContest";
 import ForgotPassword from "../Pages/ForgotPassword";
 import VerifyOtp from "../Pages/VerifyOtp";
-import ResetPassword from "../Pages/ResetPassord";
+import ResetPassword from "../Pages/ResetPassword";
 import Matches from "../Pages/Matches";
 import TournamentList from "../Pages/TournamentList";
 import PlayerSearch from "../Pages/PlayerSearch";
 import TeamList from "../Pages/TeamList";
 import LiveStreams from "../Pages/LiveStreams";
+import LiveStreamViewer from "../Pages/LiveStreamViewer";
 import Wallet from "../Pages/Wallet";
 import Community from "../Pages/Community";
 import Blogs from "../Pages/Blogs";
@@ -41,7 +42,15 @@ import ReferEarn from "../Pages/ReferEarn";
 import CreateMatch from "../Pages/CreateMatch";
 import TossScreen from "../Pages/TossScreen";
 import LiveControl from "../Pages/LiveControl";
+import TeamSelection from "../Pages/TeamSelection";
+import ProtectedLiveControl from "../Components/ProtectedLiveControl";
+import ProtectedRoute from "./ProtectedRoute";
+import LineupPage from "../Pages/LineupPage";
+import LiveMatchesPage from "../Pages/LiveMatchesPage";
+import LiveControlRedirect from "./LiveControlRedirect";
 
+import ScheduledMatches from "../Pages/ScheduledMatches";
+import { Navigate } from "react-router-dom";
 
 function AppRoutes() {
   return (
@@ -63,15 +72,28 @@ function AppRoutes() {
       <Route path="/match/:id" element={<MatchDetails />} />
       <Route path="/create-match" element={<CreateMatch />} />
       <Route path="/match/:id/toss" element={<TossScreen />} />
-      <Route path="/match/:id/live-control" element={<LiveControl />} />
+      <Route path="/match/:id/live-control" element={<ProtectedLiveControl />} />
+      <Route path="/match/:id/team-select" element={<TeamSelection />} />
+      <Route path="/match/:id/start" element={<ProtectedLiveControl />} />
+      <Route path="/live-control/:id" element={<LiveControlRedirect />} />
+      <Route path="/match/:id/commentary" element={<Navigate to={`/match/${window.location.pathname.split('/')[2]}?tab=commentary`} replace />} />
+      <Route path="/live-matches" element={<LiveMatchesPage />} />
+      <Route path="/scheduled-matches" element={<Navigate to="/my-matches" replace />} />
+      <Route path="/my-matches" element={<ScheduledMatches />} />
+      <Route path="/lineup" element={<ProtectedRoute><LineupPage /></ProtectedRoute>} />
+      <Route path="/match/:id/lineup" element={<ProtectedRoute><TeamSelection /></ProtectedRoute>} />
+
+
 
       <Route path="/tournaments" element={<TournamentList />} />
+
       <Route path="/players" element={<PlayerSearch />} />
       <Route path="/players/:id" element={<PlayerProfile />} />
       <Route path="/teams" element={<TeamList />} />
       <Route path="/teams/:id" element={<TeamDetails />} />
       <Route path="/teams/:id/edit" element={<TeamEdit />} />
       <Route path="/live" element={<LiveStreams />} />
+      <Route path="/live/:streamId" element={<LiveStreamViewer />} />
       <Route path="/wallet" element={<Wallet />} />
       <Route path="/community" element={<Community />} />
       <Route path="/blogs" element={<Blogs />} />
@@ -91,6 +113,7 @@ function AppRoutes() {
       <Route path="/portfolio" element={<MyPortfolio />} />
       <Route path="/refer-earn" element={<ReferEarn />} />
       <Route path="/tournament/:id" element={<TournamentPage />} />
+      
     </Routes>
   );
 }

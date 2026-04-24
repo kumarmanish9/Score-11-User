@@ -14,7 +14,7 @@ api.interceptors.request.use((config) => {
 });
 
 export const getBlogs = async () => {
-  const response = await api.get('/');
+  const response = await api.get('/published');
   return response.data.data || [];
 };
 

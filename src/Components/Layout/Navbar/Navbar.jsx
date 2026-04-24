@@ -156,6 +156,8 @@ function Navbar() {
               <ul className="dropdown-menu shadow-lg border-0 mt-2 rounded-3">
                 <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/live">Live Streams</Link></li>
                 <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/go-live">Go Live</Link></li>
+                <li><Link className="dropdown-item px-4 py-3 fw-bold text-danger" to="/live-matches">🔴 LIVE MATCHES</Link></li>
+
                 <li><hr className="dropdown-divider mx-3 my-0" /></li>
                 <li><Link className="dropdown-item px-4 py-3 fw-medium" to="/community">Community</Link></li>
               </ul>
@@ -276,7 +278,9 @@ function Navbar() {
                   <li><Link className="dropdown-item px-4 py-3 fw-semibold border-bottom" to="/profile">Profile</Link></li>
                   <li><Link className="dropdown-item px-4 py-3 fw-semibold" to="/dashboard">Dashboard</Link></li>
                 <li><Link className="dropdown-item px-4 py-3 fw-semibold" to="/create-team">Create Team</Link></li>
-                <li><Link className="dropdown-item px-4 py-3 fw-semibold text-success" to="/create-match">⚽ Create Match</Link></li>
+<li><Link className="dropdown-item px-4 py-3 fw-semibold text-success" to="/create-match">⚽ Create Match</Link></li>
+<li><Link className="dropdown-item px-4 py-3 fw-semibold text-info" to="/my-matches">📅 My Matches</Link></li>
+
 
                   <li><Link className="dropdown-item px-4 py-3 fw-semibold" to="/wallet">Wallet</Link></li>
                   <li><Link className="dropdown-item px-4 py-3 fw-semibold" to="/teams">My Teams</Link></li>

@@ -8,9 +8,466 @@ import {
   FaUsers,
   FaStar,
   FaFire,
-  FaMedal
+  FaMedal,
+  FaCrown,
+  FaArrowRight,
+  FaPlus,
+  FaSyncAlt,
+  FaEye
 } from "react-icons/fa";
-import "../assets/Styles/Global.css";
+
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+  .team-history-page {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    padding: 40px 0;
+  }
+
+  /* Hero Section */
+  .hero-section {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  .hero-icon {
+    font-size: 48px;
+    color: #f59e0b;
+    margin-bottom: 16px;
+  }
+
+  .hero-title {
+    font-size: 42px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 12px;
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+    color: #64748b;
+    margin-bottom: 30px;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .stat-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  /* Tabs */
+  .tabs-container {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  .tabs-group {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+
+  .tab-btn {
+    padding: 16px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    border: none;
+    background: white;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: capitalize;
+  }
+
+  .tab-btn.active {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+  }
+
+  .tab-btn:hover:not(.active) {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+
+  /* Teams Grid */
+  .teams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 24px;
+  }
+
+  /* Team Card */
+  .team-card {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    position: relative;
+  }
+
+  .team-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Status Badge */
+  .status-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 1;
+  }
+
+  .status-active {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+  }
+
+  .status-upcoming {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+  }
+
+  .status-completed {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+  }
+
+  /* Card Content */
+  .card-content {
+    padding: 24px;
+  }
+
+  .card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .team-info {
+    flex: 1;
+  }
+
+  .team-name {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 6px;
+  }
+
+  .team-logo-small {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e2e8f0;
+  }
+
+  /* Match Info Box */
+  .match-info-box {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 20px;
+  }
+
+  .match-date {
+    font-size: 12px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .match-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  /* Stats Row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .stat-item {
+    background: #f8fafc;
+    padding: 12px 8px;
+    border-radius: 14px;
+  }
+
+  .stat-number {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1e293b;
+  }
+
+  .stat-label-small {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 500;
+    margin-top: 4px;
+  }
+
+  /* Captain Box */
+  .captain-box {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-radius: 14px;
+    padding: 12px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .captain-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #92400e;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .captain-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: #78350f;
+  }
+
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    gap: 12px;
+  }
+
+  .btn-view {
+    flex: 1;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .btn-view:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    color: white;
+  }
+
+  .btn-edit-small {
+    flex: 1;
+    background: #f1f5f9;
+    color: #475569;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .btn-edit-small:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+  }
+
+  /* Create Team Button */
+  .btn-create-team {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    padding: 14px 32px;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 800;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  }
+
+  .btn-create-team:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+    color: white;
+  }
+
+  /* Refresh Button */
+  .btn-refresh {
+    background: white;
+    color: #475569;
+    padding: 12px 24px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    margin-left: 12px;
+  }
+
+  .btn-refresh:hover {
+    background: #f8fafc;
+    transform: translateY(-2px);
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 24px;
+  }
+
+  .empty-icon {
+    font-size: 64px;
+    color: #cbd5e1;
+    margin-bottom: 20px;
+  }
+
+  .empty-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 12px;
+  }
+
+  .empty-text {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 24px;
+  }
+
+  /* Loading Spinner */
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  .custom-spinner {
+    width: 60px;
+    height: 60px;
+    border: 3px solid rgba(59, 130, 246, 0.2);
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Responsive */
+  @media (max-width: 992px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .teams-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .team-history-page {
+      padding: 20px 0;
+    }
+    .hero-title {
+      font-size: 28px;
+    }
+    .stats-grid {
+      gap: 12px;
+    }
+    .stat-card {
+      padding: 16px;
+    }
+    .stat-value {
+      font-size: 24px;
+    }
+    .tabs-group {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .tab-btn {
+      padding: 12px 8px;
+      font-size: 12px;
+    }
+    .action-buttons {
+      flex-direction: column;
+    }
+  }
+`;
 
 function TeamHistory() {
   const [teams, setTeams] = useState([]);
@@ -32,14 +489,37 @@ function TeamHistory() {
       
       // Calculate stats
       const totalTeams = sortedTeams.length;
-      const activeTeams = sortedTeams.filter(t => t.status === 'Active').length;
+      const activeTeams = sortedTeams.filter(t => t.status === 'Active' || t.status === 'active').length;
       const winRate = sortedTeams.length > 0 ? Math.round((sortedTeams.filter(t => t.points > 50).length / totalTeams) * 100) : 0;
       
-      setStats({ totalTeams, activeTeams, winRate, avgPoints: sortedTeams.reduce((sum, t) => sum + (t.points || 0), 0) / totalTeams || 0 });
+      setStats({ 
+        totalTeams, 
+        activeTeams, 
+        winRate, 
+        avgPoints: sortedTeams.reduce((sum, t) => sum + (t.points || 0), 0) / totalTeams || 0 
+      });
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getStatusClass = (status) => {
+    switch(status?.toLowerCase()) {
+      case 'active': return 'status-active';
+      case 'upcoming': return 'status-upcoming';
+      case 'completed': return 'status-completed';
+      default: return 'status-active';
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch(status?.toLowerCase()) {
+      case 'active': return 'Active';
+      case 'upcoming': return 'Upcoming';
+      case 'completed': return 'Completed';
+      default: return status || 'Active';
     }
   };
 
@@ -49,261 +529,172 @@ function TeamHistory() {
 
   if (loading) {
     return (
-      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-gradient-team py-5">
-        <div className="spinner-border text-primary fs-1" role="status">
-          <span className="visually-hidden">Loading...</span>
+      <>
+        <style>{styles}</style>
+        <div className="loading-container">
+          <div className="custom-spinner"></div>
+          <p style={{ marginTop: 20, color: '#64748b' }}>Loading your teams...</p>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-vh-100 bg-gradient-team py-5">
-      <div className="container-xl px-4">
-        {/* Hero Header */}
-        <div className="text-center mb-7">
-          <h1 className="display-4 fw-bold text-white mb-4 animate-fade-in">
-            <FaTrophy className="fs-1 me-3 text-warning mb-3 d-block" />
-            Team History
-          </h1>
-          <p className="lead text-white-50 mb-5">Track all your teams, points & performance across contests</p>
-          
-          <Link to="/create-team" className="btn btn-lg btn-warning fw-bold px-6 py-3 shadow-lg">
-            <FaFire className="me-2" />
-            Create New Team
-          </Link>
-        </div>
+    <>
+      <style>{styles}</style>
+      <div className="team-history-page">
+        <div className="container">
+          {/* Hero Section */}
+          <div className="hero-section">
+            <div className="hero-icon">
+              <FaTrophy />
+            </div>
+            <h1 className="hero-title">Team History</h1>
+            <p className="hero-subtitle">Track all your teams, points & performance across contests</p>
+            <div>
+              <Link to="/create-team" className="btn-create-team">
+                <FaPlus /> Create New Team
+              </Link>
+              <button onClick={fetchTeams} className="btn-refresh">
+                <FaSyncAlt /> Refresh
+              </button>
+            </div>
+          </div>
 
-        {/* Stats Cards */}
-        <div className="row g-4 mb-8">
-          <div className="col-lg-3 col-md-6">
-            <div className="card border-0 shadow-lg bg-white/20 backdrop-blur-xl text-center p-5 text-white">
-              <FaUsers className="fs-1 text-info mb-3" />
-              <div className="h3 fw-bold mb-1">{stats.totalTeams || 0}</div>
-              <div className="text-white-50">Total Teams</div>
+          {/* Stats Cards */}
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-icon">👥</div>
+              <div className="stat-value">{stats.totalTeams || 0}</div>
+              <div className="stat-label">Total Teams</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">⭐</div>
+              <div className="stat-value">{stats.winRate}%</div>
+              <div className="stat-label">Win Rate</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">📈</div>
+              <div className="stat-value">{stats.avgPoints?.toFixed(0) || 0}</div>
+              <div className="stat-label">Avg Points</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">🔥</div>
+              <div className="stat-value">{stats.activeTeams || 0}</div>
+              <div className="stat-label">Active Teams</div>
             </div>
           </div>
-          <div className="col-lg-3 col-md-6">
-            <div className="card border-0 shadow-lg bg-white/20 backdrop-blur-xl text-center p-5 text-white">
-              <FaStar className="fs-1 text-warning mb-3" />
-              <div className="h3 fw-bold mb-1">{stats.winRate}%</div>
-              <div className="text-white-50">Win Rate</div>
-            </div>
-          </div>
-          <div className="col-lg-3 col-md-6">
-            <div className="card border-0 shadow-lg bg-white/20 backdrop-blur-xl text-center p-5 text-white">
-              <FaChartLine className="fs-1 text-success mb-3" />
-              <div className="h3 fw-bold mb-1">
-                {stats.avgPoints?.toFixed(0) || 0}
-              </div>
-              <div className="text-white-50">Avg Points</div>
-            </div>
-          </div>
-          <div className="col-lg-3 col-md-6">
-            <div className="card border-0 shadow-lg bg-white/20 backdrop-blur-xl text-center p-5 text-white">
-              <FaCalendar className="fs-1 text-primary mb-3" />
-              <div className="h3 fw-bold mb-1">{stats.activeTeams || 0}</div>
-              <div className="text-white-50">Active Teams</div>
-            </div>
-          </div>
-        </div>
 
-        {/* Filter Tabs */}
-        <div className="card border-0 shadow-xl bg-white/30 backdrop-blur-xl mb-6">
-          <div className="card-body p-0">
-            <div className="btn-group w-100 rounded-0" role="group">
+          {/* Tabs */}
+          <div className="tabs-container">
+            <div className="tabs-group">
               {['all', 'active', 'upcoming', 'completed'].map(tab => (
                 <button
                   key={tab}
-                  className={`btn btn-lg fw-semibold flex-fill py-4 px-0 border-0 ${
-                    activeTab === tab 
-                      ? 'bg-gradient-primary text-white shadow-lg' 
-                      : 'bg-transparent text-white-50 hover:bg-white/10 transition-all'
-                  }`}
+                  className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
                   onClick={() => setActiveTab(tab)}
                 >
                   {tab.charAt(0).toUpperCase() + tab.slice(1)} 
-                  ({teams.filter(t => t.status?.toLowerCase() === tab).length})
+                  <span style={{ marginLeft: 6, opacity: 0.8 }}>
+                    ({teams.filter(t => t.status?.toLowerCase() === tab).length})
+                  </span>
                 </button>
               ))}
             </div>
           </div>
-        </div>
 
-        {/* Teams Timeline */}
-        <div className="row g-4">
+          {/* Teams Grid */}
           {filteredTeams.length > 0 ? (
-            filteredTeams.map((team, index) => (
-              <div key={team._id} className="col-xl-4 col-lg-6 col-md-6">
-                <div className="card border-0 shadow-xl h-100 bg-white/80 backdrop-blur-lg overflow-hidden transform-hover">
-                  <div className="position-relative">
-                    <div className={`timeline-badge position-absolute start-0 top-50 translate-middle-y ms-3 z-index-1 ${getStatusColor(team.status)}`}>
-                      <div className="timeline-icon">
-                        <i className={`fas ${getStatusIcon(team.status)}`}></i>
+            <div className="teams-grid">
+              {filteredTeams.map((team) => (
+                <div key={team._id} className="team-card">
+                  <div className={`status-badge ${getStatusClass(team.status)}`}>
+                    {getStatusText(team.status)}
+                  </div>
+                  
+                  <div className="card-content">
+                    <div className="card-header-row">
+                      <div className="team-info">
+                        <h3 className="team-name">{team.name}</h3>
+                      </div>
+                      {team.logo?.url && (
+                        <img 
+                          src={team.logo.url} 
+                          className="team-logo-small"
+                          alt={team.name}
+                        />
+                      )}
+                    </div>
+
+                    <div className="match-info-box">
+                      <div className="match-date">
+                        <FaCalendar /> {new Date(team.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </div>
+                      <div className="match-name">
+                        {team.match?.name || 'Fantasy Match'}
                       </div>
                     </div>
-                    <div className="p-5 pt-8">
-                      {/* Team Header */}
-                      <div className="d-flex justify-content-between align-items-start mb-4">
-                        <div>
-                          <h5 className="fw-bold mb-1 lh-1">{team.name}</h5>
-                          <small className="badge fs-6 px-3 py-2 fw-semibold rounded-pill bg-gradient-status">
-                            {team.status || 'Active'}
-                          </small>
-                        </div>
-                        {team.logo && (
-                          <img 
-                            src={team.logo.url} 
-                            className="rounded-circle shadow-lg" 
-                            style={{width: '60px', height: '60px', objectFit: 'cover'}}
-                            alt={team.name}
-                          />
-                        )}
-                      </div>
 
-                      {/* Match Info */}
-                      <div className="bg-light/50 p-3 rounded-3 mb-4">
-                        <small className="text-muted mb-1 d-block">
-                          <FaCalendar className="me-1" />
-                          {new Date(team.createdAt).toLocaleDateString()}
-                        </small>
-                        <div className="fw-semibold text-truncate">
-                          {team.match?.name || 'Fantasy Match'}
+                    <div className="stats-row">
+                      <div className="stat-item">
+                        <div className="stat-number">{team.points || 0}</div>
+                        <div className="stat-label-small">Points</div>
+                      </div>
+                      <div className="stat-item">
+                        <div className="stat-number">#{team.rank || '-'}</div>
+                        <div className="stat-label-small">Rank</div>
+                      </div>
+                      <div className="stat-item">
+                        <div className="stat-number">{team.players?.length || 0}/25</div>
+                        <div className="stat-label-small">Players</div>
+                      </div>
+                    </div>
+
+                    {team.captain && (
+                      <div className="captain-box">
+                        <div className="captain-label">
+                          <FaCrown style={{ fontSize: 10, marginRight: 4 }} /> CAPTAIN
+                        </div>
+                        <div className="captain-name">
+                          {team.captain.playerName || team.captain.name}
                         </div>
                       </div>
+                    )}
 
-                      {/* Performance Stats */}
-                      <div className="row text-center g-3 mb-4">
-                        <div className="col-4">
-                          <div className="fs-5 fw-bold text-primary">{team.points || 0}</div>
-                          <small className="text-muted">Points</small>
-                        </div>
-                        <div className="col-4">
-                          <div className="fs-5 fw-bold text-success">
-                            #{team.rank || '-'}
-                          </div>
-                          <small className="text-muted">Rank</small>
-                        </div>
-                        <div className="col-4">
-                          <div className="fs-5 fw-bold text-info">
-                            {team.players?.length || 0}/11
-                          </div>
-                          <small className="text-muted">Players</small>
-                        </div>
-                      </div>
-
-                      {/* Captain */}
-                      {team.captain && (
-                        <div className="bg-gradient-captain p-3 rounded-3 mb-4 text-center">
-                          <FaMedal className="text-warning me-2 mb-2 d-block fs-4" />
-                          <small className="text-white-50 d-block mb-1">Captain</small>
-                          <div className="fw-bold text-white">{team.captain.name}</div>
-                        </div>
-                      )}
-
-                      {/* Quick Actions */}
-                      <div className="d-grid gap-2">
-                        <Link
-                          to={`/match/${team.match?._id}`}
-                          className="btn btn-primary fw-semibold py-3"
-                        >
-                          <FaChartLine className="me-2" />
-                          View Match
+                    <div className="action-buttons">
+                      <Link to={`/teams/${team._id}`} className="btn-view">
+                        <FaEye /> View Details
+                      </Link>
+                      {team.status?.toLowerCase() === 'active' && (
+                        <Link to={`/teams/${team._id}/edit`} className="btn-edit-small">
+                          <FaStar /> Edit
                         </Link>
-                        {team.status === 'Active' && (
-                          <Link
-                            to={`/edit-team/${team._id}`}
-                            className="btn btn-outline-primary fw-semibold py-3"
-                          >
-                            Edit Team
-                          </Link>
-                        )}
-                        <button
-                          className="btn btn-outline-secondary py-3"
-                          onClick={fetchTeams}
-                        >
-                          Refresh
-                        </button>
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </div>
           ) : (
-            <div className="col-12 text-center py-10">
-              <FaTrophy className="display-1 text-white-50 mb-4" />
-              <h3 className="text-white mb-4">No teams in this category</h3>
-              <p className="text-white-50 mb-5">Create your first team and start your journey!</p>
-              <Link to="/create-team" className="btn btn-lg btn-warning fw-bold px-6 py-3 shadow-lg">
-                Create First Team
+            <div className="empty-state">
+              <div className="empty-icon">
+                <FaTrophy />
+              </div>
+              <h3 className="empty-title">No Teams Found</h3>
+              <p className="empty-text">
+                {activeTab === 'all' 
+                  ? "You haven't created any teams yet." 
+                  : `No ${activeTab} teams in this category.`}
+              </p>
+              <Link to="/create-team" className="btn-create-team">
+                <FaPlus /> Create Your First Team
               </Link>
             </div>
           )}
         </div>
       </div>
-
-      <style jsx>{`
-        :global(.bg-gradient-team) {
-          background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
-        }
-        :global(.bg-gradient-primary) {
-          background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%) !important;
-        }
-        :global(.bg-gradient-status) {
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-        :global(.bg-gradient-captain) {
-          background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        }
-        :global(.timeline-badge) {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        :global(.status-active) { background: #10b981 !important; }
-        :global(.status-upcoming) { background: #f59e0b !important; }
-        :global(.status-completed) { background: #6b7280 !important; }
-        :global(.transform-hover:hover) {
-          transform: translateY(-8px);
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        :global(.animate-fade-in) {
-          animation: fadeIn 1s ease-out;
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @media (max-width: 768px) {
-          :global(.timeline-badge) { display: none !important; }
-        }
-      `}</style>
-    </div>
+    </>
   );
 }
 
-// Status helpers
-const getStatusColor = (status) => {
-  switch(status?.toLowerCase()) {
-    case 'active': return 'status-active';
-    case 'upcoming': return 'status-upcoming';
-    case 'completed': return 'status-completed';
-    default: return 'status-active';
-  }
-};
-
-const getStatusIcon = (status) => {
-  switch(status?.toLowerCase()) {
-    case 'active': return 'fa-play-circle';
-    case 'upcoming': return 'fa-clock';
-    case 'completed': return 'fa-check-circle';
-    default: return 'fa-dot-circle';
-  }
-};
-
 export default TeamHistory;
-
