@@ -418,7 +418,7 @@ const LiveStreamViewer = () => {
         setStream(streamData);
         setLikeCount(streamData.likes || 0);
         
-        socketConn = io(process.env.REACT_APP_SOCKET_URL || '/', {
+        socketConn = io(import.meta.env.VITE_BACKEND_URL || 'http://68.178.171.95:3000', {
           transports: ['websocket'],
           autoConnect: true
         });

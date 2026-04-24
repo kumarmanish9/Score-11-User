@@ -11,7 +11,18 @@ export const searchPlayers = async (query) => {
 };
 
 export const getPlayerById = async (id) => {
-  const response = await api.get(`/players/public/${id}`);
+  if (!id) {
+    console.warn('[PLAYER-SERVICE] No player ID provided to getPlayerById');
+    throw new Error('Player ID is required');
+  }
+  
+  const playerId = String(id?._id || id || '');
+  if (!playerId || playerId.length !== 24 || !/^[0-9a-fA-F]{24}$/.test(playerId)) {
+    console.warn(`[PLAYER-SERVICE] Invalid player ID format:`, id, '→', playerId);
+    throw new Error('Invalid player ID format (must be 24-char MongoDB ID)');
+  }
+
+  const response = await api.get(`/players/public/${playerId}`);
   return response.data.data;
 };
 
@@ -42,12 +53,20 @@ export const getPlayersByIds = async (playerIds) => {
     // Fallback to individual lookups since /players/by-ids endpoint doesn't exist
     const playerMap = {};
     for (const id of Array.from(new Set(playerIds))) {
+      const idStr = String(id?._id || id || '');
+      if (!idStr || idStr.length !== 24 || !/^[0-9a-fA-F]{24}$/.test(idStr)) {
+        console.warn(`[PLAYER-SERVICE] Skipping invalid ID in batch:`, id);
+        playerMap[idStr] = 'Invalid ID';
+        continue;
+      }
+      
       try {
-        const response = await api.get(`/players/public/${id}`);
+        const response = await api.get(`/players/public/${idStr}`);
         const player = response.data.data;
-        playerMap[id] = `${player.name || 'Unknown'} (${player.role || ''})`;
+        playerMap[idStr] = `${player.name || 'Unknown'} (${player.role || ''})`;
       } catch (err) {
-        playerMap[id] = 'Unknown Player';
+        console.warn(`[PLAYER-SERVICE] Failed to fetch player ${idStr}:`, err.message);
+        playerMap[idStr] = 'Unknown Player';
       }
     }
     return playerMap;

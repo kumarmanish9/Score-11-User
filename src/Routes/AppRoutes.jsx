@@ -46,6 +46,8 @@ import TeamSelection from "../Pages/TeamSelection";
 import ProtectedLiveControl from "../Components/ProtectedLiveControl";
 import ProtectedRoute from "./ProtectedRoute";
 import LineupPage from "../Pages/LineupPage";
+import LiveMatchesPage from "../Pages/LiveMatchesPage";
+import LiveControlRedirect from "./LiveControlRedirect";
 
 import ScheduledMatches from "../Pages/ScheduledMatches";
 import { Navigate } from "react-router-dom";
@@ -73,7 +75,9 @@ function AppRoutes() {
       <Route path="/match/:id/live-control" element={<ProtectedLiveControl />} />
       <Route path="/match/:id/team-select" element={<TeamSelection />} />
       <Route path="/match/:id/start" element={<ProtectedLiveControl />} />
-      <Route path="/live-control/:id" element={<Navigate to={`/match/$1/live-control`} replace />} />
+      <Route path="/live-control/:id" element={<LiveControlRedirect />} />
+      <Route path="/match/:id/commentary" element={<Navigate to={`/match/${window.location.pathname.split('/')[2]}?tab=commentary`} replace />} />
+      <Route path="/live-matches" element={<LiveMatchesPage />} />
       <Route path="/scheduled-matches" element={<Navigate to="/my-matches" replace />} />
       <Route path="/my-matches" element={<ScheduledMatches />} />
       <Route path="/lineup" element={<ProtectedRoute><LineupPage /></ProtectedRoute>} />

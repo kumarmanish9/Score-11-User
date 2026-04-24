@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getMyMatches } from "../Services/matchService";
+import { getMyMatches, updateMatchStatus } from "../Services/matchService";
 
 const styles = {
   page: {
@@ -79,7 +79,12 @@ const styles = {
   },
   btnLive: {
     background: "#dc2626",
-    borderColor: "#dc2626",
+    borderColor: "#dc2626", 
+    color: "#fff",
+  },
+  btnLiveInit: {
+    background: "#10b981",
+    borderColor: "#10b981",
     color: "#fff",
   },
   btnOutline: {
@@ -212,6 +217,31 @@ function LineupPage() {
 
   const handleLiveControl = (match) => {
     navigate(`/match/${match._id}/live-control`);
+  };
+
+  const [initializing, setInitializing] = useState({});
+
+  const handlerInitializeLive = async (match) => {
+    if (match.status !== 'team_selecting') {
+      alert('Only lineup-ready matches can be initialized');
+      return;
+    }
+    
+    setInitializing(prev => ({...prev, [match._id]: true}));
+    
+    try {
+      await updateMatchStatus(match._id, 'live');
+      alert(`✅ Match "${match.team1?.shortName || 'Match'} vs ${match.team2?.shortName || 'Team'}" is now LIVE everywhere! 🎮 Go to Live Control.`);
+      
+      // Refresh list
+      await fetchLineupMatches();
+      
+    } catch (error) {
+      console.error('Init error:', error);
+      alert(`❌ Failed to initialize: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setInitializing(prev => ({...prev, [match._id]: false}));
+    }
   };
 
   useEffect(() => {
@@ -353,6 +383,18 @@ function LineupPage() {
                 >
                   <IconLineup /> Set Lineups
                 </button>
+                
+                {match.status === 'team_selecting' && (
+                  <button
+                    style={{ ...styles.btnBase, ...styles.btnLiveInit }}
+                    onClick={() => handlerInitializeLive(match)}
+                    disabled={initializing[match._id]}
+                  >
+                    <IconLive style={{ animation: initializing[match._id] ? 'spin 1s linear infinite' : 'none' }} /> 
+                    {initializing[match._id] ? '🚀 Initializing...' : '🚀 Initialize LIVE'}
+                  </button>
+                )}
+                
                 <button
                   style={{ ...styles.btnBase, ...styles.btnLive }}
                   onClick={() => handleLiveControl(match)}

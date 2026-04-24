@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 // COMPONENTS
 import Scorecard from "../Components/MatchDetails/Scorecard";
@@ -332,6 +332,7 @@ function MatchDetails() {
 
   const [match, setMatch] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('live');
   const [error, setError] = useState('');
 
@@ -342,8 +343,12 @@ function MatchDetails() {
   const [isLoadingPlayers, setIsLoadingPlayers] = useState(false);
 
   useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && tabs.some(t => t.id === tabParam)) {
+      setActiveTab(tabParam);
+    }
     fetchMatch();
-  }, [id]);
+  }, [id, searchParams]);
 
   const fetchMatch = async () => {
     try {
@@ -584,7 +589,10 @@ function MatchDetails() {
                   <button
                     key={tab.id}
                     className={`tab-btn ${activeTab === tab.id ? 'tab-active' : 'tab-inactive'}`}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => {
+                      setActiveTab(tab.id);
+                      setSearchParams({ tab: tab.id });
+                    }}
                   >
                     {tab.icon} {tab.label}
                   </button>

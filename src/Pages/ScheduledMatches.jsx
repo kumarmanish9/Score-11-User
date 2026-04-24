@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getMyMatches, startMatch } from "../Services/matchService";
+import { getMyMatches, startMatch, updateMatchStatus } from "../Services/matchService";
 
 
 const styles = {
@@ -94,16 +94,16 @@ const styles = {
     margin: "0 6px",
     fontWeight: 400,
   },
-  badgeStatus: {
+  badgeStatus: (status) => ({
     display: "inline-block",
-    background: "#FAC775",
-    color: "#633806",
+    background: status === 'live' ? "#dc2626" : status === 'team_selecting' ? "#3B82F6" : "#FAC775",
+    color: status === 'live' || status === 'team_selecting' ? "white" : "#633806",
     borderRadius: "6px",
     padding: "2px 8px",
     fontSize: "11px",
     fontWeight: 500,
     marginTop: "5px",
-  },
+  }),
   metaRow: {
     display: "flex",
     alignItems: "center",
@@ -160,14 +160,14 @@ const IconPin = () => (
 function ScheduledMatches() {
 const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('scheduled'); // 'scheduled', 'lineup'
+  const [activeTab, setActiveTab] = useState('scheduled'); // 'scheduled', 'lineup', 'live'
   const navigate = useNavigate();
 
 const fetchMyMatches = async (tab = 'scheduled') => {
     try {
       setLoading(true);
       // 🔥 PRIVATE: Fetch user's matches based on tab
-      const statusFilter = tab === 'lineup' ? ['team_selecting'] : ['scheduled'];
+      const statusFilter = tab === 'live' ? ['live'] : tab === 'lineup' ? ['team_selecting'] : ['scheduled'];
       const data = await getMyMatches({ status: statusFilter });
       let scheduled = (data || [])
         .filter(match => {
@@ -271,6 +271,15 @@ const fetchMyMatches = async (tab = 'scheduled') => {
           }} onClick={() => setActiveTab('lineup')}>
             Lineup Ready
           </button>
+          <button style={{
+            ...styles.btnBase,
+            background: '#dc2626',
+            borderColor: '#dc2626',
+            color: 'white',
+            ...(activeTab === 'live' && styles.btnSuccess)
+          }} onClick={() => setActiveTab('live')}>
+            Live ({matches.filter(m => m.status === 'live').length})
+          </button>
         </div>
 
         <button style={{ ...styles.btnBase, ...styles.btnPrimary }} onClick={() => navigate("/create-match")}>
@@ -303,7 +312,9 @@ const fetchMyMatches = async (tab = 'scheduled') => {
                   <span style={styles.vs}>vs</span>
                   {match.team2?.shortName || match.team2?.name || "T2"}
                 </div>
-                <span style={styles.badgeStatus}>SCHEDULED</span>
+                <span style={styles.badgeStatus(match.status)}>
+                  {match.status === 'live' ? '🔴 LIVE' : match.status === 'team_selecting' ? 'LINEUP READY' : 'SCHEDULED'}
+                </span>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
@@ -325,14 +336,20 @@ const fetchMyMatches = async (tab = 'scheduled') => {
                     ...styles.btnSuccess
                   }}
                   onClick={() => {
-                    if (activeTab === 'lineup') {
+                    if (activeTab === 'live') {
+                      navigate(`/match/${match._id}/live-control`);
+                    } else if (activeTab === 'lineup') {
                       navigate(`/match/${match._id}/lineup`);
                     } else {
                       handleStartMatch(match);
                     }
                   }}
                 >
-                  {activeTab === 'lineup' ? (
+                  {activeTab === 'live' ? (
+                    <>
+                      <IconPlay /> Live Control
+                    </>
+                  ) : activeTab === 'lineup' ? (
                     <>
                       Set Lineups
                     </>
