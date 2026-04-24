@@ -1,91 +1,122 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { FaSearch, FaTh, FaList, FaCalendar, FaUser } from 'react-icons/fa';
-import { AuthContext } from '../Context/AuthContext';
-import { getBlogs } from '../Services/blogService';
+import { Link } from 'react-router-dom';
+
+// ✅ MOCK DATA
+const mockBlogs = [
+  {
+    _id: 'blog-01',
+    title: 'Premium Fantasy Strategies for IPL',
+    excerpt: 'Unlock winning lineup tips and captaincy insights.',
+    author: { name: 'Score11 Insider' },
+    createdAt: '2026-04-20T08:30:00Z',
+    image: 'https://images.unsplash.com/photo-1595210382266-2d0077c1f541?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGNyaWNrZXR8ZW58MHx8MHx8fDA%3D',
+    category: 'Strategy',
+    featured: true,
+  },
+  {
+    _id: 'blog-02',
+    title: 'Data-Driven Team Building',
+    excerpt: 'Build a squad that performs consistently.',
+    author: { name: 'Analytics Lab' },
+    createdAt: '2026-04-18T12:00:00Z',
+    image: 'https://media.istockphoto.com/id/497203317/photo/the-tools-for-a-batsman.webp?a=1&b=1&s=612x612&w=0&k=20&c=4PReFIDWkSfmwkIwwv1gLtz6iMRRe0p2qyQrx1CcmWs=',
+    category: 'Analytics',
+  },
+  {
+    _id: 'blog-03',
+    title: 'Captaincy Secrets',
+    excerpt: 'Choose impactful leaders for maximum points.',
+    author: { name: 'Captaincy Coach' },
+    createdAt: '2026-04-15T09:15:00Z',
+    image: 'https://media.istockphoto.com/id/1158435298/photo/grand-cricket-stadium-with-wooden-wickets-front-view-in-daylight.webp?a=1&b=1&s=612x612&w=0&k=20&c=3IqFHdHbb5B_R2V8JGZl0XdlzI6Tb6Obew2GXYvyOZ4=',
+    category: 'Captaincy',
+  },
+];
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
-  const { user } = useContext(AuthContext);
+  const [viewMode, setViewMode] = useState('grid');
 
   useEffect(() => {
-    fetchBlogs();
+    setTimeout(() => {
+      setBlogs(mockBlogs);
+      setLoading(false);
+    }, 300);
   }, []);
 
-  const fetchBlogs = async () => {
-    try {
-      setLoading(true);
-      const data = await getBlogs();
-      setBlogs(data);
-      setError('');
-    } catch (err) {
-      setError('Failed to load blogs. Please try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const featuredBlog = blogs.find(b => b.featured) || blogs[0];
 
   const filteredBlogs = blogs.filter(blog =>
     blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    blog.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    blog.author?.name.toLowerCase().includes(searchQuery.toLowerCase())
+    blog.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (loading) {
     return (
-      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading blogs...</span>
-        </div>
+      <div className="d-flex justify-content-center align-items-center min-vh-100 bg-white">
+        <div className="spinner-border text-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="container-fluid py-5 bg-light min-vh-100">
-      {/* Header */}
-      <div className="row mb-5">
-        <div className="col-lg-8 mx-auto text-center">
-          <h1 className="display-3 fw-bold mb-3 text-dark">
-            Cricket Blogs & Insights
-          </h1>
-          <p className="lead text-muted mb-0">
-            Latest news, analysis, tips, and stories from the world of cricket
-          </p>
+    <div className="container-fluid pt-5 pb-0 bg-white">
+
+      {/* 🔥 HERO FEATURED */}
+      <div className="container mb-5">
+        <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+          <div className="row g-0">
+            <div className="col-md-6">
+              <img
+                src={featuredBlog?.image}
+                className="w-100 h-100"
+                style={{ objectFit: 'cover', minHeight: '300px' }}
+                alt=""
+              />
+            </div>
+            <div className="col-md-6 p-5 d-flex flex-column justify-content-center">
+              <span className="badge bg-warning text-dark mb-3">
+                ⭐ Featured
+              </span>
+              <h2 className="fw-bold text-dark">{featuredBlog?.title}</h2>
+              <p className="text-muted">{featuredBlog?.excerpt}</p>
+              <button className="btn btn-dark rounded-pill mt-3 px-4">
+                Read Premium →
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="row mb-4">
-        <div className="col-lg-6">
-          <div className="input-group shadow-sm rounded-4">
-            <span className="input-group-text bg-white border-0 rounded-start-4">
-              <FaSearch />
-            </span>
-            <input 
-              type="text" 
-              className="form-control border-0 px-4 shadow-none" 
-              placeholder="Search blogs, players, matches..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+      {/* 🔍 SEARCH + VIEW */}
+      <div className="container mb-4">
+        <div className="row">
+          <div className="col-md-6">
+            <div className="input-group shadow-sm rounded-pill">
+              <span className="input-group-text bg-white border-0">
+                <FaSearch />
+              </span>
+              <input
+                className="form-control border-0"
+                placeholder="Search blogs..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
           </div>
-        </div>
-        <div className="col-lg-6 text-end">
-          <div className="btn-group shadow-sm rounded-4" role="group">
-            <button 
-              className={`btn btn-outline-primary rounded-start-4 ${viewMode === 'grid' ? 'active' : ''}`}
+
+          <div className="col-md-6 text-end">
+            <button
+              className={`btn btn-outline-dark me-2 ${viewMode === 'grid' ? 'active' : ''}`}
               onClick={() => setViewMode('grid')}
             >
               <FaTh />
             </button>
-            <button 
-              className={`btn btn-outline-primary rounded-end-4 ${viewMode === 'list' ? 'active' : ''}`}
+            <button
+              className={`btn btn-outline-dark ${viewMode === 'list' ? 'active' : ''}`}
               onClick={() => setViewMode('list')}
             >
               <FaList />
@@ -94,92 +125,74 @@ const Blogs = () => {
         </div>
       </div>
 
-      {error && (
-        <div className="alert alert-warning text-center rounded-4 shadow-sm mb-4">
-          {error}
-          <button className="btn btn-outline-warning btn-sm ms-3" onClick={fetchBlogs}>
-            Retry
-          </button>
-        </div>
-      )}
-
-      {filteredBlogs.length === 0 ? (
-        <div className="text-center py-5">
-          <img src="/no-blogs.svg" alt="No blogs" className="mb-4" style={{maxHeight: '200px', opacity: 0.5}} />
-          <h3 className="text-muted mb-3">No blogs found</h3>
-          <p className="text-muted">Try adjusting your search or check back later</p>
-        </div>
-      ) : (
-        <div className={viewMode === 'grid' ? "row g-4" : "list-group list-group-flush"}>
+      {/* 📦 BLOG CARDS */}
+      <div className="container">
+        <div className={viewMode === 'grid' ? 'row g-4' : ''}>
           {filteredBlogs.map((blog) => (
-            <div key={blog._id} className={viewMode === 'grid' ? "col-xl-3 col-lg-4 col-md-6" : ""}>
-              <Link to={`/blog/${blog._id}`} className={`text-decoration-none ${viewMode === 'grid' ? '' : 'list-group-item list-group-item-action border-0 shadow-sm mb-3 rounded-4'}`}>
-                <div className="card h-100 border-0 shadow-sm hover-lift overflow-hidden rounded-4">
-                  {blog.image && (
-                    <div className="position-relative overflow-hidden" style={{height: '200px'}}>
-                      <img
-                        src={blog.image}
-                        className="card-img-top w-100 h-100 object-fit-cover"
-                        alt={blog.title}
-                        style={{transition: 'transform 0.3s ease'}}
-                        onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-                        onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                      />
-                      <div className="position-absolute top-3 end-3">
-                        <span className="badge bg-primary rounded-pill px-3 py-2 shadow">
-                          {new Date(blog.createdAt).toLocaleDateString('en-IN', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
-                        </span>
-                      </div>
-                    </div>
+            <div key={blog._id} className={viewMode === 'grid' ? 'col-md-4' : 'mb-3'}>
+              <Link to="#" className="text-decoration-none text-dark">
+                <div className="card border-0 shadow-sm rounded-4 h-100 hover-card">
+
+                  {/* Premium badge */}
+                  {blog.featured && (
+                    <span className="position-absolute m-3 badge bg-warning text-dark">
+                      Premium
+                    </span>
                   )}
-                  <div className="card-body p-4">
-                    <h5 className="card-title fw-bold text-dark mb-3 lh-sm" style={{fontSize: '1.1rem'}}>
-                      {blog.title}
-                    </h5>
-                    <p className="card-text text-muted small mb-3 lh-sm" style={{display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden'}}>
-                      {blog.excerpt || blog.content?.substring(0, 150) + '...'}
-                    </p>
-                    <div className="d-flex align-items-center small text-muted">
-                      <FaUser className="me-2" />
-                      <span>{blog.author?.name || 'Score11 Team'}</span>
+
+                  <img
+                    src={blog.image}
+                    className="card-img-top"
+                    style={{ height: '200px', objectFit: 'cover' }}
+                    alt=""
+                  />
+
+                  <div className="card-body">
+                    <span className="badge bg-light text-dark mb-2">
+                      {blog.category}
+                    </span>
+
+                    <h5 className="fw-bold text-dark">{blog.title}</h5>
+
+                    <p className="text-muted small">{blog.excerpt}</p>
+
+                    <div className="d-flex justify-content-between text-muted small">
+                      <span>
+                        <FaUser /> {blog.author.name}
+                      </span>
+                      <span>
+                        <FaCalendar /> {new Date(blog.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
+
                 </div>
               </Link>
             </div>
           ))}
         </div>
-      )}
 
-      {/* Pagination */}
-      <div className="row mt-5">
-        <div className="col-12 text-center">
-          <nav>
-            <ul className="pagination justify-content-center gap-2">
-              <li className="page-item">
-                <button className="page-link rounded-pill shadow-sm border-0" style={{minWidth: '50px'}}>
-                  Previous
-                </button>
-              </li>
-              <li className="page-item active">
-                <span className="page-link rounded-pill shadow-sm border-0 bg-primary text-white">1</span>
-              </li>
-              <li className="page-item">
-                <button className="page-link rounded-pill shadow-sm border-0" style={{minWidth: '50px'}}>
-                  2
-                </button>
-              </li>
-              <li className="page-item">
-                <button className="page-link rounded-pill shadow-sm border-0">Next</button>
-              </li>
-            </ul>
-          </nav>
-        </div>
+        {filteredBlogs.length === 0 && (
+          <div className="text-center mt-5">
+            <h3 className="text-dark">No blogs found</h3>
+            <p className="text-muted">Try different keywords</p>
+          </div>
+        )}
       </div>
+
+      {/* ✨ HOVER EFFECT */}
+      <style>
+        {`
+          .hover-card {
+            transition: all 0.25s ease;
+          }
+          .hover-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+          }
+        `}
+      </style>
+
     </div>
   );
 };
